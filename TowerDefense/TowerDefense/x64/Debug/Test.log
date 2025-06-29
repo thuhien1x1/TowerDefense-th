@@ -1,0 +1,22 @@
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(514,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (Demo.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  cbullet.cpp
+C:\Users\elnora\OneDrive - VNU-HCMUS\HCMUS\2024 - 2025\3\OOP\Project\src\TowerDefenseProject\Test\Test\cbullet.cpp(101,39): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\elnora\OneDrive - VNU-HCMUS\HCMUS\2024 - 2025\3\OOP\Project\src\TowerDefenseProject\Test\Test\cbullet.cpp(101,36): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+  cenemy.cpp
+  cgame.cpp
+C:\Users\elnora\OneDrive - VNU-HCMUS\HCMUS\2024 - 2025\3\OOP\Project\src\TowerDefenseProject\Test\Test\cgame.cpp(29,16): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\elnora\OneDrive - VNU-HCMUS\HCMUS\2024 - 2025\3\OOP\Project\src\TowerDefenseProject\Test\Test\cgame.cpp(30,16): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\elnora\OneDrive - VNU-HCMUS\HCMUS\2024 - 2025\3\OOP\Project\src\TowerDefenseProject\Test\Test\cgame.cpp(76,22): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\elnora\OneDrive - VNU-HCMUS\HCMUS\2024 - 2025\3\OOP\Project\src\TowerDefenseProject\Test\Test\cgame.cpp(100,158): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\elnora\OneDrive - VNU-HCMUS\HCMUS\2024 - 2025\3\OOP\Project\src\TowerDefenseProject\Test\Test\cgame.cpp(100,96): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\elnora\OneDrive - VNU-HCMUS\HCMUS\2024 - 2025\3\OOP\Project\src\TowerDefenseProject\Test\Test\cgame.cpp(114,27): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\elnora\OneDrive - VNU-HCMUS\HCMUS\2024 - 2025\3\OOP\Project\src\TowerDefenseProject\Test\Test\cgame.cpp(115,27): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  clevel.cpp
+  cmap.cpp
+  cpoint.cpp
+  ctower.cpp
+C:\Users\elnora\OneDrive - VNU-HCMUS\HCMUS\2024 - 2025\3\OOP\Project\src\TowerDefenseProject\Test\Test\ctower.cpp(13,43): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\elnora\OneDrive - VNU-HCMUS\HCMUS\2024 - 2025\3\OOP\Project\src\TowerDefenseProject\Test\Test\ctower.cpp(13,40): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+  main.cpp
+  Generating Code...
+  Test.vcxproj -> C:\Users\elnora\OneDrive - VNU-HCMUS\HCMUS\2024 - 2025\3\OOP\Project\src\TowerDefenseProject\Test\x64\Debug\TowerDefense.exe

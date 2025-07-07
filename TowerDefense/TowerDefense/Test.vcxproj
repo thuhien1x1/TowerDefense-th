@@ -143,6 +143,7 @@
     <ClCompile Include="cpoint.cpp" />
     <ClCompile Include="ctower.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Menu.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cbullet.h" />
@@ -152,6 +153,7 @@
     <ClInclude Include="cmap.h" />
     <ClInclude Include="cpoint.h" />
     <ClInclude Include="ctower.h" />
+    <ClInclude Include="Menu.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

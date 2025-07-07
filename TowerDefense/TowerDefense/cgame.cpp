@@ -4,7 +4,15 @@
 using namespace sf;
 using namespace std;
 
-cgame::cgame() : window(), isGameOver(false), mainTowerHealth(5), enemySpeed(100.f), TOWER_RANGE(200.f) {
+cgame::cgame() : 
+    window(),
+    isGameOver(false),
+    mainTowerHealth(100),
+    enemySpeed(100.0f),
+    TOWER_RANGE(150.0f),
+    currentState(GameState::MainMenu)  // Start in main menu
+{
+        
     // Load resources
     if (!backgroundTexture.loadFromFile("background.png") ||
         !towerTexture.loadFromFile("tower.png") ||
@@ -57,7 +65,12 @@ void cgame::run() {
     while (window.isOpen()) {
         float dt = clock.restart().asSeconds(); // Delta time for smooth movement
         handleEvents();
-        update(dt);
+        
+        // Only update game logic if in Playing state
+        if (currentState == GameState::Playing) {
+            update(dt);
+        }
+        
         render();
     }
 }
@@ -88,20 +101,41 @@ void cgame::handleEvents() {
         if (event.type == Event::Closed)
             window.close();
 
-        // Place tower on valid map tiles by clicking the mouse
-        if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
-            int mx = event.mouseButton.x, my = event.mouseButton.y;
-            cpoint clicked = cpoint::fromXYToRowCol(mx, my);
+        if (currentState == GameState::MainMenu) {
+            // Handle menu events
+            menu.handleEvent(event, window);
+            
+            // Check if play button was clicked
+            if (menu.isPlayButtonClicked()) {
+                currentState = GameState::Playing;
+                
+                // Reset game state for a new game
+                isGameOver = false;
+                mainTowerHealth = 100;
+                enemies.clear();
+                towers.clear();
+                bullets.clear();
+                
+                // Initialize game elements
+                spawnEnemies();
+            }
+        }
+        else if (currentState == GameState::Playing) {
+            // Place tower on valid map tiles by clicking the mouse
+            if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+                int mx = event.mouseButton.x, my = event.mouseButton.y;
+                cpoint clicked = cpoint::fromXYToRowCol(mx, my);
 
-            if (clicked.getRow() >= 0 && clicked.getRow() < cpoint::MAP_ROW &&
-                clicked.getCol() >= 0 && clicked.getCol() < cpoint::MAP_COL &&
-                map.getMap()[clicked.getRow()][clicked.getCol()].getC() == -1 && towers.size() < 3) { // Assuming towers is 3 for scaling, adjust based on level setting
-                ctower t;
-                t.init(towerTexture, map.getMap()[clicked.getRow()][clicked.getCol()].getPixelX(), map.getMap()[clicked.getRow()][clicked.getCol()].getPixelY());
-                t.setLocation(clicked);
-                t.setMapForBullet(map.getMap());
-                t.getBullet().setSpeed(8);
-                towers.push_back(t);
+                if (clicked.getRow() >= 0 && clicked.getRow() < cpoint::MAP_ROW &&
+                    clicked.getCol() >= 0 && clicked.getCol() < cpoint::MAP_COL &&
+                    map.getMap()[clicked.getRow()][clicked.getCol()].getC() == -1 && towers.size() < 3) { // Assuming towers is 3 for scaling, adjust based on level setting
+                    ctower t;
+                    t.init(towerTexture, map.getMap()[clicked.getRow()][clicked.getCol()].getPixelX(), map.getMap()[clicked.getRow()][clicked.getCol()].getPixelY());
+                    t.setLocation(clicked);
+                    t.setMapForBullet(map.getMap());
+                    t.getBullet().setSpeed(8);
+                    towers.push_back(t);
+                }
             }
         }
     }
@@ -209,12 +243,23 @@ void cgame::update(float dt) {
 
 void cgame::render() {
     window.clear();
-    window.draw(backgroundSprite);
-    window.draw(mainTowerSprite);
-    window.draw(hpText);
-    if (isGameOver) window.draw(gameOverText);
-    for (const auto& t : towers) window.draw(t.getSprite());
-    for (const auto& e : enemies) window.draw(e.getSprite());
-    for (const auto& b : bullets) window.draw(b.getSprite());
+    
+    if (currentState == GameState::MainMenu) {
+        // Draw menu
+        menu.draw(window);
+    }
+    else if (currentState == GameState::Playing) {
+        // Draw game elements
+        window.draw(backgroundSprite);
+        window.draw(mainTowerSprite);
+        window.draw(hpText);
+        
+        for (const auto& t : towers) window.draw(t.getSprite());
+        for (const auto& e : enemies) window.draw(e.getSprite());
+        for (const auto& b : bullets) window.draw(b.getSprite());
+        
+        if (isGameOver) window.draw(gameOverText);
+    }
+    
     window.display();
 }

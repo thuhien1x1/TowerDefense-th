@@ -6,9 +6,15 @@
 #include "cenemy.h"
 #include "cbullet.h"
 #include "ctower.h"
+#include "Menu.h"
 
 using namespace sf;
 using namespace std;
+
+enum class GameState
+{
+    MainMenu, Playing
+};
 
 class cgame {
 private:
@@ -27,6 +33,8 @@ private:
     int mainTowerHealth;
     float enemySpeed;
     float TOWER_RANGE;
+    GameState currentState;
+    Menu menu;
 
 public:
     cgame();

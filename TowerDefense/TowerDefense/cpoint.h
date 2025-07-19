@@ -4,9 +4,9 @@
 class cpoint
 {
 public:
-    static const int MAP_ROW = 10;
-    static const int MAP_COL = 15;
-    static const int TILE_SIZE = 80;
+    static const int MAP_ROW = 27;
+    static const int MAP_COL = 48;
+    static const int TILE_SIZE = 40;
 
 private:
     int row, col, c;

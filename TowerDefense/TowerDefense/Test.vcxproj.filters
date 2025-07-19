@@ -36,7 +36,10 @@
     <ClCompile Include="cgame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="clevel.cpp">
+    <ClCompile Include="cmenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,7 +62,10 @@
     <ClInclude Include="cgame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="clevel.h">
+    <ClInclude Include="cmenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

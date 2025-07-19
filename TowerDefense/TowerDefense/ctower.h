@@ -11,6 +11,7 @@ private:
     float _shootTimer;
     int _targetEnemyIdx;
 
+    int _type = 1;
 public:
     ctower();
 
@@ -30,4 +31,7 @@ public:
     void resetShootTimer(); // Reset the shoot timer to 0 after firing a bullet
     void addShootTimer(float dt); // Add delta time to the shoot timer, used to track cooldown between shots
     float getShootTimer() const; // Get the current value of the shoot timer to check if the tower is ready to shootc
+
+    int& getType() { return _type; };
+    void setType(int t) { if (t >= 0 && t < 3) _type = t; else _type = 0; }
 };

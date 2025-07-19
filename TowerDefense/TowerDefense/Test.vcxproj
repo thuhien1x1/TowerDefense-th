@@ -138,20 +138,22 @@
     <ClCompile Include="cbullet.cpp" />
     <ClCompile Include="cenemy.cpp" />
     <ClCompile Include="cgame.cpp" />
-    <ClCompile Include="clevel.cpp" />
     <ClCompile Include="cmap.cpp" />
+    <ClCompile Include="cmenu.cpp" />
     <ClCompile Include="cpoint.cpp" />
     <ClCompile Include="ctower.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cbullet.h" />
     <ClInclude Include="cenemy.h" />
     <ClInclude Include="cgame.h" />
-    <ClInclude Include="clevel.h" />
     <ClInclude Include="cmap.h" />
+    <ClInclude Include="cmenu.h" />
     <ClInclude Include="cpoint.h" />
     <ClInclude Include="ctower.h" />
+    <ClInclude Include="player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

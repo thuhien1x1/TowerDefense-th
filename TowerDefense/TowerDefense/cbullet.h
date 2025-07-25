@@ -16,6 +16,26 @@ class cbullet
     int _damage;
     sf::Sprite _sprite;
 
+    // Add animation for bullets
+    sf::IntRect _frameRect;   // Current frame of the sprite sheet
+    int _frameWidth;
+    int _frameHeight;
+    int _currentFrame;
+    int _totalFrames;
+    float _animationTimer;
+    float _animationSpeed; // Time for per frame
+
+    // Add laser
+    bool isLaser;
+    float laserDuration;
+    float laserTimer;
+    sf::Sprite laserSprite;
+    sf::Vector2f startPos;
+    sf::Vector2f targetPos;
+
+    // Bomb: 16, 15, 7, scale 4.f
+    // Fire bullet: 1667, 1167, 4, scale 0.1f
+
 public:
     cbullet();
     void updateMap(cpoint map[][cpoint::MAP_COL]); // Update
@@ -39,10 +59,11 @@ public:
     void trackEnemy(const cenemy& enemy, float deltaTime);
 
     // Position and movement
-    void init(const sf::Texture& tex, float x, float y);
+    void init(const sf::Texture& tex, float x, float y, int frameWidth, int frameHeight, int totalFrames, float animSpeed); // Update
+    void updateAnimation(float deltaTime); // Add
     void updateSprite();
     const sf::Sprite& getSprite() const { return _sprite; }
-    
+
     float getX() const { return _posX; }
     float getY() const { return _posY; }
 
@@ -58,4 +79,10 @@ public:
 
     bool isActive() const { return _active; } // Returns true if the bullet is still active (on screen, valid target), used to skip deactivated bullets.
     void deactivate() { _active = false; } // Marks the bullet as inactive after hitting an enemy or going off - screen, Prevents further updates or rendering.
+
+    // Add laser
+    void initLaser(const sf::Texture& tex, float x, float y, float targetX, float targetY, float duration = 0.2f);
+    bool isLaserBullet() const { return isLaser; }
+    const sf::Sprite& getLaserSprite() const { return laserSprite; }
+    void updateLaser(float deltaTime);
 };

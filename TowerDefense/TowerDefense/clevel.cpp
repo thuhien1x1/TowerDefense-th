@@ -1,13 +1,29 @@
 #include "clevel.h"
+#include <iostream>
 
-int clevel::getMapValue(int row, int col) const {
-    if (row < 0 || row >= cpoint::MAP_ROW || col < 0 || col >= cpoint::MAP_COL) 
-        return -99;
-    return _map[row][col];
+using namespace std;
+
+clevel::clevel(int levelID, int enemyCount, int waveCount, int towerMaxCount, int startGold) {
+	_levelID = levelID;
+	_enemyCount = enemyCount;
+	_waveCount = waveCount;
+	_towerMaxCount = towerMaxCount;
+	_startGold = startGold;
+	_currentLevel = 1;
 }
 
-void clevel::getFullMap(int dest[][cpoint::MAP_COL]) const {
-    for (int i = 0; i < cpoint::MAP_ROW; i++)
-        for (int j = 0; j < cpoint::MAP_COL; j++)
-            dest[i][j] = _map[i][j];
+void clevel::loadMap(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, int levelId) {
+	_map.makeMapData(mainTowerTexture, mapTexture, levelId);
+}
+
+void clevel::nextWave() {
+	if (_currentWaveIndex + 1 < _waves.size())
+		_currentWaveIndex++;
+}
+
+pair<EnemyType, int> clevel::getCurrentWaveInfo() const {
+	if (_currentWaveIndex < _waves.size())
+		return _waves[_currentWaveIndex];
+	else
+		return { HEAVY_WALKER, 0 };
 }

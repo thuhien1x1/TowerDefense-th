@@ -2,6 +2,7 @@
 #include "FOREACH.h"
 
 #include <cassert>
+#include <iostream>
 
 
 StateStack::StateStack(State::Context context)
@@ -71,10 +72,35 @@ State::Ptr StateStack::createState(States::ID stateID)
 	return found->second();
 }
 
+// ============ For debug ============= /
+std::string getActionName(StateStack::Action action) {
+	switch (action) {
+	case StateStack::Push:  return "Push";
+	case StateStack::Pop:   return "Pop";
+	case StateStack::Clear: return "Clear";
+	default:                return "Unknown";
+	}
+}
+
+std::string getStateName(States::ID id) {
+	switch (id) {
+	case States::None:    return "None";
+	case States::Title:   return "Title";
+	case States::Menu:    return "Menu";
+	case States::Game:    return "Game";
+	case States::Loading: return "Loading";
+	case States::Pause:   return "Pause";
+	default:              return "Unknown";
+	}
+}
+// ====================================== //
+
 void StateStack::applyPendingChanges()
 {
 	FOREACH(PendingChange change, mPendingList)
 	{
+		std::cout << "Applying change: " << getActionName(change.action)
+			<< " for state " << getStateName(change.stateID) << "\n";
 		switch (change.action)
 		{
 		case Push:

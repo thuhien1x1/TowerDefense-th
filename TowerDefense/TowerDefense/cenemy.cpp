@@ -2,6 +2,8 @@
 #include <queue>
 #include <vector>
 #include <algorithm>
+#include <iostream>
+using namespace std;
 
 cenemy::cenemy()
     : _posX(0.f), _posY(0.f), _health(3), _speed(3), _currentTarget(1), _reachedEnd(false), _pathLength(0) {
@@ -18,6 +20,11 @@ cenemy::cenemy()
     // Path array initialization
     for (int i = 0; i < cpoint::MAP_ROW * cpoint::MAP_COL; i++)
         _p[i] = cpoint();
+
+    // Add
+    _state = WALK;
+    _isDead = false;
+    _isAttackTriggered = false;
 }
 
 
@@ -26,12 +33,6 @@ cenemy::cenemy(cpoint tstart, cpoint tend, cpoint tcurr) : cenemy() {
     _end = tend;
     _curr = tcurr;
 }
-
-void cenemy::setSpeed(int tspeed) { if (tspeed > 0 && tspeed < 10) _speed = tspeed; }
-void cenemy::setStart(const cpoint& tstart) { _start = tstart; }
-void cenemy::setEnd(const cpoint& tend) { _end = tend; }
-void cenemy::setCurr(const cpoint& tcurr) { _curr = tcurr; }
-
 
 void cenemy::calcPath(int a[][cpoint::MAP_COL], int n, cpoint s, cpoint e) {
     std::queue<cpoint> q;
@@ -86,55 +87,178 @@ void cenemy::findPath(cpoint a[][cpoint::MAP_COL], cpoint s, cpoint e) {
     calcPath(ta, cpoint::MAP_ROW, s, e);
 }
 
-void cenemy::init(const sf::Texture& tex, float x, float y, int hp) {
-    _sprite.setTexture(tex);
-    _sprite.setOrigin(tex.getSize().x / 2.f, tex.getSize().y / 2.f); // Center the sprite origin
-    _sprite.setScale(0.5f, 0.5f);
-    _posX = x;
-    _posY = y;
-    _health = hp;
-    _reachedEnd = false;
-    _currentTarget = 1;  
-    updateSprite();
-}
-
 void cenemy::updateSprite() {
     _sprite.setPosition(_posX, _posY);
 }
 
-void cenemy::setPosition(float x, float y) { 
-    _posX = x; 
-    _posY = y; 
-    updateSprite(); 
+void cenemy::setPosition(float x, float y) {
+    _posX = x;
+    _posY = y;
+    updateSprite();
 }
 
-void cenemy::move(float dx, float dy) { 
-    _posX += dx; 
-    _posY += dy; 
-    updateSprite(); 
+void cenemy::move(float dx, float dy) {
+    _posX += dx;
+    _posY += dy;
+    updateSprite();
 }
 
+// Update
 void cenemy::takeDamage(int damage) {
+    if (_state == DEATH) return;
+
     _health -= damage;
-
     if (_health <= 0) {
-        _sprite.setColor(sf::Color(255, 255, 255, 0)); // Make enemy disappear
-        _reachedEnd = true; 
-    }
-    else { 
-        // Enemy takes damage: color becomes more red as health decreases
-        float intensity = static_cast<float>(_health) / 3.f; // Assuming max health is 3 for scaling, adjust based on level setting
-        if (intensity < 0.f) intensity = 0.f;
-        if (intensity > 1.f) intensity = 1.f;
+        _sprite.setTexture(*_deathTex);
+        _state = DEATH;
+        _currentFrame = 0;
+        _animationTimer = 0.f;
 
-        int greenBlue = static_cast<int>(255 * intensity);
+        _totalFrames = _deathFrames;
+        _animationSpeed = _deathSpeed;
+        _frameWidth = _deathFrameWidth;
+        _frameHeight = _deathFrameHeight;
 
-        // The lower the health, the less green/blue -> more red
-        _sprite.setColor(sf::Color(255, greenBlue, greenBlue));
+        _frameRect = sf::IntRect(0, 0, _frameWidth, _frameHeight);
+        _sprite.setTextureRect(_frameRect);
+        _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 2.f);
     }
 }
 
+// Update
+void cenemy::init(EnemyType type, float x, float y, int hp, const EnemyAnimationData& data) {
+    _posX = x;
+    _posY = y;
+    _health = hp;
+    _type = type;
 
+    _sprite.setTexture(*_walkTex);
+    _totalFrames = _walkFrames;
+    _animationSpeed = _walkSpeed;
+    _frameWidth = _walkFrameWidth;
+    _frameHeight = _walkFrameHeight;
+
+    _currentFrame = 0;
+    _animationTimer = 0.f;
+    _state = WALK;
+    _isDead = false;
+    _isAttackTriggered = false;
+    _reachedEnd = false;
+
+    _frameRect = sf::IntRect(0, 0, _frameWidth, _frameHeight);
+    _sprite.setTextureRect(_frameRect);
+    _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 2.f);
+
+    updateSprite();
+}
+
+// Add
+void cenemy::loadFromData(const EnemyAnimationData& data) {
+    _walkTex = data.walkTex;
+    _attackTex = data.attackTex;
+    _deathTex = data.deathTex;
+
+    _walkFrames = data.walkFrames;
+    _attackFrames = data.attackFrames;
+    _deathFrames = data.deathFrames;
+
+    _walkSpeed = data.walkSpeed;
+    _attackSpeed = data.attackSpeed;
+    _deathSpeed = data.deathSpeed;
+
+    _walkFrameWidth = data.walkFrameWidth;
+    _walkFrameHeight = data.walkFrameHeight;
+    _attackFrameWidth = data.attackFrameWidth;
+    _attackFrameHeight = data.attackFrameHeight;
+    _deathFrameWidth = data.deathFrameWidth;
+    _deathFrameHeight = data.deathFrameHeight;
+
+    _sprite.setScale(data.scaleX, data.scaleY); // Because the sizes of the sprite sheets are not the same
+}
+
+void cenemy::triggerAttack(float towerX, float towerY) {
+    if (_state != WALK) return;
+
+    _sprite.setTexture(*_attackTex);
+    _state = ATTACK;
+    _currentFrame = 0;
+    _animationTimer = 0.f;
+    _isAttackingMainTower = true;
+    _attackTimer = 0.f;
+
+    _totalFrames = _attackFrames;
+    _animationSpeed = _attackSpeed;
+    _frameWidth = _attackFrameWidth;
+    _frameHeight = _attackFrameHeight;
+
+    _frameRect = IntRect(0, 0, _frameWidth, _frameHeight);
+    _sprite.setTextureRect(_frameRect);
+    _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 2.f);
+}
+
+void cenemy::updateAnimation(float deltaTime) {
+    if (_state == DEATH && _isDead) return;
+
+    _animationTimer += deltaTime;
+    if (_animationTimer >= _animationSpeed) {
+        _animationTimer -= _animationSpeed;
+        _currentFrame++;
+
+        if (_currentFrame >= _totalFrames) {
+            if (_state == DEATH) {
+                _currentFrame = _totalFrames - 1;
+                _isDead = true;
+            }
+            else
+                _currentFrame = 0;
+        }
+
+        _frameRect.left = _currentFrame * _frameWidth;
+        _frameRect.top = 0;
+        _sprite.setTextureRect(_frameRect);
+    }
+}
+
+void cenemy::faceLeft(EnemyType type) {
+    if (type == RANGED_MECH)
+        _sprite.setScale(-1.f, 1.f);
+    else
+        _sprite.setScale(-0.5f, 0.5f);
+}
+
+void cenemy::faceRight(EnemyType type) {
+    if (type == RANGED_MECH)
+        _sprite.setScale(1.f, 1.f);
+    else
+        _sprite.setScale(0.5f, 0.5f);
+}
+
+int cenemy::getHealthByType(EnemyType type) {
+    switch (type) {
+    case FAST_SCOUT: return 3;
+    case RANGED_MECH: return 5;
+    case HEAVY_WALKER: return 8;
+    default: return 3;
+    }
+}
+
+int cenemy::getSpeedByType(EnemyType type) {
+    switch (type) {
+    case FAST_SCOUT: return 120;
+    case RANGED_MECH: return 100;
+    case HEAVY_WALKER: return 70;
+    default: return 70;
+    }
+}
+
+int cenemy::getResourcesByType(EnemyType type) {
+    switch (type) {
+    case FAST_SCOUT: return 20;
+    case RANGED_MECH: return 30;
+    case HEAVY_WALKER: return 40;
+    default: return 20;
+    }
+}
 
 
 

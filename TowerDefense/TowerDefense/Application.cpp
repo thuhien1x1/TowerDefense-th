@@ -4,6 +4,8 @@
 #include "MenuState.h"
 #include "GameState.h"
 #include "PauseState.h"
+#include "SettingState.h"
+#include "InformationState.h"
 
 Application::Application()
     : mWindow(sf::VideoMode(1920, 1080), "Tower Defense", sf::Style::Close)
@@ -62,6 +64,8 @@ void Application::registerStates()
     mStateStack.registerState<MenuState>(States::Menu);
     mStateStack.registerState<GameState>(States::Game);
     mStateStack.registerState<PauseState>(States::Pause);
+    mStateStack.registerState<SettingState>(States::Setting);
+    mStateStack.registerState<InformationState>(States::Information);
 }
 
 void Application::processInput()

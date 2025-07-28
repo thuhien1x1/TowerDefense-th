@@ -143,10 +143,12 @@
     <ClCompile Include="cpoint.cpp" />
     <ClCompile Include="ctower.cpp" />
     <ClCompile Include="GameState.cpp" />
+    <ClCompile Include="InformationState.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MenuState.cpp" />
     <ClCompile Include="PauseState.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="SettingState.cpp" />
     <ClCompile Include="State.cpp" />
     <ClCompile Include="StateStack.cpp" />
     <ClCompile Include="TitleState.cpp" />
@@ -162,11 +164,13 @@
     <ClInclude Include="ctower.h" />
     <ClInclude Include="Foreach.h" />
     <ClInclude Include="GameState.h" />
+    <ClInclude Include="InformationState.h" />
     <ClInclude Include="MenuState.h" />
     <ClInclude Include="PauseState.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="ResourceHolder.h" />
     <ClInclude Include="ResourceIdentifiers.h" />
+    <ClInclude Include="SettingState.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="StateIdentifiers.h" />
     <ClInclude Include="StateStack.h" />

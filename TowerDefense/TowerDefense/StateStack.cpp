@@ -90,6 +90,8 @@ std::string getStateName(States::ID id) {
 	case States::Game:    return "Game";
 	case States::Loading: return "Loading";
 	case States::Pause:   return "Pause";
+	case States::Setting: return "Setting";
+	
 	default:              return "Unknown";
 	}
 }

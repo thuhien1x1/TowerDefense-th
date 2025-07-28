@@ -25,11 +25,25 @@ MenuState::MenuState(StateStack& stack, Context context)
 	playOption.setPosition(context.window->getView().getSize() / 2.f);
 	mOptions.push_back(playOption);
 
+	sf::Text settingOption;
+	settingOption.setFont(font);
+	settingOption.setString("Setting");
+	centerOrigin(settingOption);
+	settingOption.setPosition(playOption.getPosition() + sf::Vector2f(0.f, 30.f));
+	mOptions.push_back(settingOption);
+
+	sf::Text informationOption;
+	informationOption.setFont(font);
+	informationOption.setString("Information");
+	centerOrigin(informationOption);
+	informationOption.setPosition(settingOption.getPosition() + sf::Vector2f(0.f, 30.f));
+	mOptions.push_back(informationOption);
+
 	sf::Text exitOption;
 	exitOption.setFont(font);
 	exitOption.setString("Exit");
 	centerOrigin(exitOption);
-	exitOption.setPosition(playOption.getPosition() + sf::Vector2f(0.f, 30.f));
+	exitOption.setPosition(informationOption.getPosition() + sf::Vector2f(0.f, 30.f));
 	mOptions.push_back(exitOption);
 
 	updateOptionText();
@@ -64,6 +78,17 @@ bool MenuState::handleEvent(const sf::Event& event)
 			requestStackPop();
 			requestStackPush(States::Game);
 		}
+
+		else if (mOptionIndex == Setting) {
+			requestStackPop();
+			requestStackPush(States::Setting);
+		}
+
+		else if (mOptionIndex == Information) {
+			requestStackPop();
+			requestStackPush(States::Information);
+		}
+
 		else if (mOptionIndex == Exit)
 		{
 			// The exit option was chosen, by removing itself, the stack will be empty, and the game will know it is time to close.

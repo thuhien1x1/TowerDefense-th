@@ -1,4 +1,3 @@
-// TowerDefense\MenuState.h
 #pragma once
 
 #include "State.h"
@@ -6,10 +5,10 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
 
-class MenuState : public State
+class InformationState : public State
 {
 public:
-	MenuState(StateStack& stack, Context context);
+	InformationState(StateStack& stack, Context context);
 
 	virtual void			draw();
 	virtual bool			update(sf::Time dt);
@@ -21,10 +20,7 @@ public:
 private:
 	enum OptionNames
 	{
-		Play,
-		Setting,
-		Information,
-		Exit,
+		Return
 	};
 
 
@@ -33,4 +29,6 @@ private:
 
 	std::vector<sf::Text>	mOptions;
 	std::size_t				mOptionIndex;
+
 };
+

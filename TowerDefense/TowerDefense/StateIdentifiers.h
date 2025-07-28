@@ -9,6 +9,8 @@ namespace States
 		Menu,
 		Game,
 		Loading,
-		Pause
+		Pause,
+		Setting,
+		Information
 	};
 }

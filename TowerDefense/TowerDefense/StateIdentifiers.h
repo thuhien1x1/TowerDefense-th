@@ -5,12 +5,14 @@ namespace States
 	enum ID
 	{
 		None,
-		Title,
 		Menu,
+		Setting,
+		Information,
+		MapSelection,
 		Game,
 		Loading,
 		Pause,
-		Setting,
-		Information
+		Victory,
+		Defeat,
 	};
 }

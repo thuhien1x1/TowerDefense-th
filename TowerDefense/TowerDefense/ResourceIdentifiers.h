@@ -40,8 +40,48 @@ namespace Textures
         Tower,
         MainTower,
 
-        TitleScreen,
-        // Add any additional textures here
+        MenuScreen,
+
+        // UI for MenuState
+        newGameButton,
+        loadGameButton,
+        exitButton,
+
+        // UI for SettingState
+        settingButton,
+        optionsPanelInMenu,
+        onButton,
+        offButton,
+        closeButton,
+
+        // UI for InformationState
+        infoPanel,
+        infoButton,
+
+        // UI for MapSelectionState
+        mapSelectionBackground,
+        homeButton,
+        miniMap1,
+        miniMap2,
+        miniMap3,
+        miniMap4,
+        miniMap2Locked,
+        miniMap3Locked,
+        miniMap4Locked,
+
+        // UI for GameState
+        pauseButton,
+        pausePanel,
+        restartButton,
+        quitButton,
+        commingWave,
+
+        // UI for VictoryState & DefeatState
+        victory,
+        defeat,
+        star,
+        restartButton2,
+        quitButton2,
     };
 }
 
@@ -49,8 +89,9 @@ namespace Fonts
 {
     enum ID
     {
-        Main,
-        // Add any additional fonts here
+        BruceForever,
+        KnightWarrior,
+        RobotTraffic,
     };
 }
 

@@ -1,6 +1,7 @@
 #include "PauseState.h"
 #include "Utility.h"
 #include "ResourceHolder.h"
+#include "Application.h"
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -9,37 +10,115 @@
 
 PauseState::PauseState(StateStack& stack, Context context)
 	: State(stack, context)
-	, mBackgroundSprite()
-	, mPausedText()
-	, mInstructionText()
 {
-	sf::Font& font = context.fonts->get(Fonts::Main);
 	sf::Vector2f viewSize = context.window->getView().getSize();
 
-	mPausedText.setFont(font);
-	mPausedText.setString("Game Paused");
-	mPausedText.setCharacterSize(70);
-	centerOrigin(mPausedText);
-	mPausedText.setPosition(0.5f * viewSize.x, 0.4f * viewSize.y);
+	// Pause panel
+	pausePanel.setTexture(context.textures->get(Textures::pausePanel));
+	pausePanel.setPosition(1040.f, 540.f);
+	centerOrigin(pausePanel);
 
-	mInstructionText.setFont(font);
-	mInstructionText.setString("(Press Backspace to return to the main menu)");
-	centerOrigin(mInstructionText);
-	mInstructionText.setPosition(0.5f * viewSize.x, 0.6f * viewSize.y);
+	// Close panel
+	closePanel.setTexture(context.textures->get(Textures::closeButton));
+	closePanel.setPosition(1440.f, 330.f);
+	centerOrigin(closePanel);
+
+	// Restart button
+	restartButton.setTexture(context.textures->get(Textures::restartButton));
+	restartButton.setPosition(1040.f, 660.f);
+	centerOrigin(restartButton);
+
+	// Quit button
+	quitButton.setTexture(context.textures->get(Textures::quitButton));
+	quitButton.setPosition(1040.f, 760.f);
+	centerOrigin(quitButton);
+
+	// On / Off button (for music background & sound effect)
+	musicOnButton.setTexture(context.textures->get(Textures::onButton));
+	musicOnButton.setPosition(1140.f, 390.f);
+	centerOrigin(musicOnButton);
+
+	musicOffButton.setTexture(context.textures->get(Textures::offButton));
+	musicOffButton.setPosition(1140.f, 390.f);
+	centerOrigin(musicOffButton);
+
+	soundEffectOnButton.setTexture(context.textures->get(Textures::onButton));
+	soundEffectOnButton.setPosition(1140.f, 540.f);
+	centerOrigin(soundEffectOnButton);
+
+	soundEffectOffButton.setTexture(context.textures->get(Textures::offButton));
+	soundEffectOffButton.setPosition(1140.f, 540.f);
+	centerOrigin(soundEffectOffButton);
 }
 
 void PauseState::draw()
 {
 	sf::RenderWindow& window = *getContext().window;
+	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 	window.setView(window.getDefaultView());
 
+	// Darker screen overlay
 	sf::RectangleShape backgroundShape;
 	backgroundShape.setFillColor(sf::Color(0, 0, 0, 150));
 	backgroundShape.setSize(window.getView().getSize());
-
 	window.draw(backgroundShape);
-	window.draw(mPausedText);
-	window.draw(mInstructionText);
+
+	// Pause panel
+	window.draw(pausePanel);
+
+	// Close panel button
+	if (closePanel.getGlobalBounds().contains(mousePos))
+		closePanel.setScale(1.1f, 1.1f);
+	else
+		closePanel.setScale(1.f, 1.f);
+	window.draw(closePanel);
+
+	// Restart button
+	if (restartButton.getGlobalBounds().contains(mousePos))
+		restartButton.setScale(1.1f, 1.1f);
+	else
+		restartButton.setScale(1.f, 1.f);
+	window.draw(restartButton);
+
+	// Quit button
+	if (quitButton.getGlobalBounds().contains(mousePos))
+		quitButton.setScale(1.1f, 1.1f);
+	else
+		quitButton.setScale(1.f, 1.f);
+	window.draw(quitButton);
+
+	// On / Off button
+	if (isMusicOn) {
+		if (musicOnButton.getGlobalBounds().contains(mousePos))
+			musicOnButton.setScale(1.5f, 1.5f);
+		else
+			musicOnButton.setScale(1.4f, 1.4f);
+		window.draw(musicOnButton);
+	}
+
+	else {
+		if (musicOffButton.getGlobalBounds().contains(mousePos))
+			musicOffButton.setScale(1.5f, 1.5f);
+		else
+			musicOffButton.setScale(1.4f, 1.4f);
+		window.draw(musicOffButton);
+	}
+
+	if (isSoundEffectOn) {
+		if (soundEffectOnButton.getGlobalBounds().contains(mousePos))
+			soundEffectOnButton.setScale(1.5f, 1.5f);
+		else
+			soundEffectOnButton.setScale(1.4f, 1.4f);
+		window.draw(soundEffectOnButton);
+	}
+
+	else {
+		if (soundEffectOffButton.getGlobalBounds().contains(mousePos))
+			soundEffectOffButton.setScale(1.5f, 1.5f);
+		else
+			soundEffectOffButton.setScale(1.4f, 1.4f);
+		window.draw(soundEffectOffButton);
+	}
 }
 
 bool PauseState::update(sf::Time)
@@ -49,20 +128,42 @@ bool PauseState::update(sf::Time)
 
 bool PauseState::handleEvent(const sf::Event& event)
 {
-	if (event.type != sf::Event::KeyPressed)
-		return false;
+	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+		// Convert mouse position from screen pixels to world coordinates (considering the current view)
+		sf::Vector2f mousePos = getContext().window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 
-	if (event.key.code == sf::Keyboard::Escape)
-	{
-		// Escape pressed, remove itself to return to the game
-		requestStackPop();
-	}
+		if (closePanel.getGlobalBounds().contains(mousePos)) {
+			requestStackPop();  // Exit PauseState
+			return true;
+		}
 
-	if (event.key.code == sf::Keyboard::BackSpace)
-	{
-		// Escape pressed, remove itself to return to the game
-		requestStateClear();
-		requestStackPush(States::Menu);
+		// Click SOUND ON/OFF
+		if (musicOnButton.getGlobalBounds().contains(mousePos)) {
+			isMusicOn = !isMusicOn;
+			// TODO: mute/unmute sound effects
+			return true;
+		}
+
+		// Click MUSIC ON/OFF
+		if (soundEffectOnButton.getGlobalBounds().contains(mousePos)) {
+			isSoundEffectOn = !isSoundEffectOn;
+			// TODO: mute/unmute sound effects
+			return true;
+		}
+
+		// Restart button
+		if (restartButton.getGlobalBounds().contains(mousePos)) {
+			requestStackPop();
+			requestStackPush(States::Game); // Back to current Game
+			return true;
+		}
+
+		// Quit button
+		if (quitButton.getGlobalBounds().contains(mousePos)) {
+			requestStateClear();
+			requestStackPush(States::Menu); // Back to Menu
+			return true;
+		}
 	}
 
 	return false;

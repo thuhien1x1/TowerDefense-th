@@ -14,19 +14,15 @@ public:
 	virtual bool			update(sf::Time dt);
 	virtual bool			handleEvent(const sf::Event& event);
 
-	void					updateOptionText();
-
-private:
-	enum OptionNames {
-		Music,
-		Effect,
-		Return,
-	};
-
 private:
 	sf::Sprite				mBackgroundSprite;
+	sf::Sprite				mSoundOnButton;
+	sf::Sprite				mSoundOffButton;
+	sf::Sprite				mMusicOnButton;
+	sf::Sprite				mMusicOffButton;
+	sf::Sprite				mCloseOptionsPanelButton;
 
-	std::vector<sf::Text>	mOptions;
-	std::size_t				mOptionIndex;
+	bool					isSoundOn = true;
+	bool					isMusicOn = true;
 };
 

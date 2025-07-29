@@ -1,15 +1,19 @@
 #pragma once
-#include <SFML/Graphics.hpp>
 #include "State.h"
 #include "ResourceHolder.h"
 #include "ResourceIdentifiers.h"
+#include "Utility.h"
 #include "ctower.h"
 #include "cbullet.h"
 #include "cenemy.h"
 #include "clevel.h"
 #include "cmap.h"
+
 #include <vector>
 #include <map>
+
+#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/View.hpp>
 
 using namespace std;
 using namespace sf;
@@ -22,17 +26,18 @@ public:
     virtual void draw();
     virtual bool update(Time dt);
     virtual bool handleEvent(const Event& event);
- 
+
 private:
     Event event;
 
     void loadLevel(int index);
     void spawnEnemies();
+    int calStars();
 
     Sprite backgroundSprite;
 
     Font font;
-    Text hpText, gold, gameOver, gameWin;
+    Text hpText, gold;
 
     vector<cenemy> enemies;
     vector<ctower> towers;
@@ -41,7 +46,8 @@ private:
 
     cmap* curMap;
     int currentLevelIndex;
-    int waveIndex = 0;
+    int waveIndex;
+    int mainTowerMaxHealth;
     float TOWER_RANGE;
 
     bool isGameOver;
@@ -56,4 +62,8 @@ private:
     Texture* bulletTexture;
     Texture* mainTowerTexture;
     Texture* shootEffectTexture;
+
+    // UI
+    Sprite pauseButton;
+    Sprite commingWave;
 };

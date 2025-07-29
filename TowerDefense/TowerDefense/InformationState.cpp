@@ -8,35 +8,29 @@
 
 InformationState::InformationState(StateStack& stack, Context context)
 	: State(stack, context)
-	, mOptions()
-	, mOptionIndex(0)
 {
-	sf::Texture& texture = context.textures->get(Textures::TitleScreen);
-	sf::Font& font = context.fonts->get(Fonts::Main);
-
+	sf::Texture& texture = context.textures->get(Textures::infoPanel);
 	mBackgroundSprite.setTexture(texture);
 
-	// A simple menu demonstration
-
-	sf::Text Return;
-	Return.setFont(font);
-	Return.setString("Return");
-	centerOrigin(Return);
-	Return.setPosition(context.window->getView().getSize() / 2.f);
-	mOptions.push_back(Return);
-
-	updateOptionText();
+	// Close Info Button
+	mCloseInfoButton.setTexture(context.textures->get(Textures::closeButton));
+	mCloseInfoButton.setPosition(1400.f, 290.f);
+	centerOrigin(mCloseInfoButton);
 }
 
 void InformationState::draw()
 {
 	sf::RenderWindow& window = *getContext().window;
+	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
 	window.setView(window.getDefaultView());
 	window.draw(mBackgroundSprite);
 
-	FOREACH(const sf::Text & text, mOptions)
-		window.draw(text);
+	if (mCloseInfoButton.getGlobalBounds().contains(mousePos))
+		mCloseInfoButton.setScale(1.2f, 1.2f);
+	else
+		mCloseInfoButton.setScale(1.1f, 1.1f);
+	window.draw(mCloseInfoButton);
 }
 
 bool InformationState::update(sf::Time)
@@ -46,53 +40,15 @@ bool InformationState::update(sf::Time)
 
 bool InformationState::handleEvent(const sf::Event& event)
 {
-	// The demonstration menu logic
-	if (event.type != sf::Event::KeyPressed)
-		return false;
+	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+		// Convert mouse position from screen pixels to world coordinates (considering the current view)
+		sf::Vector2f mousePos = getContext().window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 
-	if (event.key.code == sf::Keyboard::Return)
-	{
-		if (mOptionIndex == Return)
-		{
+		if (mCloseInfoButton.getGlobalBounds().contains(mousePos)) {
 			requestStackPop();
 			requestStackPush(States::Menu);
 		}
 	}
 
-	else if (event.key.code == sf::Keyboard::Up)
-	{
-		// Decrement and wrap-around
-		if (mOptionIndex > 0)
-			mOptionIndex--;
-		else
-			mOptionIndex = mOptions.size() - 1;
-
-		updateOptionText();
-	}
-
-	else if (event.key.code == sf::Keyboard::Down)
-	{
-		// Increment and wrap-around
-		if (mOptionIndex < mOptions.size() - 1)
-			mOptionIndex++;
-		else
-			mOptionIndex = 0;
-
-		updateOptionText();
-	}
-
 	return true;
-}
-
-void InformationState::updateOptionText()
-{
-	if (mOptions.empty())
-		return;
-
-	// White all texts
-	FOREACH(sf::Text & text, mOptions)
-		text.setFillColor(sf::Color::White);
-
-	// Red the selected text
-	mOptions[mOptionIndex].setFillColor(sf::Color::Red);
 }

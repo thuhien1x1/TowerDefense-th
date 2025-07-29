@@ -16,7 +16,15 @@ public:
 
 
 private:
-	sf::Sprite			mBackgroundSprite;
-	sf::Text			mPausedText;
-	sf::Text			mInstructionText;
+	sf::Sprite			pausePanel;
+	sf::Sprite			closePanel;
+	sf::Sprite			restartButton;
+	sf::Sprite			quitButton;
+	sf::Sprite			soundEffectOnButton;
+	sf::Sprite			soundEffectOffButton;
+	sf::Sprite			musicOnButton;
+	sf::Sprite			musicOffButton;
+
+	bool				isMusicOn = true;
+	bool				isSoundEffectOn = true;
 };

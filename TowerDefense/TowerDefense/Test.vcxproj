@@ -142,17 +142,19 @@
     <ClCompile Include="cmap.cpp" />
     <ClCompile Include="cpoint.cpp" />
     <ClCompile Include="ctower.cpp" />
+    <ClCompile Include="DefeatState.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="InformationState.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MapSelectionState.cpp" />
     <ClCompile Include="MenuState.cpp" />
     <ClCompile Include="PauseState.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="SettingState.cpp" />
     <ClCompile Include="State.cpp" />
     <ClCompile Include="StateStack.cpp" />
-    <ClCompile Include="TitleState.cpp" />
     <ClCompile Include="Utility.cpp" />
+    <ClCompile Include="VictoryState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cbullet.h" />
@@ -162,9 +164,11 @@
     <ClInclude Include="cmap.h" />
     <ClInclude Include="cpoint.h" />
     <ClInclude Include="ctower.h" />
+    <ClInclude Include="DefeatState.h" />
     <ClInclude Include="Foreach.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="InformationState.h" />
+    <ClInclude Include="MapSelectionState.h" />
     <ClInclude Include="MenuState.h" />
     <ClInclude Include="PauseState.h" />
     <ClInclude Include="Player.h" />
@@ -174,8 +178,8 @@
     <ClInclude Include="State.h" />
     <ClInclude Include="StateIdentifiers.h" />
     <ClInclude Include="StateStack.h" />
-    <ClInclude Include="TitleState.h" />
     <ClInclude Include="Utility.h" />
+    <ClInclude Include="VictoryState.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

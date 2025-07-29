@@ -1,17 +1,20 @@
 #include "GameState.h"
+#include "MapSelectionState.h"
+#include <iostream>
 
 GameState::GameState(StateStack& stack, Context context)
     : State(stack, context),
     TOWER_RANGE(500.f),
-    currentLevelIndex(0),
+    currentLevelIndex(MapSelectionState::levelID),
     waveIndex(0),
+    mainTowerMaxHealth(0),
     levels(),
     isGameOver(false),
     isGameWin(false),
     hasPressedPlay(false),
     isWaitingForNextLevel(false),
     showEndButtons(false)
-{   
+{
     // Load textures
     backgroundTexture[0] = &getContext().textures->get(Textures::Map1);
     backgroundTexture[1] = &getContext().textures->get(Textures::Map2);
@@ -22,11 +25,20 @@ GameState::GameState(StateStack& stack, Context context)
     towerTexture = &getContext().textures->get(Textures::Tower);
     bulletTexture = &getContext().textures->get(Textures::Bomb);
     shootEffectTexture = &getContext().textures->get(Textures::ShootEffect);
-    font = getContext().fonts->get(Fonts::Main);
+    font = getContext().fonts->get(Fonts::BruceForever);
+
+    // Load UI texture
+    pauseButton.setTexture(context.textures->get(Textures::pauseButton));
+    pauseButton.setPosition(1880.f, 50.f);
+    centerOrigin(pauseButton);
+
+    commingWave.setTexture(context.textures->get(Textures::commingWave));
+    commingWave.setPosition(60.f, 770.f);
+    centerOrigin(commingWave);
 
     // Initialize 4 levels (levelID, enemyCount, waveCount, towerMaxCount, startGold) 
     clevel level1(1, 45, 3, 5, 200);
-    level1.setWaves({ {HEAVY_WALKER, 1}, {FAST_SCOUT, 1}, {RANGED_MECH, 1} }); // 10, 15, 20
+    level1.setWaves({ {FAST_SCOUT, 20}, {FAST_SCOUT, 1}, {RANGED_MECH, 1} }); // 10, 15, 20
     level1.loadMap(mainTowerTexture, backgroundTexture[0], 1);
 
     clevel level2(2, 65, 3, 6, 400);
@@ -89,6 +101,8 @@ GameState::GameState(StateStack& stack, Context context)
 void GameState::draw()
 {
     RenderWindow& window = *getContext().window;
+    window.setView(window.getDefaultView());
+    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
     window.clear(sf::Color::Black);
 
     window.draw(backgroundSprite);
@@ -109,63 +123,20 @@ void GameState::draw()
     window.draw(waveText);
 
     if (!hasPressedPlay && !isGameOver && !isGameWin) {
-        RectangleShape playBtn(Vector2f(200, 60));
-        playBtn.setPosition(300, 150);
-        playBtn.setFillColor(Color::Blue);
-        window.draw(playBtn);
-
-        Text playText;
-        playText.setFont(font);
-        playText.setString("Play (P)");
-        playText.setCharacterSize(30);
-        playText.setFillColor(Color::White);
-        playText.setPosition(330, 160);
-        window.draw(playText);
+        if (commingWave.getGlobalBounds().contains(mousePos))
+            commingWave.setScale(0.15f, 0.15f);
+        else
+            commingWave.setScale(0.1f, 0.1f);
+        window.draw(commingWave);
     }
 
-    if (isGameOver) {
-        window.draw(gameOver);
-        Text retryPrompt("Press R to retry", font, 20);
-        retryPrompt.setFillColor(Color::Red);
-        retryPrompt.setPosition(300, 150);
-        window.draw(retryPrompt);
-
-        Text exitPrompt("Press Q to quit", font, 20);
-        exitPrompt.setFillColor(Color::Red);
-        exitPrompt.setPosition(300, 180);
-        window.draw(exitPrompt);
-    }
-
-    if (isGameWin) {
-        window.draw(gameWin);
-        Text retryPrompt("Press R to retry", font, 20);
-        retryPrompt.setFillColor(Color::Green);
-        retryPrompt.setPosition(300, 137);
-        window.draw(retryPrompt);
-
-        Text exitPrompt("Press Q to quit", font, 20);
-        exitPrompt.setFillColor(Color::Red);
-        exitPrompt.setPosition(300, 180);
-        window.draw(exitPrompt);
-    }
-
-    if (isWaitingForNextLevel && currentLevelIndex < levels.size() - 1) {
-        Text nextLevelPrompt("Press ENTER to continue", font, 20);
-        nextLevelPrompt.setFillColor(Color::Blue);
-        nextLevelPrompt.setPosition(300, 100);
-        window.draw(nextLevelPrompt);
-    }
-
-    if (showEndButtons) {
-        Text retryPrompt("Press R to retry", font, 20);
-        retryPrompt.setFillColor(Color::Green);
-        retryPrompt.setPosition(300, 137);
-        window.draw(retryPrompt);
-
-        Text exitPrompt("Press Q to quit", font, 20);
-        exitPrompt.setFillColor(Color::Red);
-        exitPrompt.setPosition(300, 180);
-        window.draw(exitPrompt);
+    // Pause button
+    if (hasPressedPlay) {
+        if (pauseButton.getGlobalBounds().contains(mousePos))
+            pauseButton.setScale(1.1f, 1.1f);
+        else
+            pauseButton.setScale(1.f, 1.f);
+        window.draw(pauseButton);
     }
 
     // Update: Add enemy's hp bar
@@ -179,7 +150,7 @@ void GameState::draw()
             float spriteHeight = e.getSprite().getGlobalBounds().height;
             float barWidth = 50.f;
             float barHeight = 6.f;
-            float barX = e.getX() - barWidth;
+            float barX = e.getX() - barWidth + 15.f;
             float barY = e.getY() - spriteHeight / 2.f - 15.f;
 
             // Black outline
@@ -214,6 +185,81 @@ void GameState::draw()
         else
             window.draw(bullets[i].getSprite());
     }
+}
+
+bool GameState::handleEvent(const sf::Event& event)
+{
+    RenderWindow& window = *getContext().window;
+
+    if (event.type == Event::Closed)
+        window.close();
+
+    if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+        // Add pause button
+        sf::Vector2f mousePos = getContext().window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+        // Click commingWave icon to spawn enemies
+        if (commingWave.getGlobalBounds().contains(mousePos) && !hasPressedPlay) {
+            hasPressedPlay = true;
+            spawnEnemies();
+            return false;
+        }
+
+        // Request pushing pause state when click pause button
+        if (pauseButton.getGlobalBounds().contains(mousePos)) {
+            requestStackPush(States::Pause);
+            return false;
+        }
+
+        // Check if mouse is over UI elements (avoid placing tower in these cases)
+        if (commingWave.getGlobalBounds().contains(mousePos) || pauseButton.getGlobalBounds().contains(mousePos))
+            return false;
+
+        // Place tower on valid map tiles by clicking the mouse
+        int mx = event.mouseButton.x, my = event.mouseButton.y;
+        cpoint clicked = cpoint::fromXYToRowCol(mx, my);
+        // Check if the clicked tile is valid for placing a tower
+        if (clicked.getRow() >= 0 && clicked.getRow() < cpoint::MAP_ROW &&
+            clicked.getCol() >= 0 && clicked.getCol() < cpoint::MAP_COL &&
+            curMap->getMap()[clicked.getRow()][clicked.getCol()].getC() == -1 && towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
+            ctower t;
+            t.init(*towerTexture, curMap->getMap()[clicked.getRow()][clicked.getCol()].getPixelX(), curMap->getMap()[clicked.getRow()][clicked.getCol()].getPixelY());
+            t.setLocation(clicked);
+            t.setMapForBullet(curMap->getMap());
+            t.getBullet().setSpeed(8);
+            t.initEffect(*shootEffectTexture, 79, 46, 7, 0.05f);
+            towers.push_back(t);
+        }
+
+        return false;
+    }
+
+    // Press "Enter" to load the next level (after winning) (demo version, adjust based on Game State Management & UI graphics)
+    if (isWaitingForNextLevel && event.type == Event::KeyPressed && event.key.code == Keyboard::Enter) {
+        if (currentLevelIndex + 1 < levels.size()) {
+            loadLevel(currentLevelIndex + 1);
+            hasPressedPlay = false;
+        }
+
+        // Reset state flags after transition
+        isWaitingForNextLevel = false;
+        isGameWin = false;
+        isGameOver = false;
+    }
+
+    // Press "R" to restart the current level if the player loss (demo version, adjust based on Game State Management & UI graphics)
+    if ((isGameOver || isGameWin) && event.type == Event::KeyPressed && event.key.code == Keyboard::R) {
+        isGameOver = false;
+        isGameWin = false;
+        isWaitingForNextLevel = false;
+        loadLevel(currentLevelIndex); // Reload current level
+    }
+
+    // Press "Q" to exit (demo version, adjust based on Game State Management & UI graphics)
+    if ((isGameOver || isGameWin || showEndButtons) && event.type == Event::KeyPressed && (event.key.code == Keyboard::Q))
+        window.close(); // Exit
+
+    return true;
 }
 
 bool GameState::update(sf::Time dt)
@@ -277,28 +323,40 @@ bool GameState::update(sf::Time dt)
         for (int i = enemies.size() - 1; i >= 0; --i)
             if ((enemies[i].isDead() && enemies[i].getState() == DEATH && enemies[i].hasFinishedDeathAnim()) || enemies[i].hasReachedEnd())
                 enemies.erase(enemies.begin() + i);
+    }
 
-        // The wave must be the last wave
-        if (!isGameOver && curMap->getMainTower().getHealth() > 0 && enemies.empty() && hasPressedPlay) {
-            clevel& level = levels[currentLevelIndex];
+    // The wave must be the last wave
+    if (!isGameOver && !isGameWin && curMap->getMainTower().getHealth() > 0 && enemies.empty() && hasPressedPlay) {
+        clevel& level = levels[currentLevelIndex];
 
-            if (!level.isLastWave()) {
-                level.nextWave();
-                spawnEnemies();
-            }
-
-            else {
-                isGameWin = true;
-                isWaitingForNextLevel = true;
-            }
+        if (!level.isLastWave()) {
+            level.nextWave();
+            spawnEnemies();
         }
 
-        if (isGameWin && currentLevelIndex == levels.size() - 1) {
-            if (currentLevelIndex == levels.size() - 1)
-                showEndButtons = true; // Only show Exit and Restart buttons on last level
-            else
-                isWaitingForNextLevel = true; // Go to the next level
+        else {
+            isGameWin = true;
+            isWaitingForNextLevel = true;
         }
+    }
+
+    if (isGameWin && currentLevelIndex == levels.size() - 1) {
+        if (currentLevelIndex == levels.size() - 1)
+            showEndButtons = true; // Only show Exit and Restart buttons on last level
+        else
+            isWaitingForNextLevel = true; // Go to the next level
+    }
+
+    if (isGameOver) {
+        requestStackPush(States::Defeat);
+        isGameOver = false;
+    }
+
+    // Push VictoryState
+    if (isGameWin) {
+        *getContext().victoryStars = calStars();
+        requestStackPush(States::Victory);
+        isGameWin = false;
     }
 
     // Tower attack logic: target enemies and shoot
@@ -412,77 +470,6 @@ bool GameState::update(sf::Time dt)
     return true;
 }
 
-bool GameState::handleEvent(const sf::Event& event)
-{
-    RenderWindow& window = *getContext().window;
-
-    if (event.type == Event::KeyPressed)
-    {
-        // Check for pause key (typically Escape)
-        if (event.key.code == Keyboard::Escape)
-        {
-            // Request pushing pause state
-            requestStackPush(States::Pause);
-            return false; // Stop event propagation
-        }
-    }
-
-    if (event.type == Event::Closed)
-        window.close();
-
-    // Place tower on valid map tiles by clicking the mouse
-    if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
-        int mx = event.mouseButton.x, my = event.mouseButton.y;
-        cpoint clicked = cpoint::fromXYToRowCol(mx, my);
-        // Check if the clicked tile is valid for placing a tower
-        if (clicked.getRow() >= 0 && clicked.getRow() < cpoint::MAP_ROW &&
-            clicked.getCol() >= 0 && clicked.getCol() < cpoint::MAP_COL &&
-            curMap->getMap()[clicked.getRow()][clicked.getCol()].getC() == -1 && towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
-            ctower t;
-            t.init(*towerTexture, curMap->getMap()[clicked.getRow()][clicked.getCol()].getPixelX(), curMap->getMap()[clicked.getRow()][clicked.getCol()].getPixelY());
-            t.setLocation(clicked);
-            t.setMapForBullet(curMap->getMap());
-            t.getBullet().setSpeed(8);
-            t.initEffect(*shootEffectTexture, 79, 46, 7, 0.05f);
-            towers.push_back(t);
-        }
-    }
-
-    // Press "P" to spawn enemies (demo version, adjust based on Game State Management & UI graphics)
-    if (event.type == Event::KeyPressed && event.key.code == Keyboard::P && !hasPressedPlay) {
-        hasPressedPlay = true;
-        spawnEnemies();  // Spawn 1st wave
-    }
-
-    // Press "Enter" to load the next level (after winning) (demo version, adjust based on Game State Management & UI graphics)
-    if (isWaitingForNextLevel && event.type == Event::KeyPressed && event.key.code == Keyboard::Enter) {
-        if (currentLevelIndex + 1 < levels.size()) {
-            loadLevel(currentLevelIndex + 1);
-            hasPressedPlay = false;
-        }
-
-        // Reset state flags after transition
-        isWaitingForNextLevel = false;
-        isGameWin = false;
-        isGameOver = false;
-    }
-
-    // Press "R" to restart the current level if the player loss (demo version, adjust based on Game State Management & UI graphics)
-    if (isGameOver && event.type == Event::KeyPressed && event.key.code == Keyboard::R) {
-        isGameOver = false;
-        isGameWin = false;
-        isWaitingForNextLevel = false;
-        loadLevel(currentLevelIndex); // Reload current level
-    }
-
-    // Press "Q" to exit (demo version, adjust based on Game State Management & UI graphics)
-    if ((isGameOver || isGameWin || showEndButtons) && event.type == Event::KeyPressed && (event.key.code == Keyboard::Q)) {
-        window.close(); // Exit
-    }
-
-    return true;
-}
-
 void GameState::loadLevel(int index) {
     RenderWindow& window = *getContext().window;
 
@@ -495,7 +482,8 @@ void GameState::loadLevel(int index) {
     cenemy& ce = curMap->getEnemy();
     ce.findPath(curMap->getMap(), ce.getStart(), ce.getEnd());
 
-    // Load map data & texture for the current level
+    // Load map data & texture & mainTowerMaxHealth for the current level
+    mainTowerMaxHealth = curMap->getMainTower().getHealth();
     backgroundSprite.setTexture(*backgroundTexture[currentLevelIndex]);
     levels[currentLevelIndex].loadMap(mainTowerTexture, backgroundTexture[index], currentLevelIndex + 1);
     window.setSize(backgroundTexture[currentLevelIndex]->getSize());
@@ -530,25 +518,6 @@ void GameState::loadLevel(int index) {
     gold.setFillColor(Color::Green);
     gold.setPosition(10.f, 50.f);
     gold.setString("GOLD: " + to_string(levels[currentLevelIndex].getStartGold()));
-
-    // Set up text to notify game loss (demo)
-    gameOver.setFont(font);
-    gameOver.setCharacterSize(30);
-    gameOver.setFillColor(Color::Magenta);
-    gameOver.setString("Main tower destroyed! Game over!");
-    FloatRect textRect = gameOver.getLocalBounds();
-    gameOver.setOrigin(textRect.left + textRect.width / 2.f, textRect.top + textRect.height / 2.f);
-    gameOver.setPosition(backgroundTexture[currentLevelIndex]->getSize().x / 2.f, backgroundTexture[currentLevelIndex]->getSize().y / 2.f);
-
-    // Set up text to notify game win (demo)
-    gameWin.setFont(font);
-    gameWin.setCharacterSize(30);
-    gameWin.setFillColor(Color::Magenta);
-    gameWin.setString("You win!");
-    textRect = gameWin.getLocalBounds();
-    gameWin.setOrigin(textRect.left + textRect.width / 2.f, textRect.top + textRect.height / 2.f);
-    gameWin.setPosition(backgroundTexture[currentLevelIndex]->getSize().x / 2.f, backgroundTexture[currentLevelIndex]->getSize().y / 2.f);
-
 }
 
 void GameState::spawnEnemies() {
@@ -583,3 +552,23 @@ void GameState::spawnEnemies() {
 
     waveIndex++; // Update wave
 }
+
+int GameState::calStars() {
+    int curHealth = curMap->getMainTower().getHealth();
+    float healthRatio = static_cast<float>(curHealth) / mainTowerMaxHealth;
+
+    // If gamwWin()
+    // If currentMainTowerHealth >= 80% mainTowerMaxHealth -> 3 stars
+    if (healthRatio >= 0.8f)
+        return 3;
+    // If currentMainTowerHealth >= 50% mainTowerMaxHealth -> 2 stars
+    else if (healthRatio >= 0.5f)
+        return 2;
+    // If currentMainTowerHealth > 1 -> 1 star
+    else if (curHealth > 0)
+        return 1;
+    // GameOver = true
+    else
+        return 0;
+}
+

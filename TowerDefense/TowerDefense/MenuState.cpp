@@ -6,58 +6,67 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/View.hpp>
 
-
 MenuState::MenuState(StateStack& stack, Context context)
 	: State(stack, context)
-	, mOptions()
-	, mOptionIndex(0)
 {
-	sf::Texture& texture = context.textures->get(Textures::TitleScreen);
-	sf::Font& font = context.fonts->get(Fonts::Main);
-
+	// Set background
+	sf::Texture& texture = context.textures->get(Textures::MenuScreen);
 	mBackgroundSprite.setTexture(texture);
 
-	// A simple menu demonstration
-	sf::Text playOption;
-	playOption.setFont(font);
-	playOption.setString("Play");
-	centerOrigin(playOption);
-	playOption.setPosition(context.window->getView().getSize() / 2.f);
-	mOptions.push_back(playOption);
+	// New Game Button
+	sf::Sprite newGameSprite;
+	newGameSprite.setTexture(context.textures->get(Textures::newGameButton));
+	centerOrigin(newGameSprite);
+	newGameSprite.setPosition(980.f, 640.f);
+	mOptionSprites.push_back(newGameSprite);
 
-	sf::Text settingOption;
-	settingOption.setFont(font);
-	settingOption.setString("Setting");
-	centerOrigin(settingOption);
-	settingOption.setPosition(playOption.getPosition() + sf::Vector2f(0.f, 30.f));
-	mOptions.push_back(settingOption);
+	// Load Game Button
+	sf::Sprite loadGameSprite;
+	loadGameSprite.setTexture(context.textures->get(Textures::loadGameButton));
+	centerOrigin(loadGameSprite);
+	loadGameSprite.setPosition(980.f, 760.f);
+	mOptionSprites.push_back(loadGameSprite);
 
-	sf::Text informationOption;
-	informationOption.setFont(font);
-	informationOption.setString("Information");
-	centerOrigin(informationOption);
-	informationOption.setPosition(settingOption.getPosition() + sf::Vector2f(0.f, 30.f));
-	mOptions.push_back(informationOption);
+	// Exit Button
+	sf::Sprite exitSprite;
+	exitSprite.setTexture(context.textures->get(Textures::exitButton));
+	centerOrigin(exitSprite);
+	exitSprite.setPosition(980.f, 880.f);
+	mOptionSprites.push_back(exitSprite);
 
-	sf::Text exitOption;
-	exitOption.setFont(font);
-	exitOption.setString("Exit");
-	centerOrigin(exitOption);
-	exitOption.setPosition(informationOption.getPosition() + sf::Vector2f(0.f, 30.f));
-	mOptions.push_back(exitOption);
+	// Setting button
+	sf::Sprite mSettingsButton;
+	mSettingsButton.setTexture(context.textures->get(Textures::settingButton));
+	mSettingsButton.setPosition(1800.f, 60.f);
+	centerOrigin(mSettingsButton);
+	mOptionSprites.push_back(mSettingsButton);
 
-	updateOptionText();
+	// Info button
+	sf::Sprite mInfoButton;
+	mInfoButton.setTexture(context.textures->get(Textures::infoButton));
+	mInfoButton.setPosition(1680.f, 60.f);
+	centerOrigin(mInfoButton);
+	mOptionSprites.push_back(mInfoButton);
 }
 
 void MenuState::draw()
 {
 	sf::RenderWindow& window = *getContext().window;
+	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
 	window.setView(window.getDefaultView());
 	window.draw(mBackgroundSprite);
 
-	FOREACH(const sf::Text & text, mOptions)
-		window.draw(text);
+	for (std::size_t i = 0; i < mOptionSprites.size(); ++i)
+	{
+		// Apply hover scale directly to the original sprite 
+		if (mOptionSprites[i].getGlobalBounds().contains(mousePos))
+			mOptionSprites[i].setScale(1.1f, 1.1f); // Enlarge when hovered
+		else
+			mOptionSprites[i].setScale(1.f, 1.f); // Reset when not hovered
+
+		window.draw(mOptionSprites[i]);
+	}
 }
 
 bool MenuState::update(sf::Time)
@@ -67,69 +76,40 @@ bool MenuState::update(sf::Time)
 
 bool MenuState::handleEvent(const sf::Event& event)
 {
-	// The demonstration menu logic
-	if (event.type != sf::Event::KeyPressed)
-		return false;
+	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+		// Convert mouse position from screen pixels to world coordinates (considering the current view)
+		sf::Vector2f mousePos = getContext().window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 
-	if (event.key.code == sf::Keyboard::Return)
-	{
-		if (mOptionIndex == Play)
-		{
-			requestStackPop();
-			requestStackPush(States::Game);
+		for (std::size_t i = 0; i < mOptionSprites.size(); ++i) {
+			if (mOptionSprites[i].getGlobalBounds().contains(mousePos)) {
+				if (i == 0) {
+					requestStackPop();
+					requestStackPush(States::MapSelection); // New game
+				}
+
+				else if (i == 1) {
+					requestStackPop();
+					requestStackPush(States::Game); // Load game, change to State::Load later
+				}
+
+				else if (i == 2)
+					requestStackPop(); // Exit
+
+				else if (i == 3) {
+					requestStackPop();
+					requestStackPush(States::Setting); // Open setting panel
+				}
+
+				else if (i == 4) {
+					requestStackPop();
+					requestStackPush(States::Information); // Open information panel
+				}
+
+				break;
+			}
 		}
-
-		else if (mOptionIndex == Setting) {
-			requestStackPop();
-			requestStackPush(States::Setting);
-		}
-
-		else if (mOptionIndex == Information) {
-			requestStackPop();
-			requestStackPush(States::Information);
-		}
-
-		else if (mOptionIndex == Exit)
-		{
-			// The exit option was chosen, by removing itself, the stack will be empty, and the game will know it is time to close.
-			requestStackPop();
-		}
-	}
-
-	else if (event.key.code == sf::Keyboard::Up)
-	{
-		// Decrement and wrap-around
-		if (mOptionIndex > 0)
-			mOptionIndex--;
-		else
-			mOptionIndex = mOptions.size() - 1;
-
-		updateOptionText();
-	}
-
-	else if (event.key.code == sf::Keyboard::Down)
-	{
-		// Increment and wrap-around
-		if (mOptionIndex < mOptions.size() - 1)
-			mOptionIndex++;
-		else
-			mOptionIndex = 0;
-
-		updateOptionText();
 	}
 
 	return true;
 }
 
-void MenuState::updateOptionText()
-{
-	if (mOptions.empty())
-		return;
-
-	// White all texts
-	FOREACH(sf::Text & text, mOptions)
-		text.setFillColor(sf::Color::White);
-
-	// Red the selected text
-	mOptions[mOptionIndex].setFillColor(sf::Color::Red);
-}

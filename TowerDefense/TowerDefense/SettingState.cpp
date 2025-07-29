@@ -8,48 +8,83 @@
 
 SettingState::SettingState(StateStack& stack, Context context)
 	: State(stack, context)
-	, mOptions()
-	, mOptionIndex(0)
 {
-	sf::Texture& texture = context.textures->get(Textures::TitleScreen);
-	sf::Font& font = context.fonts->get(Fonts::Main);
-
+	// Set background
+	sf::Texture& texture = context.textures->get(Textures::optionsPanelInMenu);
 	mBackgroundSprite.setTexture(texture);
 
-	// A simple menu demonstration
-	sf::Text Music;
-	Music.setFont(font);
-	Music.setString("Music");
-	centerOrigin(Music);
-	Music.setPosition(context.window->getView().getSize() / 2.f);
-	mOptions.push_back(Music);
+	// On / Off Button (for music background and sound effect)
+	mSoundOnButton.setTexture(context.textures->get(Textures::onButton));
+	mSoundOnButton.setPosition(1200.f, 420.f);
+	centerOrigin(mSoundOnButton);
 
-	sf::Text Sound;
-	Sound.setFont(font);
-	Sound.setString("Sound");
-	centerOrigin(Sound);
-	Sound.setPosition(Music.getPosition() + sf::Vector2f(0.f, 30.f));
-	mOptions.push_back(Sound);
+	mSoundOffButton.setTexture(context.textures->get(Textures::offButton));
+	mSoundOffButton.setPosition(1200.f, 420.f);
+	centerOrigin(mSoundOffButton);
 
-	sf::Text Return;
-	Return.setFont(font);
-	Return.setString("Return");
-	centerOrigin(Return);
-	Return.setPosition(Sound.getPosition() + sf::Vector2f(0.f, 30.f));
-	mOptions.push_back(Return);
+	mMusicOnButton.setTexture(context.textures->get(Textures::onButton));
+	mMusicOnButton.setPosition(1200.f, 620.f);
+	centerOrigin(mMusicOnButton);
 
-	updateOptionText();
+	mMusicOffButton.setTexture(context.textures->get(Textures::offButton));
+	mMusicOffButton.setPosition(1200.f, 620.f);
+	centerOrigin(mMusicOffButton);
+
+	// Close Options Panel Button
+	mCloseOptionsPanelButton.setTexture(context.textures->get(Textures::closeButton));
+	mCloseOptionsPanelButton.setPosition(1400.f, 290.f);
+	centerOrigin(mCloseOptionsPanelButton);
 }
 
 void SettingState::draw()
 {
 	sf::RenderWindow& window = *getContext().window;
+	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
 	window.setView(window.getDefaultView());
 	window.draw(mBackgroundSprite);
 
-	FOREACH(const sf::Text & text, mOptions)
-		window.draw(text);
+	window.draw(mBackgroundSprite);
+
+	// Sound button
+	if (isSoundOn) {
+		if (mSoundOnButton.getGlobalBounds().contains(mousePos))
+			mSoundOnButton.setScale(1.8f, 1.8f);
+		else
+			mSoundOnButton.setScale(1.7f, 1.7f);
+		window.draw(mSoundOnButton);
+	}
+
+	else {
+		if (mSoundOffButton.getGlobalBounds().contains(mousePos))
+			mSoundOffButton.setScale(1.8f, 1.8f);
+		else
+			mSoundOffButton.setScale(1.7f, 1.7f);
+		window.draw(mSoundOffButton);
+	}
+
+	// Music button
+	if (isMusicOn) {
+		if (mMusicOnButton.getGlobalBounds().contains(mousePos))
+			mMusicOnButton.setScale(1.8f, 1.8f);
+		else
+			mMusicOnButton.setScale(1.7f, 1.7f);
+		window.draw(mMusicOnButton);
+	}
+
+	else {
+		if (mMusicOffButton.getGlobalBounds().contains(mousePos))
+			mMusicOffButton.setScale(1.8f, 1.8f);
+		else
+			mMusicOffButton.setScale(1.7f, 1.7f);
+		window.draw(mMusicOffButton);
+	}
+
+	if (mCloseOptionsPanelButton.getGlobalBounds().contains(mousePos))
+		mCloseOptionsPanelButton.setScale(1.2f, 1.2f);
+	else
+		mCloseOptionsPanelButton.setScale(1.1f, 1.1f);
+	window.draw(mCloseOptionsPanelButton);
 }
 
 bool SettingState::update(sf::Time)
@@ -59,60 +94,34 @@ bool SettingState::update(sf::Time)
 
 bool SettingState::handleEvent(const sf::Event& event)
 {
-	// The demonstration menu logic
-	if (event.type != sf::Event::KeyPressed)
-		return false;
 
-	if (event.key.code == sf::Keyboard::Return)
-	{
-		if (mOptionIndex == Music)
+	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+		// Convert mouse position from screen pixels to world coordinates (considering the current view)
+		sf::Vector2f mousePos = getContext().window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+
+		// Click SOUND ON/OFF
+		if (mSoundOnButton.getGlobalBounds().contains(mousePos) ||
+			mSoundOffButton.getGlobalBounds().contains(mousePos))
 		{
+			isSoundOn = !isSoundOn;
+			// TODO: mute/unmute sound effects
+			return true;
 		}
 
-		else if (mOptionIndex == Effect) {
+		// Click MUSIC ON/OFF
+		if (mMusicOnButton.getGlobalBounds().contains(mousePos) ||
+			mMusicOffButton.getGlobalBounds().contains(mousePos))
+		{
+			isMusicOn = !isMusicOn;
+			// TODO: mute/unmute background music
+			return true;
 		}
 
-		else if (mOptionIndex == Return)
-		{
+		if (mCloseOptionsPanelButton.getGlobalBounds().contains(mousePos)) {
 			requestStackPop();
 			requestStackPush(States::Menu);
 		}
 	}
 
-	else if (event.key.code == sf::Keyboard::Up)
-	{
-		// Decrement and wrap-around
-		if (mOptionIndex > 0)
-			mOptionIndex--;
-		else
-			mOptionIndex = mOptions.size() - 1;
-
-		updateOptionText();
-	}
-
-	else if (event.key.code == sf::Keyboard::Down)
-	{
-		// Increment and wrap-around
-		if (mOptionIndex < mOptions.size() - 1)
-			mOptionIndex++;
-		else
-			mOptionIndex = 0;
-
-		updateOptionText();
-	}
-
 	return true;
-}
-
-void SettingState::updateOptionText()
-{
-	if (mOptions.empty())
-		return;
-
-	// White all texts
-	FOREACH(sf::Text & text, mOptions)
-		text.setFillColor(sf::Color::White);
-
-	// Red the selected text
-	mOptions[mOptionIndex].setFillColor(sf::Color::Red);
 }

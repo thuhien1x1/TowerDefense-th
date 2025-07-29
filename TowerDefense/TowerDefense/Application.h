@@ -23,5 +23,6 @@ private:
     TextureHolder mTextures;
     FontHolder mFonts;
     Player mPlayer;
+    int mVictoryStars;
     StateStack mStateStack;
 };

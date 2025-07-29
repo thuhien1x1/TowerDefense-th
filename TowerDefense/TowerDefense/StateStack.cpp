@@ -1,9 +1,9 @@
 #include "StateStack.h"
+#include "MapSelectionState.h"
 #include "FOREACH.h"
 
 #include <cassert>
 #include <iostream>
-
 
 StateStack::StateStack(State::Context context)
 	: mStack()
@@ -84,15 +84,17 @@ std::string getActionName(StateStack::Action action) {
 
 std::string getStateName(States::ID id) {
 	switch (id) {
-	case States::None:    return "None";
-	case States::Title:   return "Title";
-	case States::Menu:    return "Menu";
-	case States::Game:    return "Game";
-	case States::Loading: return "Loading";
-	case States::Pause:   return "Pause";
-	case States::Setting: return "Setting";
-	
-	default:              return "Unknown";
+	case States::None:				return "None";
+	case States::Menu:				return "Menu";
+	case States::MapSelection:		return "MapSelection";
+	case States::Setting:			return "Setting";
+	case States::Information:		return "Infomation";
+	case States::Game:				return "Game";
+	case States::Loading:			return "Loading";
+	case States::Pause:				return "Pause";
+	case States::Victory:			return "Victory";
+	case States::Defeat:			return "Defeat";
+	default:						return "Unknown";
 	}
 }
 // ====================================== //

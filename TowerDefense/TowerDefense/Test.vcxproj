@@ -146,6 +146,7 @@
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="InformationState.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MapHandle.cpp" />
     <ClCompile Include="MapSelectionState.cpp" />
     <ClCompile Include="MenuState.cpp" />
     <ClCompile Include="PauseState.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="Foreach.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="InformationState.h" />
+    <ClInclude Include="MapHandle.h" />
     <ClInclude Include="MapSelectionState.h" />
     <ClInclude Include="MenuState.h" />
     <ClInclude Include="PauseState.h" />

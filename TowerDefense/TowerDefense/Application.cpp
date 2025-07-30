@@ -34,11 +34,28 @@ Application::Application()
 
     // Load tower & tower shoot effect textures
     mTextures.load(Textures::MainTower, "Media/Textures/mainTower.png");
-    mTextures.load(Textures::Tower, "Media/Textures/tower.png");
+    mTextures.load(Textures::Tower1, "Media/Textures/tower1.png");
+    mTextures.load(Textures::Tower2, "Media/Textures/tower2.png");
+    mTextures.load(Textures::Tower3, "Media/Textures/tower3.png");
+    mTextures.load(Textures::Tower1plus, "Media/Textures/tower1+.png");
+    mTextures.load(Textures::Tower2plus, "Media/Textures/tower2+.png");
+    mTextures.load(Textures::Tower3plus, "Media/Textures/tower3+.png");
     mTextures.load(Textures::ShootEffect, "Media/Textures/shootEffect.png");
 
+    // Load tower Infos
+    mTextures.load(Textures::Info1, "Media/Textures/infotower1.png");
+    mTextures.load(Textures::Info2, "Media/Textures/infotower2.png");
+    mTextures.load(Textures::Info3, "Media/Textures/infotower3.png");
+    mTextures.load(Textures::Info1plus, "Media/Textures/infotower1+.png");
+    mTextures.load(Textures::Info2plus, "Media/Textures/infotower2+.png");
+    mTextures.load(Textures::Info3plus, "Media/Textures/infotower3+.png");
+
     // Load bullet textures
+    mTextures.load(Textures::Bullet1, "Media/Textures/bomb_sprite_sheet.png");
+    mTextures.load(Textures::Bullet2, "Media/Textures/bomb_sprite_sheet.png");
+    mTextures.load(Textures::Bullet3, "Media/Textures/bomb_sprite_sheet.png");
     mTextures.load(Textures::Bomb, "Media/Textures/bomb_sprite_sheet.png");
+   
 
     // Load enemy's animation textures
     mTextures.load(Textures::Enemy1_Walk, "Media/Textures/enemy_1_walk_126_123_6.png");
@@ -50,6 +67,9 @@ Application::Application()
     mTextures.load(Textures::Enemy3_Walk, "Media/Textures/enemy_3_walk_213_211_6.png");
     mTextures.load(Textures::Enemy3_Attack, "Media/Textures/enemy_3_attack_212_210_6.png");
     mTextures.load(Textures::Enemy3_Death, "Media/Textures/enemy_3_death_212_210_6.png");
+
+    // Load Upgrade button
+    mTextures.load(Textures::Upgrade, "Media/Textures/Upgrade.png");
 
     // Load UI in MenuState
     mTextures.load(Textures::MenuScreen, "Media/Textures/menuScreen.png");

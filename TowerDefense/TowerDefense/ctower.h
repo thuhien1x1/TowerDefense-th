@@ -31,6 +31,8 @@ private:
     float _effectSpeed;
     bool _effectPlaying;
 
+    // Type tower
+    int Type;
 public:
     ctower();
 
@@ -39,6 +41,8 @@ public:
     void setMapForBullet(cpoint map[][cpoint::MAP_COL]);
     int calcPathBullet();
     cbullet& getBullet();
+    int getType() const { return Type; } // Tower 1 = 0 ...
+    void setType(int n) { Type = n; }
 
     void init(const Texture& tex, float x, float y);
     const Sprite& getSprite() const;

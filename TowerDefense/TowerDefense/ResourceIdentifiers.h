@@ -33,14 +33,34 @@ namespace Textures
         Bomb,
         Fire,
         Laser,
+        Bullet1,
+        Bullet2,
+        Bullet3,
 
         // Effect
         ShootEffect,
 
-        Tower,
+        // Towers 
+        Tower1,
+        Tower2,
+        Tower3,
+        Tower1plus,
+        Tower2plus,
+        Tower3plus,
         MainTower,
 
+        // Tower Infos
+        Info1,
+        Info2,
+        Info3,
+        Info1plus,
+        Info2plus,
+        Info3plus,
+
         MenuScreen,
+
+        // Upgrade Button
+        Upgrade,
 
         // UI for MenuState
         newGameButton,

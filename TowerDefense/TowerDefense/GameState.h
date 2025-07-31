@@ -8,10 +8,10 @@
 #include "cenemy.h"
 #include "clevel.h"
 #include "cmap.h"
-
+#include "MapHandle.h"
 #include <vector>
 #include <map>
-
+#include <cmath>
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/View.hpp>
 
@@ -58,12 +58,28 @@ private:
 
     map<EnemyType, EnemyAnimationData> enemyData;
     Texture* backgroundTexture[4];
-    Texture* towerTexture;
-    Texture* bulletTexture;
+    Texture* towerTexture[6];
+    Texture* bulletTexture[6];
     Texture* mainTowerTexture;
     Texture* shootEffectTexture;
+
 
     // UI
     Sprite pauseButton;
     Sprite commingWave;
+
+    // Tower Infos
+    Texture* infoTexture[6];
+    Sprite infoSprite[6];
+    bool showInfo = false;
+    int selectedinfo;
+
+    // Icon appear when click
+    bool isChoosingTower = false;
+    cpoint selectedTile;  // cliked pixel
+    Sprite towerIcons[3];  // 3 icon tower
+
+    // Upgrade
+    Texture* upgradeButtonTexture;
+    Sprite upgradeButton;
 };

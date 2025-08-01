@@ -190,7 +190,7 @@ void GameState::draw()
             float barWidth = 50.f;
             float barHeight = 6.f;
             float barX = e.getX() - barWidth + 15.f;
-            float barY = e.getY() - spriteHeight / 2.f - 15.f;
+            float barY = e.getY() - spriteHeight / 2.f - 45.f;
 
             // Black outline
             RectangleShape hpOutline(Vector2f(barWidth, barHeight));

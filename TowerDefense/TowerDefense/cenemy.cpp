@@ -121,7 +121,7 @@ void cenemy::takeDamage(int damage) {
 
         _frameRect = sf::IntRect(0, 0, _frameWidth, _frameHeight);
         _sprite.setTextureRect(_frameRect);
-        _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 2.f);
+        _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 1.25f);
     }
 }
 
@@ -147,7 +147,7 @@ void cenemy::init(EnemyType type, float x, float y, int hp, const EnemyAnimation
 
     _frameRect = sf::IntRect(0, 0, _frameWidth, _frameHeight);
     _sprite.setTextureRect(_frameRect);
-    _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 2.f);
+    _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 1.25f);
 
     updateSprite();
 }
@@ -193,7 +193,7 @@ void cenemy::triggerAttack(float towerX, float towerY) {
 
     _frameRect = IntRect(0, 0, _frameWidth, _frameHeight);
     _sprite.setTextureRect(_frameRect);
-    _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 2.f);
+    _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 1.25f);
 }
 
 void cenemy::updateAnimation(float deltaTime) {

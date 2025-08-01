@@ -1,7 +1,7 @@
 #include "MapHandle.h"
 
 
-
+// MAP 1
 void MapHandle::setCmap1(cmap& map, int a, int b, int C) {
     if (a >= 14 && a <= 16 && b >= 6 && b <= 9) {
         for (int i = 14; i <= 16; ++i) {
@@ -60,6 +60,7 @@ pair<int, int> MapHandle::getTowerdes1(int a, int b)
     return { -1, -1 };
 }
 
+// MAP 2
 void MapHandle::setCmap2(cmap& map, int a, int b, int C) {
     if (a >= 14 && a <= 16 && b >= 6 && b <= 9) {
         for (int i = 14; i <= 16; ++i)
@@ -110,6 +111,7 @@ pair<int, int> MapHandle::getTowerdes2(int a, int b) {
     return { -1, -1 };
 }
 
+// MAP 3
 void MapHandle::setCmap3(cmap& map, int a, int b, int C) {
     if (a >= 14 && a <= 16 && b >= 5 && b <= 8) {
         for (int i = 14; i <= 16; ++i)
@@ -160,7 +162,7 @@ pair<int, int> MapHandle::getTowerdes3(int a, int b) {
     return { -1, -1 };
 }
 
-
+// MAP 4
 void MapHandle::setCmap4(cmap& map, int a, int b, int C) {
     if (a >= 9 && a <= 12 && b >= 9 && b <= 11) {
         for (int i = 9; i <= 12; ++i)
@@ -199,6 +201,8 @@ void MapHandle::setCmap4(cmap& map, int a, int b, int C) {
     }
 }
 
+
+// Main Handle
 pair<int, int> MapHandle::getTowerdes4(int a, int b) {
     if (a >= 9 && a <= 12 && b >= 9 && b <= 11)
         return { 10, 10 };

@@ -161,7 +161,7 @@ bool PauseState::handleEvent(const sf::Event& event)
 		// Quit button
 		if (quitButton.getGlobalBounds().contains(mousePos)) {
 			requestStateClear();
-			requestStackPush(States::Menu); // Back to Menu
+			requestStackPush(States::MapSelection); // Back to MapSelection
 			return true;
 		}
 	}

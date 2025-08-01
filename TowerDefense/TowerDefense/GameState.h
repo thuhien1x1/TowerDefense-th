@@ -80,6 +80,5 @@ private:
     Sprite towerIcons[3];  // 3 icon tower
 
     // Upgrade
-    Texture* upgradeButtonTexture;
     Sprite upgradeButton;
 };

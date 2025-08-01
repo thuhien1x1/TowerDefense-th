@@ -38,10 +38,12 @@ GameState::GameState(StateStack& stack, Context context)
     infoTexture[3] = &getContext().textures->get(Textures::Info1plus);
     infoTexture[4] = &getContext().textures->get(Textures::Info2plus);
     infoTexture[5] = &getContext().textures->get(Textures::Info3plus);
+
     // Set up for info tower
     for (int i = 0; i < 6; ++i) {
         infoSprite[i].setTexture(*infoTexture[i]);
     }
+
     // Set up for choosing towers
     for (int i = 0; i < 3; ++i) {
         towerIcons[i].setTexture(*towerTexture[i]);
@@ -59,8 +61,7 @@ GameState::GameState(StateStack& stack, Context context)
     font = getContext().fonts->get(Fonts::BruceForever);
 
     // Load Upgrade
-    upgradeButtonTexture = &getContext().textures->get(Textures::Upgrade);
-    upgradeButton.setTexture(*upgradeButtonTexture);
+    upgradeButton.setTexture(context.textures->get(Textures::upgradeButton));
 
     // Load UI texture 
     pauseButton.setTexture(context.textures->get(Textures::pauseButton));
@@ -68,7 +69,10 @@ GameState::GameState(StateStack& stack, Context context)
     centerOrigin(pauseButton);
 
     commingWave.setTexture(context.textures->get(Textures::commingWave));
-    commingWave.setPosition(60.f, 770.f);
+    if (currentLevelIndex == 3)
+        commingWave.setPosition(60.f, 690.f);
+    else
+        commingWave.setPosition(60.f, 770.f);
     centerOrigin(commingWave);
 
     // Initialize 4 levels (levelID, enemyCount, waveCount, towerMaxCount, startGold) 

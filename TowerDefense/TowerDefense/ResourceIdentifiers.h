@@ -60,7 +60,7 @@ namespace Textures
         MenuScreen,
 
         // Upgrade Button
-        Upgrade,
+        upgradeButton,
 
         // UI for MenuState
         newGameButton,

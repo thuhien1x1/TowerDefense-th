@@ -69,7 +69,7 @@ Application::Application()
     mTextures.load(Textures::Enemy3_Death, "Media/Textures/enemy_3_death_212_210_6.png");
 
     // Load Upgrade button
-    mTextures.load(Textures::Upgrade, "Media/Textures/Upgrade.png");
+    mTextures.load(Textures::upgradeButton, "Media/UI/buttons/upgradeButton.png");
 
     // Load UI in MenuState
     mTextures.load(Textures::MenuScreen, "Media/Textures/menuScreen.png");

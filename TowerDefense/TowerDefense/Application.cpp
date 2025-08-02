@@ -32,14 +32,16 @@ Application::Application()
     mTextures.load(Textures::Map3, "Media/Textures/map 3.png");
     mTextures.load(Textures::Map4, "Media/Textures/map 4.png");
 
-    // Load tower & tower shoot effect textures
+    // Load tower textures
     mTextures.load(Textures::MainTower, "Media/Textures/mainTower.png");
-    mTextures.load(Textures::Tower1, "Media/Textures/tower1.png");
-    mTextures.load(Textures::Tower2, "Media/Textures/tower2.png");
-    mTextures.load(Textures::Tower3, "Media/Textures/tower3.png");
-    mTextures.load(Textures::Tower1plus, "Media/Textures/tower1+.png");
-    mTextures.load(Textures::Tower2plus, "Media/Textures/tower2+.png");
-    mTextures.load(Textures::Tower3plus, "Media/Textures/tower3+.png");
+    mTextures.load(Textures::Tower1, "Media/Textures/tower 1.png");
+    mTextures.load(Textures::Tower2, "Media/Textures/tower 2.png");
+    mTextures.load(Textures::Tower3, "Media/Textures/tower 3.png");
+    mTextures.load(Textures::Tower1plus, "Media/Textures/tower 1 - upgraded.png");
+    mTextures.load(Textures::Tower2plus, "Media/Textures/tower 2 - upgraded.png");
+    mTextures.load(Textures::Tower3plus, "Media/Textures/tower 3 - upgraded.png");
+
+    // Load effect textures
     mTextures.load(Textures::ShootEffect, "Media/Textures/shootEffect.png");
 
     // Load tower Infos
@@ -52,10 +54,10 @@ Application::Application()
 
     // Load bullet textures
     mTextures.load(Textures::Bullet1, "Media/Textures/bomb_sprite_sheet.png");
-    mTextures.load(Textures::Bullet2, "Media/Textures/bomb_sprite_sheet.png");
+    mTextures.load(Textures::Bullet2, "Media/Textures/fire_bullet_sprite_sheet.png");
     mTextures.load(Textures::Bullet3, "Media/Textures/bomb_sprite_sheet.png");
     mTextures.load(Textures::Bomb, "Media/Textures/bomb_sprite_sheet.png");
-   
+
 
     // Load enemy's animation textures
     mTextures.load(Textures::Enemy1_Walk, "Media/Textures/enemy_1_walk_126_123_6.png");
@@ -116,6 +118,12 @@ Application::Application()
     mTextures.load(Textures::defeat, "Media/UI/icons/defeat.png");
     mTextures.load(Textures::restartButton2, "Media/UI/buttons/restartButton2.png");
     mTextures.load(Textures::quitButton2, "Media/UI/buttons/quitButton2.png");
+
+    mTextures.load(Textures::powerStation, "Media/Textures/power_station_sprite_sheet.png");
+    mTextures.load(Textures::tower1Button, "Media/UI/buttons/tower1Button.png");
+    mTextures.load(Textures::tower2Button, "Media/UI/buttons/tower2Button.png");
+    mTextures.load(Textures::tower3Button, "Media/UI/buttons/tower3Button.png");
+    mTextures.load(Textures::circle, "Media/UI/icons/circle.png");
 }
 
 void Application::run()

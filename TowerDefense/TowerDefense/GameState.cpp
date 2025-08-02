@@ -1,6 +1,7 @@
 #include "GameState.h"
 #include "MapSelectionState.h"
 #include <iostream>
+#include <sstream>
 
 GameState::GameState(StateStack& stack, Context context)
     : State(stack, context),
@@ -39,16 +40,15 @@ GameState::GameState(StateStack& stack, Context context)
     infoTexture[4] = &getContext().textures->get(Textures::Info2plus);
     infoTexture[5] = &getContext().textures->get(Textures::Info3plus);
 
-    // Set up for info tower
-    for (int i = 0; i < 6; ++i) {
-        infoSprite[i].setTexture(*infoTexture[i]);
-    }
+    // Load buttons's texture for choosing tower
+    towerChoosingButtons[0].setTexture(context.textures->get(Textures::tower1Button));
+    towerChoosingButtons[1].setTexture(context.textures->get(Textures::tower2Button));
+    towerChoosingButtons[2].setTexture(context.textures->get(Textures::tower3Button));
+    towerChoosingCircle.setTexture(context.textures->get(Textures::circle));
 
-    // Set up for choosing towers
-    for (int i = 0; i < 3; ++i) {
-        towerIcons[i].setTexture(*towerTexture[i]);
-        towerIcons[i].setScale(0.6f, 0.6f); // Tower icon size
-    }
+    // Set up for info tower
+    for (int i = 0; i < 6; ++i)
+        infoSprite[i].setTexture(*infoTexture[i]);
 
     // Load Bullet textures
     bulletTexture[0] = &getContext().textures->get(Textures::Bomb);
@@ -77,19 +77,19 @@ GameState::GameState(StateStack& stack, Context context)
 
     // Initialize 4 levels (levelID, enemyCount, waveCount, towerMaxCount, startGold) 
     clevel level1(1, 45, 3, 5, 200);
-    level1.setWaves({ {FAST_SCOUT, 20}, {FAST_SCOUT, 1}, {RANGED_MECH, 1} }); // 10, 15, 20
+    level1.setWaves({ {FAST_SCOUT, 20}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1} }); // 10, 15, 20
     level1.loadMap(mainTowerTexture, backgroundTexture[0], 1);
 
     clevel level2(2, 65, 3, 6, 400);
-    level2.setWaves({ {HEAVY_WALKER, 1}, {FAST_SCOUT, 1}, {RANGED_MECH, 1} }); // 15, 20, 30
+    level2.setWaves({ {FAST_SCOUT, 1}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1} }); // 15, 20, 30
     level2.loadMap(mainTowerTexture, backgroundTexture[1], 2);
 
     clevel level3(3, 100, 4, 6, 700);
-    level3.setWaves({ {HEAVY_WALKER, 1}, {FAST_SCOUT, 1}, {RANGED_MECH, 1}, {HEAVY_WALKER, 1} }); // 20, 25, 30, 25
+    level3.setWaves({ {FAST_SCOUT, 1}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1}, {HEAVY_WALKER, 1} }); // 20, 25, 30, 25
     level3.loadMap(mainTowerTexture, backgroundTexture[2], 3);
 
     clevel level4(4, 175, 5, 7, 1000);
-    level4.setWaves({ {HEAVY_WALKER, 1}, {FAST_SCOUT, 1}, {RANGED_MECH, 1}, {FAST_SCOUT, 1}, {HEAVY_WALKER, 1} }); // 25, 30, 35, 40, 45
+    level4.setWaves({ {FAST_SCOUT, 1}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1}, {FAST_SCOUT, 1}, {HEAVY_WALKER, 1} }); // 25, 30, 35, 40, 45
     level4.loadMap(mainTowerTexture, backgroundTexture[3], 4);
 
     levels.push_back(level1);
@@ -145,6 +145,7 @@ void GameState::draw()
     window.clear(sf::Color::Black);
 
     window.draw(backgroundSprite);
+    curMap->drawPowerStations(window);
     window.draw(curMap->getMainTower().getMainTowerSprite());
 
     window.draw(hpText);
@@ -170,15 +171,16 @@ void GameState::draw()
     }
 
     // Pause button
-    if (hasPressedPlay) {
-        if (pauseButton.getGlobalBounds().contains(mousePos))
-            pauseButton.setScale(1.1f, 1.1f);
-        else
-            pauseButton.setScale(1.f, 1.f);
-        window.draw(pauseButton);
-    }
+    if (pauseButton.getGlobalBounds().contains(mousePos))
+        pauseButton.setScale(1.1f, 1.1f);
+    else
+        pauseButton.setScale(1.f, 1.f);
+    window.draw(pauseButton);
 
-    // Update: Add enemy's hp bar
+    for (const auto& tower : towers)
+        window.draw(tower.getSprite());
+
+    // Enemy's hp bar
     for (const auto& e : enemies) {
         if (!e.hasReachedEnd() || e.getState() == DEATH) {
 
@@ -210,9 +212,6 @@ void GameState::draw()
     }
 
     for (const auto& tower : towers)
-        window.draw(tower.getSprite());
-
-    for (const auto& tower : towers)
         if (tower.isEffectPlaying())
             window.draw(tower.getEffectSprite());
 
@@ -225,19 +224,27 @@ void GameState::draw()
             window.draw(bullets[i].getSprite());
     }
 
-    // draw TowerIcons
+    // Draw choosingTowerButton
     if (isChoosingTower) {
-        for (int i = 0; i < 3; ++i)
-            window.draw(towerIcons[i]);
+        window.draw(towerChoosingCircle);
+
+        for (int i = 0; i < 3; i++) {
+            if (towerChoosingButtons[i].getGlobalBounds().contains(mousePos))
+                towerChoosingButtons[i].setScale(1.1f, 1.1f);
+            else
+                towerChoosingButtons[i].setScale(1.f, 1.f);
+            window.draw(towerChoosingButtons[i]);
+        }
     }
-    
-    // draw Tower Infos
+
+    // Draw Tower Infos
     if (showInfo && selectedinfo >= 3) {
         window.draw(infoSprite[selectedinfo - 3]);
         if (selectedinfo - 3 < 3)
             window.draw(upgradeButton);
     }
 }
+
 bool GameState::handleEvent(const sf::Event& event)
 {
     RenderWindow& window = *getContext().window;
@@ -272,33 +279,43 @@ bool GameState::handleEvent(const sf::Event& event)
 
         // If player is currently choosing a tower to place on a tile
         if (isChoosingTower) {
-            for (int i = 0; i < 3; ++i) {
-                if (towerIcons[i].getGlobalBounds().contains(mx, my)) {
-                    if (towers.size() < 3) {
-                        ctower t;
-                        // Get the designated tile to place tower from selected tile
-                        td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
+            Sprite* clickedButton = nullptr;
+            int towerType = -1;
 
-                        // Initialize tower with texture and position on map
-                        t.init(*towerTexture[i],
-                            curMap->getMap()[td.first][td.second].getPixelX(),
-                            curMap->getMap()[td.first][td.second].getPixelY());
-                        t.setLocation(cpoint(td.first, td.second, 1));
-                        t.setMapForBullet(curMap->getMap());
-                        t.getBullet().setSpeed(8);
-                        t.setType(i);
-
-                        towers.push_back(t);
-
-                        // Set the map C value to indicate a tower is placed (C = 3/4/5)
-                        MapHandle::setCmap(currentLevelIndex, *curMap, selectedTile.getRow(), selectedTile.getCol(), i + 3);
-                    }
-                    isChoosingTower = false;
-                    return false;
-                }
+            if (towerChoosingButtons[0].getGlobalBounds().contains(mx, my)) {
+                clickedButton = &towerChoosingButtons[0];
+                towerType = 0;
             }
-            isChoosingTower = false;
-            return false;
+            else if (towerChoosingButtons[1].getGlobalBounds().contains(mx, my)) {
+                clickedButton = &towerChoosingButtons[2];
+                towerType = 1;
+            }
+            else if (towerChoosingButtons[2].getGlobalBounds().contains(mx, my)) {
+                clickedButton = &towerChoosingButtons[2];
+                towerType = 2;
+            }
+
+            if (clickedButton && towerType != -1) {
+                if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
+                    ctower t;
+                    auto td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
+
+                    t.init(*towerTexture[towerType],
+                        curMap->getMap()[td.first][td.second].getPixelX(),
+                        curMap->getMap()[td.first][td.second].getPixelY());
+                    t.setLocation(cpoint(td.first, td.second, 1));
+                    t.setMapForBullet(curMap->getMap());
+                    t.getBullet().setSpeed(8);
+                    t.setType(towerType);
+                    t.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);
+
+                    towers.push_back(t);
+                    MapHandle::setCmap(currentLevelIndex, *curMap, selectedTile.getRow(), selectedTile.getCol(), towerType + 3);
+                }
+
+                isChoosingTower = false;
+                return false;
+            }
         }
 
         // Handle tower upgrade button click
@@ -352,13 +369,17 @@ bool GameState::handleEvent(const sf::Event& event)
             int c = curMap->getMap()[clicked.getRow()][clicked.getCol()].getC();
 
             // If clicked on a tile with C = 2 (candidate tower tile)
-            if (c == 2 && towers.size() < 3) {
+            if (c == 2 && towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
                 selectedTile = clicked;
                 isChoosingTower = true;
 
                 // Display tower options at click location
-                for (int i = 0; i < 3; ++i)
-                    towerIcons[i].setPosition((float)mx + i * 50.f, (float)my);
+                auto buttons = MapHandle::getTowerButtons(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
+                if (buttons.size() == 4) {
+                    for (int i = 0; i < 3; ++i)
+                        towerChoosingButtons[i].setPosition(buttons[i]);
+                    towerChoosingCircle.setPosition(buttons[3]);
+                }
 
                 return false;
             }
@@ -385,33 +406,6 @@ bool GameState::handleEvent(const sf::Event& event)
         // Hide info panel if clicked outside
         showInfo = false;
         selectedinfo = -1;
-
-
-
-        // Press "Enter" to load the next level (after winning) (demo version, adjust based on Game State Management &  UI graphics)
-        if (isWaitingForNextLevel && event.type == Event::KeyPressed && event.key.code == Keyboard::Enter) {
-            if (currentLevelIndex + 1 < levels.size()) {
-                loadLevel(currentLevelIndex + 1);
-                hasPressedPlay = false;
-            }
-
-            // Reset state flags after transition
-            isWaitingForNextLevel = false;
-            isGameWin = false;
-            isGameOver = false;
-        }
-
-        // Press "R" to restart the current level if the player loss (demo version, adjust based on Game State Management & UI graphics)
-        if ((isGameOver || isGameWin) && event.type == Event::KeyPressed && event.key.code == Keyboard::R) {
-            isGameOver = false;
-            isGameWin = false;
-            isWaitingForNextLevel = false;
-            loadLevel(currentLevelIndex); // Reload current level
-        }
-
-        // Press "Q" to exit (demo version, adjust based on Game State Management & UI graphics)
-        if ((isGameOver || isGameWin || showEndButtons) && event.type == Event::KeyPressed && (event.key.code == Keyboard::Q))
-            window.close(); // Exit
 
         return true;
     }
@@ -622,6 +616,9 @@ bool GameState::update(sf::Time dt)
 
     }
 
+    // Update powerStations animation
+    curMap->updatePowerStation(dt.asSeconds());
+
     // Remove inactive bullets
     bullets.erase(remove_if(bullets.begin(), bullets.end(), [](cbullet& b) { return !b.isActive(); }), bullets.end());
 
@@ -649,6 +646,11 @@ void GameState::loadLevel(int index) {
     backgroundSprite.setTexture(*backgroundTexture[currentLevelIndex]);
     levels[currentLevelIndex].loadMap(mainTowerTexture, backgroundTexture[index], currentLevelIndex + 1);
     window.setSize(backgroundTexture[currentLevelIndex]->getSize());
+
+    // Load powerStation effect for this level
+    const Texture& powerStationTex = getContext().textures->get(Textures::powerStation);
+    string powerStationFiles = "Media/Text files/powerStation_map" + to_string(currentLevelIndex + 1) + ".txt";
+    curMap->loadPowerStationsFromFile(powerStationTex, powerStationFiles, 92, 92, 0.03f);
 
     // Reset enemy, tower, bullet...
     enemies.clear();
@@ -680,6 +682,8 @@ void GameState::loadLevel(int index) {
     gold.setFillColor(Color::Green);
     gold.setPosition(10.f, 50.f);
     gold.setString("GOLD: " + to_string(levels[currentLevelIndex].getStartGold()));
+
+    MapHandle::initTowerButtonData();
 }
 
 void GameState::spawnEnemies() {
@@ -719,7 +723,7 @@ int GameState::calStars() {
     int curHealth = curMap->getMainTower().getHealth();
     float healthRatio = static_cast<float>(curHealth) / mainTowerMaxHealth;
 
-    // If gamwWin()
+    // If gameWin()
     // If currentMainTowerHealth >= 80% mainTowerMaxHealth -> 3 stars
     if (healthRatio >= 0.8f)
         return 3;

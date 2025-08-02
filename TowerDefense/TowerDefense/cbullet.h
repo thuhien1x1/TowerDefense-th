@@ -38,16 +38,26 @@ class cbullet
 
 public:
     cbullet();
-    void updateMap(cpoint map[][cpoint::MAP_COL]); // Update
+    void updateMap(cpoint map[][cpoint::MAP_COL]);
 
-    cpoint getCurr() const;
-    cpoint* getP();
-    int getSpeed() const;
-    int getN() const;
+    // Getter
+    cpoint getCurr() const { return _curr; }
+    cpoint* getP() { return _p; }
+    int getSpeed() const { return _speed; }
+    int getN() const { return _n; }
+    float getX() const { return _posX; }
+    float getY() const { return _posY; }
+    int getTargetIdx() const { return _targetIdx; }
+    int getDamage() const { return _damage; }
+    const sf::Sprite& getSprite() const { return _sprite; }
 
-    void setCurr(const cpoint& tcurr);
-    void setN(int tn);
-    void setSpeed(int tspeed);
+    // Setter
+    void setCurr(const cpoint& tcurr) { _curr = tcurr; }
+    void setN(int tn) { if (tn >= 0 && tn <= cpoint::MAP_ROW * cpoint::MAP_COL) _n = tn; }
+    void setSpeed(int tspeed) { if (tspeed > 0 && tspeed < 20) _speed = tspeed; }
+    void setPosition(float x, float y);
+    void setTargetIdx(int idx) { _targetIdx = idx; }
+    void setDamage(int dmg) { _damage = dmg; }
 
     int queryCFromRowCol(int row, int col) const;
     int calcPathBullet(const cpoint& tower);
@@ -59,24 +69,12 @@ public:
     void trackEnemy(const cenemy& enemy, float deltaTime);
 
     // Position and movement
-    void init(const sf::Texture& tex, float x, float y, int frameWidth, int frameHeight, int totalFrames, float animSpeed); // Update
+    void init(const sf::Texture& tex, float x, float y, int frameWidth, int frameHeight, int totalFrames, float animSpeed);
     void updateAnimation(float deltaTime); // Add
     void updateSprite();
-    const sf::Sprite& getSprite() const { return _sprite; }
-
-    float getX() const { return _posX; }
-    float getY() const { return _posY; }
-
-    void setPosition(float x, float y);
     void move(float dx, float dy);
 
     // Bullet logic
-    int getTargetIdx() const { return _targetIdx; } // Returns the index of the current enemy target the bullet is tracking
-    int getDamage() const { return _damage; } // Returns how much damage the bullet will deal on impact.
-
-    void setTargetIdx(int idx) { _targetIdx = idx; } // Assign the index of the target enemy for the bullet to track.
-    void setDamage(int dmg) { _damage = dmg; } // Define how much damage this bullet should inflict (useful for upgrade towers)
-
     bool isActive() const { return _active; } // Returns true if the bullet is still active (on screen, valid target), used to skip deactivated bullets.
     void deactivate() { _active = false; } // Marks the bullet as inactive after hitting an enemy or going off - screen, Prevents further updates or rendering.
 

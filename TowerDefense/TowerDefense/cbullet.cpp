@@ -8,7 +8,6 @@
 
 using namespace std;
 
-// Update
 cbullet::cbullet()
     : _posX(0.f), _posY(0.f), _speed(4), _active(true), _targetIdx(-1), _damage(1), _n(0),
     isLaser(false), laserDuration(0.f), laserTimer(0.f)
@@ -26,14 +25,6 @@ void cbullet::updateMap(cpoint map[][cpoint::MAP_COL]) {
         for (int j = 0; j < cpoint::MAP_COL; j++)
             _m[i][j] = map[i][j];
 }
-
-cpoint cbullet::getCurr() const { return _curr; }
-void cbullet::setCurr(const cpoint& tcurr) { _curr = tcurr; }
-cpoint* cbullet::getP() { return _p; }
-int cbullet::getSpeed() const { return _speed; }
-int cbullet::getN() const { return _n; }
-void cbullet::setN(int tn) { if (tn >= 0 && tn <= cpoint::MAP_ROW * cpoint::MAP_COL) _n = tn; }
-void cbullet::setSpeed(int tspeed) { if (tspeed > 0 && tspeed < 20) _speed = tspeed; }
 
 int cbullet::queryCFromRowCol(int row, int col) const {
     if (row < 0 || row >= cpoint::MAP_ROW || col < 0 || col >= cpoint::MAP_COL)
@@ -63,7 +54,6 @@ int cbullet::calcPathBullet(const cpoint& tower) {
     return _n;
 }
 
-// Update changes: 
 // Check collision by calculating pixel distance between bullet and enemy instead of grid - based
 bool cbullet::checkCollision(const cenemy& enemy) const {
     float dx = _posX - enemy.getX(); // Cal horizontal distance between bullet and enemy
@@ -112,7 +102,6 @@ void cbullet::move(float dx, float dy) {
     updateSprite();
 }
 
-// Update
 void cbullet::init(const sf::Texture& tex, float x, float y, int frameWidth, int frameHeight, int totalFrames, float animSpeed) {
     _sprite.setTexture(tex);
     _frameWidth = frameWidth;
@@ -134,7 +123,6 @@ void cbullet::init(const sf::Texture& tex, float x, float y, int frameWidth, int
     _curr = cpoint::fromXYToRowCol(x, y);
 }
 
-// Add
 void cbullet::updateAnimation(float deltaTime) {
     if (isLaser) {
         updateLaser(deltaTime);

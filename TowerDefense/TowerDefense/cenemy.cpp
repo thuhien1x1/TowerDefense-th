@@ -103,7 +103,6 @@ void cenemy::move(float dx, float dy) {
     updateSprite();
 }
 
-// Update
 void cenemy::takeDamage(int damage) {
     if (_state == DEATH) return;
 
@@ -125,7 +124,6 @@ void cenemy::takeDamage(int damage) {
     }
 }
 
-// Update
 void cenemy::init(EnemyType type, float x, float y, int hp, const EnemyAnimationData& data) {
     _posX = x;
     _posY = y;
@@ -152,7 +150,6 @@ void cenemy::init(EnemyType type, float x, float y, int hp, const EnemyAnimation
     updateSprite();
 }
 
-// Add
 void cenemy::loadFromData(const EnemyAnimationData& data) {
     _walkTex = data.walkTex;
     _attackTex = data.attackTex;

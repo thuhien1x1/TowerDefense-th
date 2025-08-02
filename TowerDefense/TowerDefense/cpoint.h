@@ -18,10 +18,9 @@ public:
     int getRow() const;
     int getCol() const;
     int getC() const;
-    void setC(int tc);
-
     int getPixelX() const;
     int getPixelY() const;
+    void setC(int tc);
 
     static cpoint fromXYToRowCol(int x, int y, int c = 0);
     static cpoint fromRowColToXY(int row, int col, int c = 0);

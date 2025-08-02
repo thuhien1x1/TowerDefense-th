@@ -9,6 +9,7 @@
 #include "clevel.h"
 #include "cmap.h"
 #include "MapHandle.h"
+#include "Player.h"
 #include <vector>
 #include <map>
 #include <cmath>
@@ -81,4 +82,7 @@ private:
 
     // Upgrade
     Sprite upgradeButton;
+
+    // Player for money
+    Player player;
 };

@@ -37,7 +37,7 @@ private:
     // Stats
     int _speed;
     int _health;
-    int resources;
+    int mReward;
     EnemyType _type;
 
     // Position
@@ -69,6 +69,7 @@ private:
     bool _isAttackingMainTower = false;
     float _attackTimer = 0.f;
     float _attackCooldown = 1.f;
+    bool mRewardGiven; //add flag
 
 public:
     cenemy();
@@ -85,7 +86,7 @@ public:
     int getPathLength() const { return _pathLength; }
     int getSpeed() const { return _speed; }
     int getHealth() const { return _health; }
-    int getResources() const { return resources; }
+    int getResources() const { return mReward; }
     int getCurrentTarget() const { return _currentTarget; }
     float getX() const { return _posX; }
     float getY() const { return _posY; }
@@ -124,6 +125,9 @@ public:
 
     // Pathfinding
     void findPath(cpoint a[][cpoint::MAP_COL], cpoint s, cpoint e);
+
+    bool hasGivenReward() const { return mRewardGiven; }
+    void markRewardGiven() { mRewardGiven = true; }
 
 private:
     void calcPath(int a[][cpoint::MAP_COL], int n, cpoint s, cpoint e);

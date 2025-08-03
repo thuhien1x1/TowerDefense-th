@@ -8,7 +8,6 @@ namespace States
 		Menu,
 		Setting,
 		Information,
-		Load,
 		MapSelection,
 		Game,
 		Loading,

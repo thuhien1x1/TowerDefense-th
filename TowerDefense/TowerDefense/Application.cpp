@@ -7,7 +7,6 @@
 #include "DefeatState.h"
 #include "SettingState.h"
 #include "InformationState.h"
-#include "SaveManagement.h"
 #include "MapSelectionState.h"
 
 Application::Application()
@@ -139,7 +138,6 @@ void Application::registerStates()
     mStateStack.registerState<PauseState>(States::Pause);
     mStateStack.registerState<SettingState>(States::Setting);
     mStateStack.registerState<InformationState>(States::Information);
-    mStateStack.registerState<SaveManagement>(States::Load);
     mStateStack.registerState<MapSelectionState>(States::MapSelection);
     mStateStack.registerState<VictoryState>(States::Victory);
     mStateStack.registerState<DefeatState>(States::Defeat);

@@ -170,8 +170,7 @@ void GameState::draw()
     }
 
     // Pause button
-    if (hasPressedPlay)
-    {
+    if (hasPressedPlay) {
         if (pauseButton.getGlobalBounds().contains(mousePos))
             pauseButton.setScale(1.1f, 1.1f);
         else
@@ -272,8 +271,7 @@ bool GameState::handleEvent(const sf::Event& event)
         int my = event.mouseButton.y;
 
         // If player is currently choosing a tower to place on a tile
-        if (isChoosingTower)
-        {
+        if (isChoosingTower) {
             for (int i = 0; i < 3; ++i) {
                 if (towerIcons[i].getGlobalBounds().contains(mx, my)) {
                     if (towers.size() < 3) {
@@ -283,8 +281,8 @@ bool GameState::handleEvent(const sf::Event& event)
 
                         // Initialize tower with texture and position on map
                         t.init(*towerTexture[i],
-                                curMap->getMap()[td.first][td.second].getPixelX(),
-                                curMap->getMap()[td.first][td.second].getPixelY());
+                            curMap->getMap()[td.first][td.second].getPixelX(),
+                            curMap->getMap()[td.first][td.second].getPixelY());
                         t.setLocation(cpoint(td.first, td.second, 1));
                         t.setMapForBullet(curMap->getMap());
                         t.getBullet().setSpeed(8);
@@ -304,11 +302,9 @@ bool GameState::handleEvent(const sf::Event& event)
         }
 
         // Handle tower upgrade button click
-        if (showInfo && upgradeButton.getGlobalBounds().contains(mx, my))
-        {
+        if (showInfo && upgradeButton.getGlobalBounds().contains(mx, my)) {
             int tileC = selectedinfo;
-            if (tileC >= 3 && tileC <= 5) // already placed tower
-            {
+            if (tileC >= 3 && tileC <= 5) {
                 // Find current tower's position based on C value
                 int row = -1, col = -1;
                 for (int i = 0; i < cpoint::MAP_ROW && row == -1; ++i) {
@@ -326,8 +322,7 @@ bool GameState::handleEvent(const sf::Event& event)
                 row = td.first;
                 col = td.second;
 
-                if (row != -1 && col != -1)
-                {
+                if (row != -1 && col != -1) {
                     int newC = tileC + 3;
                     MapHandle::setCmap(currentLevelIndex, *curMap, row, col, newC); // Update map C value for upgraded tower
 

@@ -2,8 +2,7 @@
 
 
 // MAP 1
-void MapHandle::setCmap1(cmap& map, int a, int b, int C) // a = row || b = col
-{
+void MapHandle::setCmap1(cmap& map, int a, int b, int C) {
     if (a >= 14 && a <= 16 && b >= 6 && b <= 9) {
         for (int i = 14; i <= 16; ++i) {
             for (int j = 6; j <= 9; ++j) {
@@ -62,8 +61,7 @@ pair<int, int> MapHandle::getTowerdes1(int a, int b)
 }
 
 // MAP 2
-void MapHandle::setCmap2(cmap& map, int a, int b, int C)
-{
+void MapHandle::setCmap2(cmap& map, int a, int b, int C) {
     if (a >= 14 && a <= 16 && b >= 6 && b <= 9) {
         for (int i = 14; i <= 16; ++i)
             for (int j = 6; j <= 9; ++j)
@@ -96,8 +94,7 @@ void MapHandle::setCmap2(cmap& map, int a, int b, int C)
     }
 }
 
-pair<int, int> MapHandle::getTowerdes2(int a, int b)
-{
+pair<int, int> MapHandle::getTowerdes2(int a, int b) {
     if (a >= 14 && a <= 16 && b >= 6 && b <= 9)
         return { 15, 8 };
     else if (a >= 16 && a <= 19 && b >= 20 && b <= 22)
@@ -115,8 +112,7 @@ pair<int, int> MapHandle::getTowerdes2(int a, int b)
 }
 
 // MAP 3
-void MapHandle::setCmap3(cmap& map, int a, int b, int C)
-{
+void MapHandle::setCmap3(cmap& map, int a, int b, int C) {
     if (a >= 14 && a <= 16 && b >= 5 && b <= 8) {
         for (int i = 14; i <= 16; ++i)
             for (int j = 5; j <= 8; ++j)
@@ -149,8 +145,7 @@ void MapHandle::setCmap3(cmap& map, int a, int b, int C)
     }
 }
 
-pair<int, int> MapHandle::getTowerdes3(int a, int b)
-{
+pair<int, int> MapHandle::getTowerdes3(int a, int b) {
     if (a >= 14 && a <= 16 && b >= 5 && b <= 8)
         return { 15, 6 };
     else if (a >= 22 && a <= 24 && b >= 16 && b <= 19)
@@ -168,8 +163,7 @@ pair<int, int> MapHandle::getTowerdes3(int a, int b)
 }
 
 // MAP 4
-void MapHandle::setCmap4(cmap& map, int a, int b, int C)
-{
+void MapHandle::setCmap4(cmap& map, int a, int b, int C) {
     if (a >= 9 && a <= 12 && b >= 9 && b <= 11) {
         for (int i = 9; i <= 12; ++i)
             for (int j = 9; j <= 11; ++j)
@@ -207,8 +201,9 @@ void MapHandle::setCmap4(cmap& map, int a, int b, int C)
     }
 }
 
-pair<int, int> MapHandle::getTowerdes4(int a, int b)
-{
+
+// Main Handle
+pair<int, int> MapHandle::getTowerdes4(int a, int b) {
     if (a >= 9 && a <= 12 && b >= 9 && b <= 11)
         return { 10, 10 };
     else if (a >= 20 && a <= 22 && b >= 7 && b <= 10)
@@ -227,8 +222,6 @@ pair<int, int> MapHandle::getTowerdes4(int a, int b)
     return { -1, -1 };
 }
 
-
-// Main Handle
 void MapHandle::setCmap(int index, cmap& map, int a, int b, int C)
 {
     if (index == 0) {

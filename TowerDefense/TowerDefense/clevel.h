@@ -45,7 +45,6 @@ public:
 	void setMap(cmap map) { _map = map; }
 	void setWaves(const vector<pair<EnemyType, int>>& waves) { _waves = waves; }
 	void resetWave() { _currentWaveIndex = 0; }
-	void setCurrentWave(int curWave) { _currentWaveIndex = curWave; }
 
 	void loadMap(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, int levelId);
 	void nextWave();

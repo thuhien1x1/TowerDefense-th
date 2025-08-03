@@ -1,5 +1,6 @@
 #include "MapHandle.h"
 
+vector<vector<Vector2f>> MapHandle::towerButtonData;
 
 // MAP 1
 void MapHandle::setCmap1(cmap& map, int a, int b, int C) {
@@ -47,15 +48,15 @@ void MapHandle::setCmap1(cmap& map, int a, int b, int C) {
 pair<int, int> MapHandle::getTowerdes1(int a, int b)
 {
     if (a >= 14 && a <= 16 && b >= 6 && b <= 9)
-        return { 16, 8 };
+        return { 13, 8 };
     else if (a >= 22 && a <= 24 && b >= 12 && b <= 15)
-        return { 25, 13 };
+        return { 21, 14 };
     else if (a >= 15 && a <= 18 && b >= 26 && b <= 28)
-        return { 16, 27 };
+        return { 14, 27 };
     else if (a >= 4 && a <= 6 && b >= 30 && b <= 33)
-        return { 5, 31 };
+        return { 3, 31 };
     else if (a >= 12 && a <= 14 && b >= 35 && b <= 38)
-        return { 13, 36 };
+        return { 11, 37 };
 
     return { -1, -1 };
 }
@@ -257,4 +258,147 @@ pair<int, int> MapHandle::getTowerdes(int index, int a, int b)
     }
 
     return getTowerdes4(a, b);
+}
+
+void MapHandle::initTowerButtonData()
+{
+    towerButtonData.resize(4); // 4 maps
+
+    // MAP 1
+    towerButtonData[0] = {
+        // Tower at (13, 8)
+        {280.f, 480.f}, {160.f, 640.f}, {400.f, 640.f}, {200.f, 520.f},
+
+        // Tower at (21, 14)
+        {520.f, 760.f}, {400.f, 920.f}, {640.f, 920.f}, {440.f, 780.f},
+
+        // Tower at (16, 27)
+        {1040.f, 520.f}, {920.f, 680.f}, {1160.f, 680.f}, {960.f, 560.f},
+
+        // Tower at (5, 31)
+        {1240.f, 80.f}, {1120.f, 240.f}, {1360.f, 240.f}, {1160.f, 120.f},
+
+        // Tower at (13, 36)
+        {1440.f, 400.f}, {1320.f, 560.f}, {1560.f, 560.f}, {1360.f, 440.f}
+    };
+
+    // MAP 2
+    towerButtonData[1] = {
+        // Tower at (15, 8)
+        {280.f, 480.f}, {160.f, 640.f}, {380.f, 640.f}, {200.f, 520.f},
+
+        // Tower at (17, 21)
+        {760.f, 560.f}, {640.f, 720.f}, {880.f, 720.f}, {680.f, 600.f},
+
+        // Tower at (23, 10)
+        {400.f, 760.f}, {280.f, 920.f}, {520.f, 920.f}, {320.f, 800.f},
+
+        // Tower at (6, 24)
+        {960.f, 120.f}, {840.f, 280.f}, {1080.f, 280.f}, {880.f, 160.f},
+
+        // Tower at (17, 29)
+        {1120.f, 560.f}, {1000.f, 720.f}, {1240.f, 720.f}, {1040.f, 600.f},
+
+        // Tower at (15, 37)
+        {1480.f, 480.f}, {1360.f, 640.f}, {1600.f, 640.f}, {1400.f, 520.f}
+    };
+
+    // MAP 3
+    towerButtonData[2] = {
+        // Tower at (15, 6)
+        {240.f, 480.f}, {120.f, 640.f}, {360.f, 640.f}, {160.f, 520.f},
+
+        // Tower at (23, 17)
+        {680.f, 800.f}, {560.f, 960.f}, {800.f, 960.f}, { 600.f, 840.f},
+
+        // Tower at (3, 26)
+        {1040.f, 0.f}, {920.f, 160.f}, {1160.f, 160.f}, {960.f, 40.f},
+
+        // Tower at (3, 38)
+        {1520.f, 0.f}, {1400.f, 160.f}, {1640.f, 160.f}, { 1440.f, 40.f},
+
+        // Tower at (16, 40)
+        {1560.f, 520.f}, {1440.f, 680.f}, {1680.f, 680.f}, {1480.f, 560.f},
+
+        // Tower at (9, 12)
+        {480.f, 240.f}, {380.f, 400.f}, {600.f, 400.f}, {400.f, 280.f}
+    };
+
+    // MAP 4
+    towerButtonData[3] = {
+        // Tower at (10, 10)
+        {400.f, 280.f}, {280.f, 440.f}, {520.f, 440.f}, {320.f, 320},
+
+        // Tower at (21, 8)
+        {320.f, 720.f}, {200.f, 880.f}, {440.f, 880.f}, {240.f, 760.f},
+
+        // Tower at (12, 19)
+        {760.f, 360.f}, {640.f, 520.f}, {880.f, 520.f}, {680.f, 400.f},
+
+        // Tower at (19, 21)
+        {840.f, 640.f}, {720.f, 800.f}, {960.f, 800.f}, {760.f, 680.f},
+
+        // Tower at (17, 36)
+        {1400.f, 560.f}, {1280.f, 720.f}, {1520.f, 720.f}, {1320.f, 600.f},
+
+        // Tower at (7, 36)
+        {1440.f, 160.f}, {1320.f, 320.f}, {1560.f, 320.f}, {1360.f, 200.f},
+
+        // Tower at (15, 42)
+        {1680.f, 480.f}, {1560.f, 640.f}, {1800.f, 640.f}, {1600.f, 520.f}
+    };
+}
+
+vector<Vector2f> MapHandle::getTowerButtons(int levelIndex, int row, int col)
+{
+    pair<int, int> towerPos = getTowerdes(levelIndex, row, col);
+    if (towerPos.first == -1) return {};
+
+    int index = -1;
+
+    if (levelIndex == 0) {
+        if (towerPos == make_pair(13, 8)) index = 0;
+        else if (towerPos == make_pair(21, 14)) index = 1;
+        else if (towerPos == make_pair(14, 27)) index = 2;
+        else if (towerPos == make_pair(3, 31)) index = 3;
+        else if (towerPos == make_pair(11, 37)) index = 4;
+    }
+
+    else if (levelIndex == 1) {
+        if (towerPos == make_pair(15, 8)) index = 0;
+        else if (towerPos == make_pair(17, 21)) index = 1;
+        else if (towerPos == make_pair(23, 10)) index = 2;
+        else if (towerPos == make_pair(6, 24)) index = 3;
+        else if (towerPos == make_pair(17, 29)) index = 4;
+        else if (towerPos == make_pair(15, 37)) index = 5;
+    }
+
+    else if (levelIndex == 2) {
+        if (towerPos == make_pair(15, 6)) index = 0;
+        else if (towerPos == make_pair(23, 17)) index = 1;
+        else if (towerPos == make_pair(3, 26)) index = 2;
+        else if (towerPos == make_pair(3, 38)) index = 3;
+        else if (towerPos == make_pair(16, 40)) index = 4;
+        else if (towerPos == make_pair(9, 12)) index = 5;
+    }
+
+    else if (levelIndex == 3) {
+        if (towerPos == make_pair(10, 10)) index = 0;
+        else if (towerPos == make_pair(21, 8)) index = 1;
+        else if (towerPos == make_pair(12, 19)) index = 2;
+        else if (towerPos == make_pair(19, 21)) index = 3;
+        else if (towerPos == make_pair(17, 36)) index = 4;
+        else if (towerPos == make_pair(7, 36)) index = 5;
+        else if (towerPos == make_pair(15, 42)) index = 6;
+    }
+
+    if (index == -1) return {};
+
+    int start = index * 4;
+    return {
+        towerButtonData[levelIndex][start],
+        towerButtonData[levelIndex][start + 1],
+        towerButtonData[levelIndex][start + 2],
+        towerButtonData[levelIndex][start + 3]
+    };
 }

@@ -1,5 +1,6 @@
 ﻿#include "cmap.h"
 #include <iostream>
+#include <fstream>
 
 cmap::cmap() {
     resetMapData();
@@ -262,3 +263,32 @@ ctower& cmap::getMainTower() {
     return _mainTower;
 }
 
+void cmap::addPowerStation(const sf::Texture& tex, sf::Vector2f pos, int frameW, int frameH, float speed)
+{
+    PowerStation p;
+    p.sprite.setTexture(tex);
+    p.sprite.setPosition(pos);
+    p.animator.init(frameW, frameH, speed, tex.getSize().x / frameW);
+    p.animator.applyTo(p.sprite);
+    _powerStations.push_back(std::move(p));
+}
+
+void cmap::loadPowerStationsFromFile(const sf::Texture& tex, const std::string& path, int frameW, int frameH, float speed) {
+    std::ifstream file(path);
+    float x, y;
+    while (file >> x >> y) {
+        addPowerStation(tex, { x, y }, frameW, frameH, speed);
+    }
+}
+
+void cmap::updatePowerStation(float dt) {
+    for (auto& p : _powerStations) {
+        p.animator.update(dt);
+        p.animator.applyTo(p.sprite);
+    }
+}
+
+void cmap::drawPowerStations(sf::RenderWindow& window) {
+    for (const auto& p : _powerStations)
+        window.draw(p.sprite);
+}

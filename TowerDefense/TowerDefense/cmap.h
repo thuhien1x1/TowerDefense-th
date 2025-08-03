@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "cenemy.h"
 #include "ctower.h"
+#include "cBaseTower.h"
+
 #include <vector>
 
 using namespace std;
@@ -11,9 +13,12 @@ private:
     cenemy _ce;
     ctower _ctw;
     cpoint _m[cpoint::MAP_ROW][cpoint::MAP_COL];
-    // Add
-    cpoint _mainTowerTile;
-    ctower _mainTower;
+    
+    //Base Tower properties
+    cBaseTower _mainTower;
+    cpoint _mainTowerTile; // Tile position of main tower
+    sf::Vector2f _mainTowerPixelPos;  // Actual pixel position
+
     vector <cpoint> _towerBuiltPos;
     vector <bool> _isBuilt;
     sf::Sprite _background;
@@ -29,8 +34,12 @@ public:
     cpoint(&getMap())[cpoint::MAP_ROW][cpoint::MAP_COL]{ return _m; }
     sf::Sprite& getBackground() { return _background; }
 
-    // Add
-    void setMainTowerTile(const cpoint& p) { _mainTowerTile = p; }
+    // Main Tower interface
+    void setMainTowerTile(const cpoint& tilePos);
     cpoint getMainTowerTile() const { return _mainTowerTile; }
-    ctower& getMainTower();
+    cBaseTower& getMainTower() { return _mainTower; }
+
+    // Helper methods
+    sf::Vector2f getMainTowerPosition() const { return _mainTowerPixelPos; }
+    bool isMainTowerDestroyed() const { return _mainTower.isDestroyed(); }
 };

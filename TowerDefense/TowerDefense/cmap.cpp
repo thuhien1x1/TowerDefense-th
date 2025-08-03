@@ -65,13 +65,26 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         _ctw.setMapForBullet(_m);
         _ctw.calcPathBullet();
 
-        // Add
+        // Modified main tower initialization
         _mainTowerTile = _m[9][46];
         cpoint towerTile = getMainTowerTile();
         float towerX = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
         float towerY = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
-        towerY -= 120.f; // Move up 
-        _mainTower.initMainTower(mainTowerTexture, 20, towerX, towerY);
+        towerX -= 50.f;
+        towerY -= 60.f;
+                
+        // Set up the base tower
+        _mainTower.setPixelPosition(towerX, towerY);
+
+        if (mainTowerTexture) {
+            _mainTower.getSprite().setTexture(*mainTowerTexture);
+            // Center the sprite if needed
+            _mainTower.getSprite().setOrigin(
+                _mainTower.getSprite().getLocalBounds().width / 2,
+                _mainTower.getSprite().getLocalBounds().height / 2
+            );
+        }
+        _mainTower.setHealthBarSize(200, 20);
     }
 
     else if (levelID == 2) {
@@ -127,13 +140,23 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         _ctw.setMapForBullet(_m);
         _ctw.calcPathBullet();
 
-        // Add
+        // Modified main tower initialization
         _mainTowerTile = _m[19][46];
         cpoint towerTile = getMainTowerTile();
         float towerX = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
         float towerY = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
-        towerY -= 120.f; // Move up 
-        _mainTower.initMainTower(mainTowerTexture, 20, towerX, towerY);
+        towerX -= 50.f;
+        towerY -= 60.f;
+
+        _mainTower.setPixelPosition(towerX, towerY);
+        if (mainTowerTexture) {
+            _mainTower.getSprite().setTexture(*mainTowerTexture);
+            _mainTower.getSprite().setOrigin(
+                _mainTower.getSprite().getLocalBounds().width / 2,
+                _mainTower.getSprite().getLocalBounds().height / 2
+            );
+        }
+        _mainTower.setHealthBarSize(200, 20);
     }
 
     else if (levelID == 3) {
@@ -187,13 +210,23 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         _ctw.setMapForBullet(_m);
         _ctw.calcPathBullet();
 
-        // Add
+        // Modified main tower initialization
         _mainTowerTile = _m[7][46];
         cpoint towerTile = getMainTowerTile();
         float towerX = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
         float towerY = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
-        towerY -= 120.f; // Move up 
-        _mainTower.initMainTower(mainTowerTexture, 30, towerX, towerY);
+        towerX -= 50.f;
+        towerY -= 60.f;
+
+        _mainTower.setPixelPosition(towerX, towerY);
+        if (mainTowerTexture) {
+            _mainTower.getSprite().setTexture(*mainTowerTexture);
+            _mainTower.getSprite().setOrigin(
+                _mainTower.getSprite().getLocalBounds().width / 2,
+                _mainTower.getSprite().getLocalBounds().height / 2
+            );
+        }
+        _mainTower.setHealthBarSize(200, 20);        
     }
 
     else if (levelID == 4) {
@@ -248,17 +281,23 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         _ctw.setMapForBullet(_m);
         _ctw.calcPathBullet();
 
-        // Add
+        // Modified
         _mainTowerTile = _m[11][46];
         cpoint towerTile = getMainTowerTile();
         float towerX = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
         float towerY = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
-        towerY -= 120.f; // Move up 
-        _mainTower.initMainTower(mainTowerTexture, 40, towerX, towerY);
+        towerX -= 50.f; // Move left
+        towerY -= 60.f; // Move up 
+        
+        _mainTower.setPixelPosition(towerX, towerY);
+        if (mainTowerTexture) {
+            _mainTower.getSprite().setTexture(*mainTowerTexture);
+            _mainTower.getSprite().setOrigin(
+                _mainTower.getSprite().getLocalBounds().width / 2,
+                _mainTower.getSprite().getLocalBounds().height / 2
+            );
+        }
+        _mainTower.setHealthBarSize(200, 20);
     }
-}
-
-ctower& cmap::getMainTower() {
-    return _mainTower;
 }
 

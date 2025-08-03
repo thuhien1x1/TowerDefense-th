@@ -61,10 +61,4 @@ public:
     bool isEffectPlaying() const { return _effectPlaying; }
     const Sprite& getEffectSprite() const { return _effectSprite; }
 
-    // Add mainTower
-    void initMainTower(Texture* texture, int health, float x, float y);
-    int getHealth() { return _mainTowerHealth; }
-    void setHealth(int health) { _mainTowerHealth = health; }
-    void decreaseHealth() { _mainTowerHealth--; if (_mainTowerHealth <= 0)  _mainTowerHealth = 0; }
-    const Sprite& getMainTowerSprite() const { return _mainTowerSprite; }
 };

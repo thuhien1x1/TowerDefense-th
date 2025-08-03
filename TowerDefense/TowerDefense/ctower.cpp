@@ -77,14 +77,4 @@ void ctower::updateEffect(float deltaTime) {
     }
 }
 
-// Add init mainTower
-void ctower::initMainTower(Texture* texture, int health, float x, float y) {
-    _mainTowerTexture = texture;
-    _mainTowerHealth = health;
-    _mainTowerSprite.setTexture(*_mainTowerTexture);
-    _mainTowerSprite.setPosition(x, y);
-    _mainTowerSprite.setOrigin(_mainTowerTexture->getSize().x / 2.f, _mainTowerTexture->getSize().y / 2.f);
-    _mainTowerSprite.setScale(1.8f, 1.8f);
-}
-
 

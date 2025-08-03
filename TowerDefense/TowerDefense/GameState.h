@@ -8,6 +8,7 @@
 #include "cenemy.h"
 #include "clevel.h"
 #include "cmap.h"
+#include "cBaseTower.h"
 #include "MapHandle.h"
 #include "Player.h"
 #include <vector>

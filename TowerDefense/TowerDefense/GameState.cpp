@@ -1,10 +1,11 @@
 #include "GameState.h"
 #include "MapSelectionState.h"
+#include "Utility.h"
 #include <iostream>
 
 GameState::GameState(StateStack& stack, Context context)
     : State(stack, context),
-    TOWER_RANGE(500.f),
+    TOWER_RANGE(300.f),
     currentLevelIndex(MapSelectionState::levelID),
     waveIndex(0),
     mainTowerMaxHealth(0),
@@ -145,7 +146,10 @@ void GameState::draw()
     window.clear(sf::Color::Black);
 
     window.draw(backgroundSprite);
-    window.draw(curMap->getMainTower().getMainTowerSprite());
+    Sprite mt_sprite = curMap->getMainTower().getSprite();
+    centerOrigin(mt_sprite);
+    window.draw(mt_sprite);
+    curMap->getMainTower().drawHealthBar(window);
 
     window.draw(hpText);
     window.draw(gold);
@@ -424,70 +428,84 @@ bool GameState::handleEvent(const sf::Event& event)
 
 bool GameState::update(sf::Time dt)
 {
-    // Retrieve mainTower position in pixels
-    cpoint towerTile = curMap->getMainTowerTile();
-    float towerX = curMap->getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
-    float towerY = curMap->getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
-
-    //Enemy update
+    //Enemy update - modify tower damage logic
     for (auto it = enemies.begin(); it != enemies.end(); ) {
-        cenemy& e = *it;  // Get reference to current enemy
+        cenemy& e = *it;
+        bool shouldErase = false;
 
-        if (!e.hasReachedEnd() && e.getCurrentTarget() < e.getPathLength() && e.getState() == WALK) {
-            float targetX = e.getP()[e.getCurrentTarget()].getPixelX();
-            float targetY = e.getP()[e.getCurrentTarget()].getPixelY();
+        // Handle dead enemies first
+        if (e.isDead()) {
+            if (e.getState() == DEATH && e.hasFinishedDeathAnim()) {
+                // Only give reward if not already given
+                if (!e.hasGivenReward()) {
+                    player.addMoney(e.getResources());
+                    e.markRewardGiven();
+                }
+                shouldErase = true;
+            }
+            // Dead but still playing death animation - just update
+            else {
+                e.updateAnimation(dt.asSeconds());
+                ++it;
+            }
+            continue;
+        }
 
-            float dx = targetX - e.getX();
-            float dy = targetY - e.getY();
-            float len = sqrt(dx * dx + dy * dy);
+        // Handle living enemies
+        if (!e.hasReachedEnd()) {
+            if (e.getCurrentTarget() < e.getPathLength()) {
+                // Normal path following
+                float targetX = e.getP()[e.getCurrentTarget()].getPixelX();
+                float targetY = e.getP()[e.getCurrentTarget()].getPixelY();
 
-            if (len < 1.f) {
-                e.incrementTarget();
+                float dx = targetX - e.getX();
+                float dy = targetY - e.getY();
+                float len = sqrt(dx * dx + dy * dy);
 
-                if (e.getCurrentTarget() >= e.getPathLength()) {
-                    // Enemy reached end - damage tower immediately
-                    curMap->getMainTower().decreaseHealth();
+                if (len < 1.f) {
+                    e.incrementTarget();
 
-                    // Check for game over
-                    if (curMap->getMainTower().getHealth() <= 0) {
-                        isGameOver = true;
-                        isGameWin = false;
+                    // Check if reached final target
+                    if (e.getCurrentTarget() >= e.getPathLength()) {
+                        // Damage tower and mark for removal
+                        curMap->getMainTower().takeDamage(e.getDamage());
+                        e.reachEnd();
+                        shouldErase = true;
+
+                        // Check for game over
+                        if (curMap->getMainTower().isDestroyed()) {
+                            isGameOver = true;
+                            isGameWin = false;
+                        }
                     }
+                }
+                else {
+                    // Normal movement
+                    dx /= len;
+                    dy /= len;
 
-                    // Remove enemy immediately (no attack animation)
-                    it = enemies.erase(it);
-                    continue;  // Skip remaining processing for this enemy
+                    // Rotate enemy sprite
+                    if (dx < -0.1f)
+                        e.faceLeft(e.getType());
+                    else if (dx > 0.1f || dy < -0.1f)
+                        e.faceRight(e.getType());
+
+                    e.move(dx * e.getSpeedByType(e.getType()) * dt.asSeconds(),
+                        dy * e.getSpeedByType(e.getType()) * dt.asSeconds());
                 }
             }
-            else {
-                // Normal movement
-                dx /= len;
-                dy /= len;
 
-                // Rotate enemy sprite when changing direction
-                if (dx < -0.1f)
-                    e.faceLeft(e.getType());
-                else if (dx > 0.1f || dy < -0.1f)
-                    e.faceRight(e.getType());
-
-                e.move(dx * e.getSpeedByType(e.getType()) * dt.asSeconds(),
-                    dy * e.getSpeedByType(e.getType()) * dt.asSeconds());
-            }
+            // Update animation for living enemies
+            e.updateAnimation(dt.asSeconds());
         }
 
-        // Animation update
-        e.updateAnimation(dt.asSeconds());
-
-        // Handle enemy death and rewards
-        if (e.isDead() && e.getState() == DEATH && e.hasFinishedDeathAnim() && !e.hasGivenReward()) {
-            player.addMoney(e.getResources()); // Give reward
-            e.markRewardGiven(); // Prevent double rewards
-            e.setPosition(-2000.f, -2000.f); // Move off-screen
-            e.reachEnd(); // Mark as reached end
+        // Erase enemy if marked, otherwise move to next
+        if (shouldErase) {
+            it = enemies.erase(it);
         }
-
-        // Move to next enemy if we didn't erase this one
-        ++it;
+        else {
+            ++it;
+        }
     }
 
     // Clean up dead enemies and enemies that reached end
@@ -644,7 +662,8 @@ bool GameState::update(sf::Time dt)
     bullets.erase(remove_if(bullets.begin(), bullets.end(), [](cbullet& b) { return !b.isActive(); }), bullets.end());
 
     // Update mainTower hp & gold
-    hpText.setString("MAIN TOWER HP: " + to_string(curMap->getMainTower().getHealth()));
+    hpText.setString("MAIN TOWER HP: " + to_string(curMap->getMainTower().getHealth())
+        + "/" + to_string(curMap->getMainTower().getMaxHealth()));
     gold.setString("GOLD: " + to_string(player.getMoney()));
 
     return true;
@@ -663,10 +682,13 @@ void GameState::loadLevel(int index) {
     ce.findPath(curMap->getMap(), ce.getStart(), ce.getEnd());
 
     // Load map data & texture & mainTowerMaxHealth for the current level
-    mainTowerMaxHealth = curMap->getMainTower().getHealth();
-    backgroundSprite.setTexture(*backgroundTexture[currentLevelIndex]);
+
     levels[currentLevelIndex].loadMap(mainTowerTexture, backgroundTexture[index], currentLevelIndex + 1);
+    backgroundSprite.setTexture(*backgroundTexture[currentLevelIndex]);
     window.setSize(backgroundTexture[currentLevelIndex]->getSize());
+
+    // Apply the position to the tower sprite
+    curMap->getMainTower().getPosition();
 
     // Reset enemy, tower, bullet...
     enemies.clear();
@@ -688,14 +710,14 @@ void GameState::loadLevel(int index) {
     // Set up text to display main tower hp (demo)
     hpText.setFont(font);
     hpText.setCharacterSize(20);
-    hpText.setFillColor(Color::Black);
+    hpText.setFillColor(Color::Green);
     hpText.setPosition(10.f, 10.f);
     hpText.setString("MAIN TOWER HP: " + to_string(curMap->getMainTower().getHealth()));
 
     // Set up text to display gold (demo)
     gold.setFont(font);
     gold.setCharacterSize(20);
-    gold.setFillColor(Color::Green);
+    gold.setFillColor(Color::Yellow);
     gold.setPosition(10.f, 50.f);
     gold.setString("GOLD: " + to_string(levels[currentLevelIndex].getStartGold()));
 }

@@ -136,6 +136,9 @@ void cenemy::init(EnemyType type, float x, float y, int hp, const EnemyAnimation
     _health = hp;
     _type = type;
 
+    mDamage = getDamageByType(type);
+    mHasDamagedTower = false;
+
     _sprite.setTexture(*_walkTex);
     _totalFrames = _walkFrames;
     _animationSpeed = _walkSpeed;
@@ -263,5 +266,15 @@ int cenemy::getResourcesByType(EnemyType type) {
     case RANGED_MECH: return 30;
     case HEAVY_WALKER: return 40;
     default: return 20;
+    }
+}
+
+int cenemy::getDamageByType(EnemyType type)
+{
+    switch (type) {
+    case FAST_SCOUT: return 100;
+    case RANGED_MECH: return 200;
+    case HEAVY_WALKER: return 300;
+    default: return 100;
     }
 }

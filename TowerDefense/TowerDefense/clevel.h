@@ -19,6 +19,8 @@ private:
 	vector<pair<EnemyType, int>> _waves;
 	int _currentWaveIndex = 0;
 
+	cBaseTower mainTower;
+
 public:
 	clevel(int levelID, int enemyCount, int waveCount, int towerMaxCount, int startGold);
 

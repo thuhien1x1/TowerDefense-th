@@ -40,6 +40,9 @@ private:
     int mReward;
     EnemyType _type;
 
+    int mDamage;  // Add damage property
+    bool mHasDamagedTower; // To prevent multiple hits
+
     // Position
     float _posX, _posY;
     bool _reachedEnd;
@@ -88,6 +91,7 @@ public:
     int getHealth() const { return _health; }
     int getResources() const { return mReward; }
     int getCurrentTarget() const { return _currentTarget; }
+    int getDamage() const { return mDamage; } // Add getter for damage
     float getX() const { return _posX; }
     float getY() const { return _posY; }
     EnemyState getState() const { return _state; }
@@ -96,6 +100,7 @@ public:
     static int getHealthByType(EnemyType type);
     static int getSpeedByType(EnemyType type);
     static int getResourcesByType(EnemyType type);
+    static int getDamageByType(EnemyType type); // Add static method to get damage by type
 
     // Setters 
     void setSpeed(int tspeed) { if (tspeed > 0 && tspeed < 10) _speed = tspeed; }
@@ -108,6 +113,14 @@ public:
     void loadFromData(const EnemyAnimationData& data);
     bool hasReachedEnd() const { return _reachedEnd; }
     bool isDead() const { return _health <= 0; }
+
+    bool isActive() const {
+        return !isDead() && !hasReachedEnd();
+    }
+
+    bool shouldBeRemoved() const {
+        return (isDead() && hasFinishedDeathAnim()) || hasReachedEnd();
+    }
 
     // Movement
     void updateSprite();

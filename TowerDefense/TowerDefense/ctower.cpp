@@ -14,22 +14,6 @@ void ctower::init(const Texture& tex, float x, float y) {
     _location = cpoint::fromXYToRowCol(x, y);
 }
 
-const Sprite& ctower::getSprite() const { return _sprite; }
-
-void ctower::setLocation(const cpoint& loc) { _location = loc; }
-cpoint ctower::getLocation() const { return _location; }
-
-void ctower::resetShootTimer() { _shootTimer = 0.f; }
-void ctower::addShootTimer(float dt) { _shootTimer += dt; }
-float ctower::getShootTimer() const { return _shootTimer; }
-
-int ctower::getTargetEnemyIdx() const { return _targetEnemyIdx; }
-void ctower::setTargetEnemyIdx(int idx) { _targetEnemyIdx = idx; }
-
-void ctower::setMapForBullet(cpoint map[][cpoint::MAP_COL]) {
-    _cb.updateMap(map);
-}
-
 void ctower::initEffect(const Texture& tex, int frameWidth, int frameHeight, int totalFrames, float speed) {
     _effectSprite.setTexture(tex);
     _effectFrameWidth = frameWidth;

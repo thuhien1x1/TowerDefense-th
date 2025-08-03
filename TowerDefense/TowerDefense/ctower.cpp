@@ -8,8 +8,8 @@ int ctower::calcPathBullet() {
 
 void ctower::init(const Texture& tex, float x, float y) {
     _sprite.setTexture(tex);
-    _sprite.setScale(2.f, 2.f);
     _sprite.setOrigin(tex.getSize().x / 2.f, tex.getSize().y / 2.f);
+    _sprite.setScale(0.4f, 0.4f);
     _sprite.setPosition(x, y);
     _location = cpoint::fromXYToRowCol(x, y);
 }
@@ -30,9 +30,6 @@ void ctower::setMapForBullet(cpoint map[][cpoint::MAP_COL]) {
     _cb.updateMap(map);
 }
 
-cbullet& ctower::getBullet() { return _cb; }
-
-// Add
 void ctower::initEffect(const Texture& tex, int frameWidth, int frameHeight, int totalFrames, float speed) {
     _effectSprite.setTexture(tex);
     _effectFrameWidth = frameWidth;
@@ -76,5 +73,7 @@ void ctower::updateEffect(float deltaTime) {
         _effectSprite.setTextureRect(_effectFrameRect);
     }
 }
+
+
 
 

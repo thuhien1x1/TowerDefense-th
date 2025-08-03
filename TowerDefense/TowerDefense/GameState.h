@@ -65,10 +65,13 @@ private:
     Texture* mainTowerTexture;
     Texture* shootEffectTexture;
 
-
     // UI
     Sprite pauseButton;
     Sprite commingWave;
+    Sprite upgradeButton;
+    Sprite towerChoosingButtons[3];
+    Sprite towerChoosingCircle;
+
 
     // Tower Infos
     Texture* infoTexture[6];
@@ -79,11 +82,6 @@ private:
     // Icon appear when click
     bool isChoosingTower = false;
     cpoint selectedTile;  // cliked pixel
-    Sprite towerIcons[3];  // 3 icon tower
-
-    // Upgrade
-    Sprite upgradeButton;
-
     // Player for money
     Player player;
 };

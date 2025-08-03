@@ -103,6 +103,15 @@ namespace Textures
         star,
         restartButton2,
         quitButton2,
+
+        // Load powerStation texture
+        powerStation,
+
+        // Load UI for choosing tower
+        tower1Button,
+        tower2Button,
+        tower3Button,
+        circle,
     };
 }
 

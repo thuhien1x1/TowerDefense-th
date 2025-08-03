@@ -24,6 +24,9 @@ private:
 public:
 	clevel(int levelID, int enemyCount, int waveCount, int towerMaxCount, int startGold);
 
+	void loadMap(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, int levelId);
+	void nextWave();
+
 	// Getters
 	int getLevelID() const { return _levelID; }
 	int getCurrentLevel() const { return _currentLevel; }
@@ -47,8 +50,5 @@ public:
 	void setMap(cmap map) { _map = map; }
 	void setWaves(const vector<pair<EnemyType, int>>& waves) { _waves = waves; }
 	void resetWave() { _currentWaveIndex = 0; }
-
-	void loadMap(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, int levelId);
-	void nextWave();
 };
 

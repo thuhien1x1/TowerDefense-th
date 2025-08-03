@@ -2,10 +2,17 @@
 #include <iostream>
 #include <cmath>
 #include "cmap.h"
+#include <vector>
+#include <SFML/System.hpp>
 
 using namespace std;
+using namespace sf;
 
 class MapHandle {
+private:
+    inline static float TILE_SIZE = 40.f;
+    static vector<vector<Vector2f>> towerButtonData;
+
 public:
     static void setCmap1(cmap& map, int a, int b, int C);
     static void setCmap2(cmap& map, int a, int b, int C);
@@ -19,4 +26,6 @@ public:
     static void setCmap(int index, cmap& map, int a, int b, int C);
     static pair <int, int> getTowerdes(int index, int a, int b);
 
+    static void initTowerButtonData();
+    static vector<Vector2f> getTowerButtons(int levelIndex, int row, int col);
 };

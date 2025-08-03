@@ -151,6 +151,7 @@
     <ClCompile Include="MenuState.cpp" />
     <ClCompile Include="PauseState.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="SaveManagement.cpp" />
     <ClCompile Include="SettingState.cpp" />
     <ClCompile Include="State.cpp" />
     <ClCompile Include="StateStack.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="ResourceHolder.h" />
     <ClInclude Include="ResourceIdentifiers.h" />
+    <ClInclude Include="SaveManagement.h" />
     <ClInclude Include="SettingState.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="StateIdentifiers.h" />

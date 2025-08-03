@@ -89,7 +89,7 @@ bool MenuState::handleEvent(const sf::Event& event)
 
 				else if (i == 1) {
 					requestStackPop();
-					requestStackPush(States::MapSelection); // Load game, change to State::Load later
+					requestStackPush(States::Load); // Load game, change to State::Load later
 				}
 
 				else if (i == 2)

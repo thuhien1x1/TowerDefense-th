@@ -95,6 +95,9 @@ namespace Textures
         restartButton,
         quitButton,
         commingWave,
+        heartIcon,
+        waveIcon,
+        currencyIcon,
 
         // UI for VictoryState & DefeatState
         victory,

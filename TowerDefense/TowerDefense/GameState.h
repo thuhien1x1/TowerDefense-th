@@ -37,7 +37,7 @@ private:
     Sprite backgroundSprite;
 
     Font font;
-    Text hpText, gold;
+    Text hp, gold, wave;
 
     vector<cenemy> enemies;
     vector<ctower> towers;
@@ -69,7 +69,9 @@ private:
     Sprite upgradeButton;
     Sprite towerChoosingButtons[3];
     Sprite towerChoosingCircle;
-
+    Sprite heartIcon;
+    Sprite waveIcon;
+    Sprite currencyIcon;
 
     // Tower Infos
     Texture* infoTexture[6];

@@ -9,8 +9,7 @@
 using namespace std;
 
 cbullet::cbullet()
-    : _posX(0.f), _posY(0.f), _speed(4), _active(true), _targetIdx(-1), _damage(1), _n(0),
-    isLaser(false), laserDuration(0.f), laserTimer(0.f)
+    : _posX(0.f), _posY(0.f), _speed(4), _active(true), _targetIdx(-1), _damage(1), _n(0)
 {
     for (int i = 0; i < cpoint::MAP_ROW * cpoint::MAP_COL; i++)
         _p[i] = cpoint(0, 0, 0);
@@ -65,8 +64,6 @@ bool cbullet::checkCollision(const cenemy& enemy) const {
 
 // Move the bullet towards the enemy using pixel-based tracking instead of grid - based
 void cbullet::trackEnemy(const cenemy& enemy, float deltaTime) {
-    if (isLaser || !_active) return;
-
     float dx = enemy.getX() - _posX;
     float dy = enemy.getY() - _posY;
     float len = sqrt(dx * dx + dy * dy);
@@ -124,11 +121,6 @@ void cbullet::init(const sf::Texture& tex, float x, float y, int frameWidth, int
 }
 
 void cbullet::updateAnimation(float deltaTime) {
-    if (isLaser) {
-        updateLaser(deltaTime);
-        return;
-    }
-
     _animationTimer += deltaTime;
 
     if (_animationTimer >= _animationSpeed) {
@@ -144,36 +136,6 @@ void cbullet::updateAnimation(float deltaTime) {
 
         _sprite.setTextureRect(_frameRect);
     }
-}
-
-void cbullet::initLaser(const sf::Texture& tex, float x, float y, float targetX, float targetY, float duration) {
-    isLaser = true;
-    laserDuration = duration;
-    laserTimer = 0.f;
-    startPos = sf::Vector2f(x, y);
-    targetPos = sf::Vector2f(targetX, targetY);
-
-    laserSprite.setTexture(tex);
-    laserSprite.setOrigin(0.f, tex.getSize().y / 2.f);
-    laserSprite.setPosition(startPos);
-
-    float dx = targetX - x;
-    float dy = targetY - y;
-    float distance = sqrtf(dx * dx + dy * dy);
-    float angle = atan2f(dy, dx) * 180.f / 3.14159265f;
-
-    laserSprite.setRotation(angle);
-    laserSprite.setScale(distance / tex.getSize().x, 0.1f);
-
-    _active = true;
-}
-
-
-void cbullet::updateLaser(float deltaTime) {
-    if (!isLaser || !_active) return;
-    laserTimer += deltaTime;
-    if (laserTimer >= laserDuration)
-        _active = false;
 }
 
 

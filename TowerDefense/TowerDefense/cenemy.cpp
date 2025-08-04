@@ -24,7 +24,6 @@ cenemy::cenemy()
     // Add
     _state = WALK;
     _isDead = false;
-    _isAttackTriggered = false;
 }
 
 
@@ -140,7 +139,6 @@ void cenemy::init(EnemyType type, float x, float y, int hp, const EnemyAnimation
     _animationTimer = 0.f;
     _state = WALK;
     _isDead = false;
-    _isAttackTriggered = false;
     _reachedEnd = false;
 
     _frameRect = sf::IntRect(0, 0, _frameWidth, _frameHeight);
@@ -180,7 +178,6 @@ void cenemy::triggerAttack(float towerX, float towerY) {
     _state = ATTACK;
     _currentFrame = 0;
     _animationTimer = 0.f;
-    _isAttackingMainTower = true;
     _attackTimer = 0.f;
 
     _totalFrames = _attackFrames;
@@ -196,6 +193,8 @@ void cenemy::triggerAttack(float towerX, float towerY) {
 void cenemy::updateAnimation(float deltaTime) {
     if (_state == DEATH && _isDead) return;
 
+    if (_state == ATTACK && _isAttack) return;
+
     _animationTimer += deltaTime;
     if (_animationTimer >= _animationSpeed) {
         _animationTimer -= _animationSpeed;
@@ -206,6 +205,12 @@ void cenemy::updateAnimation(float deltaTime) {
                 _currentFrame = _totalFrames - 1;
                 _isDead = true;
             }
+
+            else if (_state == ATTACK) {
+                _currentFrame = _totalFrames - 1;
+                _isAttack = true;
+            }
+
             else
                 _currentFrame = 0;
         }

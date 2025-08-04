@@ -65,8 +65,7 @@ private:
     // Add animation
     EnemyState _state;
     bool _isDead;
-    bool _isAttackTriggered;
-    bool _isAttackingMainTower = false;
+    bool _isAttack;
     float _attackTimer = 0.f;
     float _attackCooldown = 1.f;
 
@@ -119,6 +118,7 @@ public:
 
     // Combat
     bool hasFinishedDeathAnim() const { return _isDead; }
+    bool hasFinishedAttackAnim() const { return _isAttack; }
     void triggerAttack(float towerX, float towerY);
     void takeDamage(int damage);
 

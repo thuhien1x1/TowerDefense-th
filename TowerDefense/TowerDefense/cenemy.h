@@ -139,6 +139,7 @@ public:
     // Pathfinding
     void findPath(cpoint a[][cpoint::MAP_COL], cpoint s, cpoint e);
 
+    // Prevent duplicate
     bool hasGivenReward() const { return mRewardGiven; }
     void markRewardGiven() { mRewardGiven = true; }
 

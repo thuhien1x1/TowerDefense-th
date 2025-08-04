@@ -298,23 +298,25 @@ bool GameState::handleEvent(const sf::Event& event)
             }
 
             if (clickedButton && towerType != -1) {
-                if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
-                    ctower t;
-                    auto td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
+                // Check if player can afford this tower
+                if (player.spendMoney(GameConstants::TOWER_COSTS[towerType])) {
+                    if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
+                        ctower t;
+                        auto td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
 
-                    t.init(*towerTexture[towerType],
-                        curMap->getMap()[td.first][td.second].getPixelX(),
-                        curMap->getMap()[td.first][td.second].getPixelY());
-                    t.setLocation(cpoint(td.first, td.second, 1));
-                    t.setMapForBullet(curMap->getMap());
-                    t.getBullet().setSpeed(8);
-                    t.setType(towerType);
-                    t.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);
+                        t.init(*towerTexture[towerType],
+                            curMap->getMap()[td.first][td.second].getPixelX(),
+                            curMap->getMap()[td.first][td.second].getPixelY());
+                        t.setLocation(cpoint(td.first, td.second, 1));
+                        t.setMapForBullet(curMap->getMap());
+                        t.getBullet().setSpeed(8);
+                        t.setType(towerType);
+                        t.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);
 
-                    towers.push_back(t);
-                    MapHandle::setCmap(currentLevelIndex, *curMap, selectedTile.getRow(), selectedTile.getCol(), towerType + 3);
+                        towers.push_back(t);
+                        MapHandle::setCmap(currentLevelIndex, *curMap, selectedTile.getRow(), selectedTile.getCol(), towerType + 3);
+                    }
                 }
-
                 isChoosingTower = false;
                 return false;
             }
@@ -323,43 +325,45 @@ bool GameState::handleEvent(const sf::Event& event)
         // Handle tower upgrade button click
         if (showInfo && upgradeButton.getGlobalBounds().contains(mx, my)) {
             int tileC = selectedinfo;
-            if (tileC >= 3 && tileC <= 5) {
-                // Find current tower's position based on C value
-                int row = -1, col = -1;
-                for (int i = 0; i < cpoint::MAP_ROW && row == -1; ++i) {
-                    for (int j = 0; j < cpoint::MAP_COL; ++j) {
-                        if (curMap->getMap()[i][j].getC() == tileC) {
-                            row = i;
-                            col = j;
-                            break;
+            if (player.spendMoney(GameConstants::UPGRADE_COSTS[tileC - 3])) {
+                if (tileC >= 3 && tileC <= 5) {
+                    // Find current tower's position based on C value
+                    int row = -1, col = -1;
+                    for (int i = 0; i < cpoint::MAP_ROW && row == -1; ++i) {
+                        for (int j = 0; j < cpoint::MAP_COL; ++j) {
+                            if (curMap->getMap()[i][j].getC() == tileC) {
+                                row = i;
+                                col = j;
+                                break;
+                            }
                         }
                     }
-                }
 
-                // Get the designated tile and upgrade C value
-                td = MapHandle::getTowerdes(currentLevelIndex, row, col);
-                row = td.first;
-                col = td.second;
+                    // Get the designated tile and upgrade C value
+                    td = MapHandle::getTowerdes(currentLevelIndex, row, col);
+                    row = td.first;
+                    col = td.second;
 
-                if (row != -1 && col != -1) {
-                    int newC = tileC + 3;
-                    MapHandle::setCmap(currentLevelIndex, *curMap, row, col, newC); // Update map C value for upgraded tower
+                    if (row != -1 && col != -1) {
+                        int newC = tileC + 3;
+                        MapHandle::setCmap(currentLevelIndex, *curMap, row, col, newC); // Update map C value for upgraded tower
 
-                    // Update the tower's type and texture
-                    for (auto& t : towers) {
-                        if (t.getLocation().getRow() == row && t.getLocation().getCol() == col) {
-                            t.setType(newC - 3);
-                            t.init(*towerTexture[newC - 3],
-                                curMap->getMap()[row][col].getPixelX(),
-                                curMap->getMap()[row][col].getPixelY());
-                            break;
+                        // Update the tower's type and texture
+                        for (auto& t : towers) {
+                            if (t.getLocation().getRow() == row && t.getLocation().getCol() == col) {
+                                t.setType(newC - 3);
+                                t.init(*towerTexture[newC - 3],
+                                    curMap->getMap()[row][col].getPixelX(),
+                                    curMap->getMap()[row][col].getPixelY());
+                                break;
+                            }
                         }
                     }
-                }
 
-                showInfo = false;
-                selectedinfo = -1;
-                return false;
+                    showInfo = false;
+                    selectedinfo = -1;
+                    return false;
+                }
             }
         }
 
@@ -421,20 +425,28 @@ bool GameState::update(sf::Time dt)
         cenemy& e = *it;
         bool shouldErase = false;
 
+        cenemy& e0 = *enemies.begin();
         // Handle dead enemies first
         if (e.isDead()) {
-            if (e.getState() == DEATH && e.hasFinishedDeathAnim()) {
+
+            if (e.getState() == DEATH) {
                 // Only give reward if not already given
                 if (!e.hasGivenReward()) {
+                    cout << "Give reward: " << e.getResources() << endl;
                     player.addMoney(e.getResources());
                     e.markRewardGiven();
                 }
+            }
+
+            if (e.getState() == DEATH && e.hasFinishedDeathAnim()) {
                 shouldErase = true;
             }
+
             // Dead but still playing death animation - just update
             else {
                 e.updateAnimation(dt.asSeconds());
                 ++it;
+                shouldErase = true;
             }
             continue;
         }

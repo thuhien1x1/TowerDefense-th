@@ -483,7 +483,6 @@ bool GameState::update(sf::Time dt)
                         if (e.hasFinishedAttackAnim()) {
                             e.reachEnd();
                             shouldErase = true;
-                            std::cout << "State: " << e.getState() << ", isAttackDone: " << e.hasFinishedAttackAnim() << "\n";
                         }
 
                         curMap->getMainTower().takeDamage(e.getDamage());

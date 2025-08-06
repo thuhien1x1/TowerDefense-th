@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "cpoint.h"
 #include <SFML/Graphics.hpp>
-#include <iostream>
 
 using namespace sf;
 

@@ -63,6 +63,9 @@ namespace Textures
         // Upgrade Button
         upgradeButton,
 
+        // Construction Icon
+        constructionicon,
+
         // UI for MenuState
         newGameButton,
         loadGameButton,

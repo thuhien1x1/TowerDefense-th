@@ -8,7 +8,7 @@ int ctower::calcPathBullet() {
 
 void ctower::init(const Texture& tex, float x, float y) {
     _sprite.setTexture(tex);
-    _sprite.setOrigin(tex.getSize().x / 2.f, tex.getSize().y / 2.f);
+    _sprite.setOrigin(tex.getSize().x / 3.0f, tex.getSize().y);
     _sprite.setScale(0.4f, 0.4f);
     _sprite.setPosition(x, y);
     _location = cpoint::fromXYToRowCol(x, y);

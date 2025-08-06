@@ -153,7 +153,7 @@ bool PauseState::handleEvent(const sf::Event& event)
 
 		// Restart button
 		if (restartButton.getGlobalBounds().contains(mousePos)) {
-			requestStackPop();
+			requestStateClear();
 			requestStackPush(States::Game); // Back to current Game
 			return true;
 		}

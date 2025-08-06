@@ -19,7 +19,7 @@ private:
     void render();
     void registerStates();
 
-    float gameSpeed = 2.0f;
+    float gameSpeed = 1.0f;
 
     sf::RenderWindow mWindow;
     TextureHolder mTextures;

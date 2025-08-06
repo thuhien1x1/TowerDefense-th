@@ -6,7 +6,7 @@
 using namespace std;
 
 cenemy::cenemy()
-    : _posX(0.f), _posY(0.f), _health(3), _speed(3), 
+    : _posX(0.f), _posY(0.f), _health(3), _speed(3),
     _currentTarget(1), _reachedEnd(false), _pathLength(0),
     mRewardGiven(false),
     mReward(0),
@@ -27,8 +27,6 @@ cenemy::cenemy()
     for (int i = 0; i < cpoint::MAP_ROW * cpoint::MAP_COL; i++)
         _p[i] = cpoint();
 
-    // Add
-    _state = WALK;
     _isDead = false;
 }
 
@@ -187,9 +185,9 @@ void cenemy::triggerAttack() {
 
     _sprite.setTexture(*_attackTex);
     _state = ATTACK;
+    _isAttack = false;
     _currentFrame = 0;
     _animationTimer = 0.f;
-    _attackTimer = 0.f;
 
     _totalFrames = _attackFrames;
     _animationSpeed = _attackSpeed;
@@ -204,23 +202,19 @@ void cenemy::triggerAttack() {
 void cenemy::updateAnimation(float deltaTime) {
     if (_state == DEATH && _isDead) return;
 
-    if (_state == ATTACK && _isAttack && _state != DEATH) return;
-
     _animationTimer += deltaTime;
     if (_animationTimer >= _animationSpeed) {
         _animationTimer -= _animationSpeed;
         _currentFrame++;
 
         if (_currentFrame >= _totalFrames) {
-            if (_state == DEATH) {
-                _currentFrame = _totalFrames - 1;
-                _isDead = true;
-            }
+            _currentFrame = _totalFrames - 1;
 
-            else if (_state == ATTACK) {
-                _currentFrame = _totalFrames - 1;
+            if (_state == DEATH)
+                _isDead = true;
+
+            else if (_state == ATTACK)
                 _isAttack = true;
-            }
 
             else
                 _currentFrame = 0;
@@ -276,9 +270,9 @@ int cenemy::getResourcesByType(EnemyType type) {
 int cenemy::getDamageByType(EnemyType type)
 {
     switch (type) {
-    case FAST_SCOUT: return 100;
-    case RANGED_MECH: return 200;
-    case HEAVY_WALKER: return 300;
+    case FAST_SCOUT: return 1;
+    case RANGED_MECH: return 2;
+    case HEAVY_WALKER: return 3;
     default: return 100;
     }
 }

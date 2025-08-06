@@ -57,7 +57,7 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
 
         // Set start, end, curr positions for enemy
         _ce.setStart(_m[19][0]);
-        _ce.setEnd(_m[9][43]);
+        _ce.setEnd(_m[9][42]);
         _ce.setCurr(_m[19][0]);
         _ce.findPath(_m, _ce.getStart(), _ce.getEnd());
 
@@ -72,20 +72,13 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         float towerX = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
         float towerY = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
         towerX -= 50.f;
-        towerY -= 60.f;
-                
+        towerY -= 120.f;
+
         // Set up the base tower
         _mainTower.setPixelPosition(towerX, towerY);
-
-        if (mainTowerTexture) {
-            _mainTower.getSprite().setTexture(*mainTowerTexture);
-            // Center the sprite if needed
-            _mainTower.getSprite().setOrigin(
-                _mainTower.getSprite().getLocalBounds().width / 2,
-                _mainTower.getSprite().getLocalBounds().height / 2
-            );
-        }
-        _mainTower.setHealthBarSize(200, 20);
+        _mainTower.setTexture(*mainTowerTexture);
+        _mainTower.setMaxHealh(20);
+        _mainTower.setHealthBarSize(240, 20);
     }
 
     else if (levelID == 2) {
@@ -131,7 +124,7 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
 
         // Set start, end, curr positions for enemy
         _ce.setStart(_m[19][0]);
-        _ce.setEnd(_m[19][43]);
+        _ce.setEnd(_m[19][42]);
         _ce.setCurr(_m[19][0]);
         _ce.findPath(_m, _ce.getStart(), _ce.getEnd());
 
@@ -147,17 +140,12 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         float towerX = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
         float towerY = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
         towerX -= 50.f;
-        towerY -= 60.f;
+        towerY -= 120.f;
 
         _mainTower.setPixelPosition(towerX, towerY);
-        if (mainTowerTexture) {
-            _mainTower.getSprite().setTexture(*mainTowerTexture);
-            _mainTower.getSprite().setOrigin(
-                _mainTower.getSprite().getLocalBounds().width / 2,
-                _mainTower.getSprite().getLocalBounds().height / 2
-            );
-        }
-        _mainTower.setHealthBarSize(200, 20);
+        _mainTower.setTexture(*mainTowerTexture);
+        _mainTower.setMaxHealh(20);
+        _mainTower.setHealthBarSize(240, 20);
     }
 
     else if (levelID == 3) {
@@ -202,7 +190,7 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
 
         // Set start, end, curr positions for enemy
         _ce.setStart(_m[19][0]);
-        _ce.setEnd(_m[7][43]);
+        _ce.setEnd(_m[7][42]);
         _ce.setCurr(_m[19][0]);
         _ce.findPath(_m, _ce.getStart(), _ce.getEnd());
 
@@ -217,17 +205,12 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         float towerX = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
         float towerY = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
         towerX -= 50.f;
-        towerY -= 60.f;
+        towerY -= 120.f;
 
         _mainTower.setPixelPosition(towerX, towerY);
-        if (mainTowerTexture) {
-            _mainTower.getSprite().setTexture(*mainTowerTexture);
-            _mainTower.getSprite().setOrigin(
-                _mainTower.getSprite().getLocalBounds().width / 2,
-                _mainTower.getSprite().getLocalBounds().height / 2
-            );
-        }
-        _mainTower.setHealthBarSize(200, 20);        
+        _mainTower.setTexture(*mainTowerTexture);
+        _mainTower.setMaxHealh(30);
+        _mainTower.setHealthBarSize(240, 20);
     }
 
     else if (levelID == 4) {
@@ -273,7 +256,7 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
 
         // Set start, end, curr positions for enemy
         _ce.setStart(_m[17][0]);
-        _ce.setEnd(_m[11][43]);
+        _ce.setEnd(_m[11][42]);
         _ce.setCurr(_m[17][0]);
         _ce.findPath(_m, _ce.getStart(), _ce.getEnd());
 
@@ -288,17 +271,12 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         float towerX = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
         float towerY = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
         towerX -= 50.f; // Move left
-        towerY -= 60.f; // Move up 
-        
+        towerY -= 120.f; // Move up 
+
         _mainTower.setPixelPosition(towerX, towerY);
-        if (mainTowerTexture) {
-            _mainTower.getSprite().setTexture(*mainTowerTexture);
-            _mainTower.getSprite().setOrigin(
-                _mainTower.getSprite().getLocalBounds().width / 2,
-                _mainTower.getSprite().getLocalBounds().height / 2
-            );
-        }
-        _mainTower.setHealthBarSize(200, 20);
+        _mainTower.setTexture(*mainTowerTexture);
+        _mainTower.setMaxHealh(40);
+        _mainTower.setHealthBarSize(240, 20);
     }
 }
 

@@ -136,6 +136,7 @@ void Application::run()
     while (mWindow.isOpen())
     {
         sf::Time dt = clock.restart();
+        dt = dt * gameSpeed;
         processInput();
         update(dt);
         render();

@@ -6,7 +6,13 @@
 using namespace std;
 
 cenemy::cenemy()
-    : _posX(0.f), _posY(0.f), _health(3), _speed(3), _currentTarget(1), _reachedEnd(false), _pathLength(0) {
+    : _posX(0.f), _posY(0.f), _health(3), _speed(3), 
+    _currentTarget(1), _reachedEnd(false), _pathLength(0),
+    mRewardGiven(false),
+    mReward(0),
+    _isDead(false),
+    _isAttack(false)
+{
 
     // Directions: up, left, down, right for pathfinding
     dd[0] = -1; dd[1] = 0; dd[2] = 1; dd[3] = 0;
@@ -129,6 +135,9 @@ void cenemy::init(EnemyType type, float x, float y, int hp, const EnemyAnimation
     _health = hp;
     _type = type;
 
+    mDamage = getDamageByType(type);
+    mHasDamagedTower = false;
+
     _sprite.setTexture(*_walkTex);
     _totalFrames = _walkFrames;
     _animationSpeed = _walkSpeed;
@@ -146,6 +155,8 @@ void cenemy::init(EnemyType type, float x, float y, int hp, const EnemyAnimation
     _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 1.25f);
 
     updateSprite();
+
+    mReward = getResourcesByType(type); // Set reward based on type
 }
 
 void cenemy::loadFromData(const EnemyAnimationData& data) {
@@ -171,7 +182,7 @@ void cenemy::loadFromData(const EnemyAnimationData& data) {
     _sprite.setScale(data.scaleX, data.scaleY); // Because the sizes of the sprite sheets are not the same
 }
 
-void cenemy::triggerAttack(float towerX, float towerY) {
+void cenemy::triggerAttack() {
     if (_state != WALK) return;
 
     _sprite.setTexture(*_attackTex);
@@ -193,7 +204,7 @@ void cenemy::triggerAttack(float towerX, float towerY) {
 void cenemy::updateAnimation(float deltaTime) {
     if (_state == DEATH && _isDead) return;
 
-    if (_state == ATTACK && _isAttack) return;
+    if (_state == ATTACK && _isAttack && _state != DEATH) return;
 
     _animationTimer += deltaTime;
     if (_animationTimer >= _animationSpeed) {
@@ -262,5 +273,12 @@ int cenemy::getResourcesByType(EnemyType type) {
     }
 }
 
-
-
+int cenemy::getDamageByType(EnemyType type)
+{
+    switch (type) {
+    case FAST_SCOUT: return 100;
+    case RANGED_MECH: return 200;
+    case HEAVY_WALKER: return 300;
+    default: return 100;
+    }
+}

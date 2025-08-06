@@ -8,7 +8,9 @@
 #include "cenemy.h"
 #include "clevel.h"
 #include "cmap.h"
+#include "cBaseTower.h"
 #include "MapHandle.h"
+#include "Player.h"
 #include <vector>
 #include <map>
 #include <cmath>
@@ -82,4 +84,6 @@ private:
     // Icon appear when click
     bool isChoosingTower = false;
     cpoint selectedTile;  // cliked pixel
+    // Player for money
+    Player player;
 };

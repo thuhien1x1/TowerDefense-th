@@ -37,8 +37,11 @@ private:
     // Stats
     int _speed;
     int _health;
-    int resources;
+    int mReward;
     EnemyType _type;
+
+    int mDamage;  // Add damage property
+    bool mHasDamagedTower; // To prevent multiple hits
 
     // Position
     float _posX, _posY;
@@ -68,6 +71,7 @@ private:
     bool _isAttack;
     float _attackTimer = 0.f;
     float _attackCooldown = 1.f;
+    bool mRewardGiven; //add flag
 
 public:
     cenemy();
@@ -84,8 +88,9 @@ public:
     int getPathLength() const { return _pathLength; }
     int getSpeed() const { return _speed; }
     int getHealth() const { return _health; }
-    int getResources() const { return resources; }
+    int getResources() const { return mReward; }
     int getCurrentTarget() const { return _currentTarget; }
+    int getDamage() const { return mDamage; } // Add getter for damage
     float getX() const { return _posX; }
     float getY() const { return _posY; }
     EnemyState getState() const { return _state; }
@@ -94,6 +99,7 @@ public:
     static int getHealthByType(EnemyType type);
     static int getSpeedByType(EnemyType type);
     static int getResourcesByType(EnemyType type);
+    static int getDamageByType(EnemyType type); // Add static method to get damage by type
 
     // Setters 
     void setSpeed(int tspeed) { if (tspeed > 0 && tspeed < 10) _speed = tspeed; }
@@ -107,6 +113,14 @@ public:
     bool hasReachedEnd() const { return _reachedEnd; }
     bool isDead() const { return _health <= 0; }
 
+    bool isActive() const {
+        return !isDead() && !hasReachedEnd();
+    }
+
+    bool shouldBeRemoved() const {
+        return (isDead() && hasFinishedDeathAnim()) || hasReachedEnd();
+    }
+
     // Movement
     void updateSprite();
     void updateAnimation(float deltaTime);
@@ -119,11 +133,15 @@ public:
     // Combat
     bool hasFinishedDeathAnim() const { return _isDead; }
     bool hasFinishedAttackAnim() const { return _isAttack; }
-    void triggerAttack(float towerX, float towerY);
+    void triggerAttack();
     void takeDamage(int damage);
 
     // Pathfinding
     void findPath(cpoint a[][cpoint::MAP_COL], cpoint s, cpoint e);
+
+    // Prevent duplicate
+    bool hasGivenReward() const { return mRewardGiven; }
+    void markRewardGiven() { mRewardGiven = true; }
 
 private:
     void calcPath(int a[][cpoint::MAP_COL], int n, cpoint s, cpoint e);

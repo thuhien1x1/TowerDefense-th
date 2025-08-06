@@ -19,6 +19,8 @@ private:
     void render();
     void registerStates();
 
+    float gameSpeed = 2.0f;
+
     sf::RenderWindow mWindow;
     TextureHolder mTextures;
     FontHolder mFonts;

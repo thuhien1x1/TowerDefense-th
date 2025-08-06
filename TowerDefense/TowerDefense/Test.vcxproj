@@ -138,6 +138,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cBaseTower.cpp" />
     <ClCompile Include="cbullet.cpp" />
     <ClCompile Include="cenemy.cpp" />
     <ClCompile Include="Application.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="VictoryState.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cBaseTower.h" />
     <ClInclude Include="cbullet.h" />
     <ClInclude Include="cenemy.h" />
     <ClInclude Include="Application.h" />

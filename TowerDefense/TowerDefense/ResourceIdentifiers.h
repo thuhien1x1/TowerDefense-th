@@ -4,6 +4,7 @@
 #include <SFML/Graphics/Font.hpp>
 #include "ResourceHolder.h"
 
+
 namespace Textures
 {
     enum ID
@@ -125,6 +126,32 @@ namespace Fonts
         KnightWarrior,
         RobotTraffic,
     };
+}
+
+// Add a new namespace for game constants
+
+namespace GameConstants
+{
+    // Tower costs
+    const int TOWER_BASE_COST = 100;
+    const int TOWER_COSTS[] = { 100, 150, 200 }; // Costs for basic tower types
+
+    // Upgrade costs
+    const int UPGRADE_COST = 75;
+    const int UPGRADE_COSTS[] = { 75, 100, 125 }; // Different costs per tower type if needed
+
+    // Tower sell refund percentage (50%)
+    const float SELL_REFUND_RATE = 0.5f;
+
+    // Enemy rewards
+    const int ENEMY_REWARDS[] = { 20, 30, 40 }; // Rewards for killing different enemy types
+
+    // Starting money
+    const int STARTING_MONEY = 300;
+
+    // Passive income (per wave or per time interval)
+    const int PASSIVE_INCOME = 25;
+    const float INCOME_INTERVAL = 10.0f; // Seconds between passive income
 }
 
 // Type aliases for easy access

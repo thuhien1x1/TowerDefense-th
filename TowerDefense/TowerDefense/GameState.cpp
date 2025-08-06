@@ -1,5 +1,6 @@
 #include "GameState.h"
 #include "MapSelectionState.h"
+#include "Utility.h"
 #include <iostream>
 #include <sstream>
 
@@ -158,7 +159,8 @@ void GameState::draw()
 
     window.draw(backgroundSprite);
     curMap->drawPowerStations(window);
-    window.draw(curMap->getMainTower().getMainTowerSprite());
+    window.draw(curMap->getMainTower().getSprite());
+    curMap->getMainTower().drawHealthBar(window);
 
     window.draw(heartIcon);
     window.draw(currencyIcon);
@@ -306,23 +308,25 @@ bool GameState::handleEvent(const sf::Event& event)
             }
 
             if (clickedButton && towerType != -1) {
-                if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
-                    ctower t;
-                    auto td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
+                // Check if player can afford this tower
+                if (player.spendMoney(GameConstants::TOWER_COSTS[towerType])) {
+                    if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
+                        ctower t;
+                        auto td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
 
-                    t.init(*towerTexture[towerType],
-                        curMap->getMap()[td.first][td.second].getPixelX(),
-                        curMap->getMap()[td.first][td.second].getPixelY());
-                    t.setLocation(cpoint(td.first, td.second, 1));
-                    t.setMapForBullet(curMap->getMap());
-                    t.getBullet().setSpeed(8);
-                    t.setType(towerType);
-                    t.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);
+                        t.init(*towerTexture[towerType],
+                            curMap->getMap()[td.first][td.second].getPixelX(),
+                            curMap->getMap()[td.first][td.second].getPixelY());
+                        t.setLocation(cpoint(td.first, td.second, 1));
+                        t.setMapForBullet(curMap->getMap());
+                        t.getBullet().setSpeed(8);
+                        t.setType(towerType);
+                        t.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);
 
-                    towers.push_back(t);
-                    MapHandle::setCmap(currentLevelIndex, *curMap, selectedTile.getRow(), selectedTile.getCol(), towerType + 3);
+                        towers.push_back(t);
+                        MapHandle::setCmap(currentLevelIndex, *curMap, selectedTile.getRow(), selectedTile.getCol(), towerType + 3);
+                    }
                 }
-
                 isChoosingTower = false;
                 return false;
             }
@@ -331,43 +335,45 @@ bool GameState::handleEvent(const sf::Event& event)
         // Handle tower upgrade button click
         if (showInfo && upgradeButton.getGlobalBounds().contains(mx, my)) {
             int tileC = selectedinfo;
-            if (tileC >= 3 && tileC <= 5) {
-                // Find current tower's position based on C value
-                int row = -1, col = -1;
-                for (int i = 0; i < cpoint::MAP_ROW && row == -1; ++i) {
-                    for (int j = 0; j < cpoint::MAP_COL; ++j) {
-                        if (curMap->getMap()[i][j].getC() == tileC) {
-                            row = i;
-                            col = j;
-                            break;
+            if (player.spendMoney(GameConstants::UPGRADE_COSTS[tileC - 3])) {
+                if (tileC >= 3 && tileC <= 5) {
+                    // Find current tower's position based on C value
+                    int row = -1, col = -1;
+                    for (int i = 0; i < cpoint::MAP_ROW && row == -1; ++i) {
+                        for (int j = 0; j < cpoint::MAP_COL; ++j) {
+                            if (curMap->getMap()[i][j].getC() == tileC) {
+                                row = i;
+                                col = j;
+                                break;
+                            }
                         }
                     }
-                }
 
-                // Get the designated tile and upgrade C value
-                td = MapHandle::getTowerdes(currentLevelIndex, row, col);
-                row = td.first;
-                col = td.second;
+                    // Get the designated tile and upgrade C value
+                    td = MapHandle::getTowerdes(currentLevelIndex, row, col);
+                    row = td.first;
+                    col = td.second;
 
-                if (row != -1 && col != -1) {
-                    int newC = tileC + 3;
-                    MapHandle::setCmap(currentLevelIndex, *curMap, row, col, newC); // Update map C value for upgraded tower
+                    if (row != -1 && col != -1) {
+                        int newC = tileC + 3;
+                        MapHandle::setCmap(currentLevelIndex, *curMap, row, col, newC); // Update map C value for upgraded tower
 
-                    // Update the tower's type and texture
-                    for (auto& t : towers) {
-                        if (t.getLocation().getRow() == row && t.getLocation().getCol() == col) {
-                            t.setType(newC - 3);
-                            t.init(*towerTexture[newC - 3],
-                                curMap->getMap()[row][col].getPixelX(),
-                                curMap->getMap()[row][col].getPixelY());
-                            break;
+                        // Update the tower's type and texture
+                        for (auto& t : towers) {
+                            if (t.getLocation().getRow() == row && t.getLocation().getCol() == col) {
+                                t.setType(newC - 3);
+                                t.init(*towerTexture[newC - 3],
+                                    curMap->getMap()[row][col].getPixelX(),
+                                    curMap->getMap()[row][col].getPixelY());
+                                break;
+                            }
                         }
                     }
-                }
 
-                showInfo = false;
-                selectedinfo = -1;
-                return false;
+                    showInfo = false;
+                    selectedinfo = -1;
+                    return false;
+                }
             }
         }
 
@@ -424,73 +430,109 @@ bool GameState::handleEvent(const sf::Event& event)
 
 bool GameState::update(sf::Time dt)
 {
-    // Retrieve mainTower position in pixels
-    cpoint towerTile = curMap->getMainTowerTile();
-    float towerX = curMap->getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
-    float towerY = curMap->getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
+    //Enemy update - modify tower damage logic
+    for (auto it = enemies.begin(); it != enemies.end(); ) {
+        cenemy& e = *it;
+        bool shouldErase = false;
 
-    // Enemy movement & Wave management
-    for (auto& e : enemies) {
-        if (!e.hasReachedEnd() && e.getCurrentTarget() < e.getPathLength() && e.getState() == WALK) {
+        cenemy& e0 = *enemies.begin();
+        // Handle dead enemies first
+        if (e.isDead()) {
 
-            float targetX = e.getP()[e.getCurrentTarget()].getPixelX();
-            float targetY = e.getP()[e.getCurrentTarget()].getPixelY();
-
-            float dx = targetX - e.getX();
-            float dy = targetY - e.getY();
-            float len = sqrt(dx * dx + dy * dy);
-
-            if (len < 1.f) {
-                e.incrementTarget();
-
-                if (e.getCurrentTarget() >= e.getPathLength()) {
-                    // Enemy automatically switches to ATTACK state when close to the main tower
-                    e.setPosition(targetX, targetY);
-                    e.triggerAttack(towerX, towerY);
-
-                    curMap->getMainTower().decreaseHealth();
-
-                    if (curMap->getMainTower().getHealth() <= 0) {
-                        isGameOver = true;
-                        isGameWin = false;
-                    }
+            if (e.getState() == DEATH) {
+                // Only give reward if not already given
+                if (!e.hasGivenReward()) {
+                    player.addMoney(e.getResources());
+                    e.markRewardGiven();
                 }
             }
 
-            else {
-                dx /= len;
-                dy /= len;
-
-                // Rotate enemies's sprite sheet when they turn left 
-                if (dx < -0.1f)
-                    e.faceLeft(e.getType());
-
-                else if (dx > 0.1f || dy < -0.1f)
-                    e.faceRight(e.getType());
-
-                e.move(dx * e.getSpeedByType(e.getType()) * dt.asSeconds(), dy * e.getSpeedByType(e.getType()) * dt.asSeconds());
+            if (e.getState() == DEATH && e.hasFinishedDeathAnim()) {
+                shouldErase = true;
             }
+
+            // Dead but still playing death animation - just update
+            else {
+                e.updateAnimation(dt.asSeconds());
+                ++it;
+                shouldErase = true;
+            }
+            continue;
         }
 
-        e.updateAnimation(dt.asSeconds());
+        // Handle living enemies
+        if (!e.hasReachedEnd()) {
+            if (e.getCurrentTarget() < e.getPathLength()) {
+                // Normal path following
+                float targetX = e.getP()[e.getCurrentTarget()].getPixelX();
+                float targetY = e.getP()[e.getCurrentTarget()].getPixelY();
 
-        if (e.isDead() && e.getState() == DEATH && e.hasFinishedDeathAnim() && !e.hasReachedEnd()) {
-            e.setPosition(-2000.f, -2000.f);
-            e.reachEnd();
+                float dx = targetX - e.getX();
+                float dy = targetY - e.getY();
+                float len = sqrt(dx * dx + dy * dy);
+
+                if (len < 1.f) {
+                    e.incrementTarget();
+
+                    // Check if reached final target
+                    if (e.getCurrentTarget() >= e.getPathLength()) {
+                        // If not already attacking, trigger attack
+                        if (e.getState() != ATTACK) {
+                            e.triggerAttack();
+                        }
+                        // Check if attack animation has finished
+                        e.hasFinishedAttackAnim();
+                        curMap->getMainTower().takeDamage(e.getDamage());
+                        e.reachEnd();
+                        shouldErase = true;
+                        
+                        // Check for game over
+                        if (curMap->getMainTower().isDestroyed()) {
+                            isGameOver = true;
+                            isGameWin = false;
+                        }
+                    }
+                }
+                else {
+                    // Normal movement
+                    dx /= len;
+                    dy /= len;
+
+                    // Rotate enemy sprite
+                    if (dx < -0.1f)
+                        e.faceLeft(e.getType());
+                    else if (dx > 0.1f || dy < -0.1f)
+                        e.faceRight(e.getType());
+
+                    e.move(dx * e.getSpeedByType(e.getType()) * dt.asSeconds(),
+                        dy * e.getSpeedByType(e.getType()) * dt.asSeconds());
+                }
+            }
+
+            // Update animation for living enemies
+            e.updateAnimation(dt.asSeconds());
         }
 
-        if (e.isDead() && e.getState() == ATTACK && e.hasFinishedAttackAnim() && !e.hasReachedEnd()) {
-            e.setPosition(-2000.f, -2000.f);
-            e.reachEnd();
+        // Erase enemy if marked, otherwise move to next
+        if (shouldErase) {
+            it = enemies.erase(it);
+        }
+        else {
+            ++it;
         }
 
-        // Remove enemy if dead AND death anim done OR has reached end
-        for (int i = enemies.size() - 1; i >= 0; --i)
-            if ((enemies[i].isDead() && enemies[i].getState() == DEATH && enemies[i].hasFinishedDeathAnim())
-                || enemies[i].getState() == ATTACK && enemies[i].hasFinishedAttackAnim()
-                || enemies[i].hasReachedEnd())
-                enemies.erase(enemies.begin() + i);
+        
     }
+            
+    // Clean up dead enemies and enemies that reached end
+    enemies.erase(
+        std::remove_if(enemies.begin(), enemies.end(),
+            [](const cenemy& e) {
+                return (e.isDead() && e.hasFinishedDeathAnim()) || e.hasReachedEnd();
+            }),
+        enemies.end()
+    );
+
 
     // The wave must be the last wave
     if (!isGameOver && !isGameWin && curMap->getMainTower().getHealth() > 0 && enemies.empty() && hasPressedPlay) {
@@ -620,7 +662,7 @@ bool GameState::update(sf::Time dt)
 
     // Update mainTower hp & gold
     hp.setString(to_string(curMap->getMainTower().getHealth()));
-    gold.setString(to_string(levels[currentLevelIndex].getStartGold()));
+    gold.setString(to_string(player.getMoney()));
     wave.setString(to_string(levels[currentLevelIndex].getCurrentWaveIndex() + 1) + "/" + to_string(levels[currentLevelIndex].getWaveCount()));
 
     return true;
@@ -639,15 +681,18 @@ void GameState::loadLevel(int index) {
     ce.findPath(curMap->getMap(), ce.getStart(), ce.getEnd());
 
     // Load map data & texture & mainTowerMaxHealth for the current level
-    mainTowerMaxHealth = curMap->getMainTower().getHealth();
-    backgroundSprite.setTexture(*backgroundTexture[currentLevelIndex]);
+
     levels[currentLevelIndex].loadMap(mainTowerTexture, backgroundTexture[index], currentLevelIndex + 1);
+    backgroundSprite.setTexture(*backgroundTexture[currentLevelIndex]);
     window.setSize(backgroundTexture[currentLevelIndex]->getSize());
 
     // Load powerStation effect for this level
     const Texture& powerStationTex = getContext().textures->get(Textures::powerStation);
     string powerStationFiles = "Media/Text files/powerStation_map" + to_string(currentLevelIndex + 1) + ".txt";
     curMap->loadPowerStationsFromFile(powerStationTex, powerStationFiles, 92, 92, 0.03f);
+
+    // Apply the position to the tower sprite
+    curMap->getMainTower().getPosition();
 
     // Reset enemy, tower, bullet...
     enemies.clear();
@@ -679,7 +724,7 @@ void GameState::loadLevel(int index) {
     gold.setCharacterSize(30);
     gold.setFillColor(Color::White);
     gold.setPosition(410.f, 60.f);
-    gold.setString(to_string(levels[currentLevelIndex].getStartGold()));
+    gold.setString(to_string(player.getMoney()));
     centerOrigin(gold);
 
     // Set up text to display current wave index

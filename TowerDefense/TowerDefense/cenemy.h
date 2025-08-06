@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include "cpoint.h"
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
 using namespace sf;
 
-// Add
 enum EnemyState { WALK, ATTACK, DEATH };
 enum EnemyType { FAST_SCOUT = 0, RANGED_MECH = 1, HEAVY_WALKER = 2 };
 
@@ -47,7 +47,7 @@ private:
     float _posX, _posY;
     bool _reachedEnd;
 
-    // Add frame data
+    // Frame data
     Sprite _sprite;
     IntRect _frameRect;
     int _frameWidth, _frameHeight;
@@ -65,13 +65,11 @@ private:
     float _walkSpeed, _attackSpeed, _deathSpeed;
     float _walkFrameWidth, _walkFrameHeight, _attackFrameWidth, _attackFrameHeight, _deathFrameWidth, _deathFrameHeight;
 
-    // Add animation
+    // Animation
     EnemyState _state;
     bool _isDead;
     bool _isAttack;
-    float _attackTimer = 0.f;
-    float _attackCooldown = 1.f;
-    bool mRewardGiven; //add flag
+    bool mRewardGiven;
 
 public:
     cenemy();

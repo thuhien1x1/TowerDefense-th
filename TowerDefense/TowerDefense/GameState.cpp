@@ -447,9 +447,8 @@ bool GameState::update(sf::Time dt)
                 }
             }
 
-            if (e.getState() == DEATH && e.hasFinishedDeathAnim()) {
+            if (e.getState() == DEATH && e.hasFinishedDeathAnim())
                 shouldErase = true;
-            }
 
             // Dead but still playing death animation - just update
             else {
@@ -477,16 +476,18 @@ bool GameState::update(sf::Time dt)
                     // Check if reached final target
                     if (e.getCurrentTarget() >= e.getPathLength()) {
                         // If not already attacking, trigger attack
-                        if (e.getState() != ATTACK) {
+                        if (e.getState() != ATTACK)
                             e.triggerAttack();
-                        }
+
                         // Check if attack animation has finished
-                        e.hasFinishedAttackAnim();
+                        if (e.hasFinishedAttackAnim()) {
+                            e.reachEnd();
+                            shouldErase = true;
+                            std::cout << "State: " << e.getState() << ", isAttackDone: " << e.hasFinishedAttackAnim() << "\n";
+                        }
+
                         curMap->getMainTower().takeDamage(e.getDamage());
-                        e.reachEnd();
-                        shouldErase = true;
-                        
-                        // Check for game over
+
                         if (curMap->getMainTower().isDestroyed()) {
                             isGameOver = true;
                             isGameWin = false;
@@ -514,21 +515,19 @@ bool GameState::update(sf::Time dt)
         }
 
         // Erase enemy if marked, otherwise move to next
-        if (shouldErase) {
+        if (shouldErase)
             it = enemies.erase(it);
-        }
-        else {
+        else
             ++it;
-        }
-
-        
     }
-            
+
     // Clean up dead enemies and enemies that reached end
     enemies.erase(
-        std::remove_if(enemies.begin(), enemies.end(),
+        remove_if(enemies.begin(), enemies.end(),
             [](const cenemy& e) {
-                return (e.isDead() && e.hasFinishedDeathAnim()) || e.hasReachedEnd();
+                return (e.isDead() && e.hasFinishedDeathAnim())
+                    || e.hasFinishedAttackAnim()
+                    || e.hasReachedEnd();
             }),
         enemies.end()
     );
@@ -705,11 +704,6 @@ void GameState::loadLevel(int index) {
     hasPressedPlay = false; // Reset play state for new level
     waveIndex = 0;
     levels[currentLevelIndex].resetWave(); // Start from wave 0
-
-    /*
-    // Set up start gold of each level for player
-    p.setGold(levels[currentLevelIndex].getStartGold());
-    */
 
     // Set up text to display main tower hp (demo)
     hp.setFont(font);

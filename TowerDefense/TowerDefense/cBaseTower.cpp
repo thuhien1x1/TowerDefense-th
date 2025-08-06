@@ -4,7 +4,7 @@
 #include <iostream>
 
 cBaseTower::cBaseTower() :
-    maxHealth(1000),
+    maxHealth(20),
     currentHealth(maxHealth),
     mRecentlyDamaged(false),
     position(0, 0, 0)
@@ -23,6 +23,7 @@ void cBaseTower::setTexture(const sf::Texture& texture) {
         sprite.getLocalBounds().width / 2,
         sprite.getLocalBounds().height / 2
     );
+    sprite.setScale(1.8f, 1.8f);
 }
 
 void cBaseTower::setPosition(int row, int col) {
@@ -35,6 +36,11 @@ void cBaseTower::setPixelPosition(float x, float y) {
     updateSpritePosition();
 }
 
+void cBaseTower::setMaxHealh(int hp)
+{
+    maxHealth = hp;
+}
+
 void cBaseTower::updateSpritePosition() {
     float pixelX = position.getPixelX();
     float pixelY = position.getPixelY();
@@ -44,7 +50,7 @@ void cBaseTower::updateSpritePosition() {
     // Position health bar above the tower
     healthBarBackground.setPosition(
         pixelX - healthBarBackground.getSize().x / 2 - 20.f,
-        pixelY - 100.f  // Offset above the tower
+        pixelY - 170.f // Offset above the tower
     );
     healthBarFill.setPosition(
         healthBarBackground.getPosition().x,

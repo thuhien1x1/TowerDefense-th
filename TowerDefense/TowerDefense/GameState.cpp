@@ -47,10 +47,6 @@ GameState::GameState(StateStack& stack, Context context)
     towerChoosingButtons[2].setTexture(context.textures->get(Textures::tower3Button));
     towerChoosingCircle.setTexture(context.textures->get(Textures::circle));
 
-    // Set up for info tower
-    for (int i = 0; i < 6; ++i)
-        infoSprite[i].setTexture(*infoTexture[i]);
-
     // Load Bullet textures
     bulletTexture[0] = &getContext().textures->get(Textures::Bomb);
     bulletTexture[1] = &getContext().textures->get(Textures::Bullet2);
@@ -60,6 +56,10 @@ GameState::GameState(StateStack& stack, Context context)
     bulletTexture[5] = &getContext().textures->get(Textures::Bullet3);
     shootEffectTexture = &getContext().textures->get(Textures::ShootEffect);
     font = getContext().fonts->get(Fonts::BruceForever);
+
+    // Load info tower texture
+    for (int i = 0; i < 6; ++i)
+        infoSprite[i].setTexture(*infoTexture[i]);
 
     // Load Upgrade
     upgradeButton.setTexture(context.textures->get(Textures::upgradeButton));
@@ -71,14 +71,26 @@ GameState::GameState(StateStack& stack, Context context)
 
     commingWave.setTexture(context.textures->get(Textures::commingWave));
     if (currentLevelIndex == 3)
-        commingWave.setPosition(60.f, 690.f);
+        commingWave.setPosition(60.f, 700.f);
     else
-        commingWave.setPosition(60.f, 770.f);
+        commingWave.setPosition(60.f, 780.f);
     centerOrigin(commingWave);
+
+    heartIcon.setTexture(context.textures->get(Textures::heartIcon));
+    heartIcon.setPosition(140.f, 60.f);
+    centerOrigin(heartIcon);
+
+    currencyIcon.setTexture(context.textures->get(Textures::currencyIcon));
+    currencyIcon.setPosition(380.f, 60.f);
+    centerOrigin(currencyIcon);
+
+    waveIcon.setTexture(context.textures->get(Textures::waveIcon));
+    waveIcon.setPosition(140.f, 130.f);
+    centerOrigin(waveIcon);
 
     // Initialize 4 levels (levelID, enemyCount, waveCount, towerMaxCount, startGold) 
     clevel level1(1, 45, 3, 5, 200);
-    level1.setWaves({ {FAST_SCOUT, 20}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1} }); // 10, 15, 20
+    level1.setWaves({ {FAST_SCOUT, 10}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1} }); // 10, 15, 20
     level1.loadMap(mainTowerTexture, backgroundTexture[0], 1);
 
     clevel level2(2, 65, 3, 6, 400);
@@ -150,39 +162,28 @@ void GameState::draw()
     window.draw(curMap->getMainTower().getSprite());
     curMap->getMainTower().drawHealthBar(window);
 
-    window.draw(hpText);
+    window.draw(heartIcon);
+    window.draw(currencyIcon);
+    window.draw(waveIcon);
+
+    window.draw(hp);
     window.draw(gold);
-
-    Text levelInfo("LEVEL: " + to_string(currentLevelIndex + 1), font, 20);
-    levelInfo.setFillColor(Color::Black);
-    levelInfo.setPosition(10.f, 80.f);
-    window.draw(levelInfo);
-
-    clevel& level = levels[currentLevelIndex];
-    Text waveText("WAVE: " + to_string(level.getCurrentWaveIndex() + 1) + "/" + to_string(level.getWaveCount()), font, 20);
-    waveText.setFillColor(Color::Black);
-    waveText.setPosition(10.f, 110.f);
-    window.draw(waveText);
+    window.draw(wave);
 
     if (!hasPressedPlay && !isGameOver && !isGameWin) {
         if (commingWave.getGlobalBounds().contains(mousePos))
-            commingWave.setScale(0.15f, 0.15f);
+            commingWave.setScale(0.5f, 0.5f);
         else
-            commingWave.setScale(0.1f, 0.1f);
+            commingWave.setScale(0.4f, 0.4f);
         window.draw(commingWave);
     }
 
-    // Pause button
     if (pauseButton.getGlobalBounds().contains(mousePos))
         pauseButton.setScale(1.1f, 1.1f);
     else
         pauseButton.setScale(1.f, 1.f);
     window.draw(pauseButton);
 
-    for (const auto& tower : towers)
-        window.draw(tower.getSprite());
-
-    // Enemy's hp bar
     for (const auto& e : enemies) {
         if (!e.hasReachedEnd() || e.getState() == DEATH) {
 
@@ -214,14 +215,15 @@ void GameState::draw()
     }
 
     for (const auto& tower : towers)
+        window.draw(tower.getSprite());
+
+    for (const auto& tower : towers)
         if (tower.isEffectPlaying())
             window.draw(tower.getEffectSprite());
 
     for (int i = 0; i < bullets.size(); ++i) {
-        if (!bullets[i].isActive()) continue;
-
-        if (bullets[i].isLaserBullet())
-            window.draw(bullets[i].getLaserSprite());
+        if (!bullets[i].isActive())
+            continue;
         else
             window.draw(bullets[i].getSprite());
     }
@@ -295,6 +297,14 @@ bool GameState::handleEvent(const sf::Event& event)
             else if (towerChoosingButtons[2].getGlobalBounds().contains(mx, my)) {
                 clickedButton = &towerChoosingButtons[2];
                 towerType = 2;
+            }
+
+            if (!towerChoosingButtons[0].getGlobalBounds().contains(mx, my) &&
+                !towerChoosingButtons[1].getGlobalBounds().contains(mx, my) &&
+                !towerChoosingButtons[2].getGlobalBounds().contains(mx, my))
+            {
+                isChoosingTower = false;
+                return false;
             }
 
             if (clickedButton && towerType != -1) {
@@ -432,7 +442,6 @@ bool GameState::update(sf::Time dt)
             if (e.getState() == DEATH) {
                 // Only give reward if not already given
                 if (!e.hasGivenReward()) {
-                    cout << "Give reward: " << e.getResources() << endl;
                     player.addMoney(e.getResources());
                     e.markRewardGiven();
                 }
@@ -467,11 +476,16 @@ bool GameState::update(sf::Time dt)
 
                     // Check if reached final target
                     if (e.getCurrentTarget() >= e.getPathLength()) {
-                        // Damage tower and mark for removal
+                        // If not already attacking, trigger attack
+                        if (e.getState() != ATTACK) {
+                            e.triggerAttack();
+                        }
+                        // Check if attack animation has finished
+                        e.hasFinishedAttackAnim();
                         curMap->getMainTower().takeDamage(e.getDamage());
                         e.reachEnd();
                         shouldErase = true;
-
+                        
                         // Check for game over
                         if (curMap->getMainTower().isDestroyed()) {
                             isGameOver = true;
@@ -506,8 +520,10 @@ bool GameState::update(sf::Time dt)
         else {
             ++it;
         }
-    }
 
+        
+    }
+            
     // Clean up dead enemies and enemies that reached end
     enemies.erase(
         std::remove_if(enemies.begin(), enemies.end(),
@@ -516,6 +532,7 @@ bool GameState::update(sf::Time dt)
             }),
         enemies.end()
     );
+
 
     // The wave must be the last wave
     if (!isGameOver && !isGameWin && curMap->getMainTower().getHealth() > 0 && enemies.empty() && hasPressedPlay) {
@@ -607,7 +624,7 @@ bool GameState::update(sf::Time dt)
             Vector2f enemyPos(enemies[enemyIdx].getX(), enemies[enemyIdx].getY());
 
             cbullet laser;
-            laser.initLaser(laserTexture, towerPos.x, towerPos.y, enemyPos.x, enemyPos.y, 0.2f);
+            laser.initLaser(*bulletTexture[5], towerPos.x, towerPos.y, enemyPos.x, enemyPos.y, 0.2f);
             laser.setTargetIdx(enemyIdx);
             laser.setDamage(1);
 
@@ -618,42 +635,21 @@ bool GameState::update(sf::Time dt)
     // Bullet logic: track and hit enemies
     for (auto& b : bullets) {
         if (!b.isActive()) continue;
+        int idx = b.getTargetIdx();
 
-        if (b.isLaserBullet()) {
-            b.updateLaser(dt.asSeconds());
-
-            int idx = b.getTargetIdx();
-            if (idx >= 0 && idx < enemies.size() && !enemies[idx].isDead() && !enemies[idx].hasReachedEnd()) {
-                enemies[idx].takeDamage(b.getDamage());
-
-                if (enemies[idx].isDead()) {
-                    enemies[idx].setPosition(-100.f, -100.f);
-                    enemies[idx].reachEnd();
-                }
-            }
+        if (idx < 0 || idx >= enemies.size() || enemies[idx].hasReachedEnd() || enemies[idx].isDead()) {
+            b.deactivate();
+            continue;
         }
+
+        if (b.checkCollision(enemies[idx])) {
+            b.deactivate();
+            enemies[idx].takeDamage(b.getDamage());
+        }
+
         else {
-            int idx = b.getTargetIdx();
-            if (idx < 0 || idx >= enemies.size() || enemies[idx].hasReachedEnd() || enemies[idx].isDead()) {
-                b.deactivate();
-                continue;
-            }
-
-            if (b.checkCollision(enemies[idx])) {
-                b.deactivate();
-                enemies[idx].takeDamage(b.getDamage());
-    
-                // Add collision effect
-                /*float impactX = (b.getSprite().getPosition().x + enemies[idx].getX()) / 2.f;
-                float impactY = (b.getSprite().getPosition().y + enemies[idx].getY()) / 2.f;
-
-                cimpact impact(impactTexture, impactX, impactY, 500, 360, 8, 0.02f);
-                impacts.push_back(impact);*/
-            }
-            else {
-                b.trackEnemy(enemies[idx], dt.asSeconds());
-                b.updateAnimation(dt.asSeconds());
-            }
+            b.trackEnemy(enemies[idx], dt.asSeconds());
+            b.updateAnimation(dt.asSeconds());
         }
 
     }
@@ -665,9 +661,9 @@ bool GameState::update(sf::Time dt)
     bullets.erase(remove_if(bullets.begin(), bullets.end(), [](cbullet& b) { return !b.isActive(); }), bullets.end());
 
     // Update mainTower hp & gold
-    hpText.setString("MAIN TOWER HP: " + to_string(curMap->getMainTower().getHealth())
-        + "/" + to_string(curMap->getMainTower().getMaxHealth()));
-    gold.setString("GOLD: " + to_string(player.getMoney()));
+    hp.setString(to_string(curMap->getMainTower().getHealth()));
+    gold.setString(to_string(player.getMoney()));
+    wave.setString(to_string(levels[currentLevelIndex].getCurrentWaveIndex() + 1) + "/" + to_string(levels[currentLevelIndex].getWaveCount()));
 
     return true;
 }
@@ -716,18 +712,28 @@ void GameState::loadLevel(int index) {
     */
 
     // Set up text to display main tower hp (demo)
-    hpText.setFont(font);
-    hpText.setCharacterSize(20);
-    hpText.setFillColor(Color::Green);
-    hpText.setPosition(10.f, 10.f);
-    hpText.setString("MAIN TOWER HP: " + to_string(curMap->getMainTower().getHealth()));
+    hp.setFont(font);
+    hp.setCharacterSize(30);
+    hp.setFillColor(Color::White);
+    hp.setPosition(160.f, 60.f);
+    hp.setString(to_string(curMap->getMainTower().getHealth()));
+    centerOrigin(hp);
 
     // Set up text to display gold (demo)
     gold.setFont(font);
-    gold.setCharacterSize(20);
-    gold.setFillColor(Color::Yellow);
-    gold.setPosition(10.f, 50.f);
-    gold.setString("GOLD: " + to_string(levels[currentLevelIndex].getStartGold()));
+    gold.setCharacterSize(30);
+    gold.setFillColor(Color::White);
+    gold.setPosition(410.f, 60.f);
+    gold.setString(to_string(player.getMoney()));
+    centerOrigin(gold);
+
+    // Set up text to display current wave index
+    wave.setFont(font);
+    wave.setCharacterSize(30);
+    wave.setString(to_string(levels[currentLevelIndex].getCurrentWaveIndex() + 1) + "/" + to_string(levels[currentLevelIndex].getWaveCount()));
+    wave.setFillColor(Color::White);
+    wave.setPosition(160.f, 130.f);
+    centerOrigin(wave);
 
     MapHandle::initTowerButtonData();
 }

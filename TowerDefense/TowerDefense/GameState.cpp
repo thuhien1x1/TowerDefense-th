@@ -64,6 +64,13 @@ GameState::GameState(StateStack& stack, Context context)
     // Load Upgrade
     upgradeButton.setTexture(context.textures->get(Textures::upgradeButton));
 
+    // Load Construction Icon
+    for (int i = 0; i < 7; ++i) {
+        constructionicons[i].setTexture(context.textures->get(Textures::constructionicon));
+        // set bool
+        towerconstructed[i] = false;
+    }
+
     // Load UI texture 
     pauseButton.setTexture(context.textures->get(Textures::pauseButton));
     pauseButton.setPosition(1880.f, 50.f);
@@ -228,6 +235,17 @@ void GameState::draw()
             window.draw(bullets[i].getSprite());
     }
 
+    // Draw Construction Icons
+    int numbericons;
+    if (currentLevelIndex == 0) numbericons = 5;
+    else if (currentLevelIndex == 3) numbericons = 7;
+    else numbericons = 6;
+    for (int i = 0; i < numbericons; ++i) {
+        if (towerconstructed[i] == false) {
+            window.draw(constructionicons[i]);
+        }
+    }
+
     // Draw choosingTowerButton
     if (isChoosingTower) {
         window.draw(towerChoosingCircle);
@@ -248,7 +266,6 @@ void GameState::draw()
             window.draw(upgradeButton);
     }
 }
-
 bool GameState::handleEvent(const sf::Event& event)
 {
     RenderWindow& window = *getContext().window;
@@ -299,81 +316,63 @@ bool GameState::handleEvent(const sf::Event& event)
                 towerType = 2;
             }
 
-            if (!towerChoosingButtons[0].getGlobalBounds().contains(mx, my) &&
-                !towerChoosingButtons[1].getGlobalBounds().contains(mx, my) &&
-                !towerChoosingButtons[2].getGlobalBounds().contains(mx, my))
-            {
-                isChoosingTower = false;
-                return false;
-            }
-
             if (clickedButton && towerType != -1) {
-                // Check if player can afford this tower
-                if (player.spendMoney(GameConstants::TOWER_COSTS[towerType])) {
-                    if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
-                        ctower t;
-                        auto td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
+                if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
+                    ctower t;
+                    td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
 
-                        t.init(*towerTexture[towerType],
-                            curMap->getMap()[td.first][td.second].getPixelX(),
-                            curMap->getMap()[td.first][td.second].getPixelY());
-                        t.setLocation(cpoint(td.first, td.second, 1));
-                        t.setMapForBullet(curMap->getMap());
-                        t.getBullet().setSpeed(8);
-                        t.setType(towerType);
-                        t.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);
+                    t.init(*towerTexture[towerType],
+                        curMap->getMap()[td.first][td.second].getPixelX(),
+                        curMap->getMap()[td.first][td.second].getPixelY());
+                    t.setLocation(cpoint(td.first, td.second, 1));
+                    t.setMapForBullet(curMap->getMap());
+                    t.getBullet().setSpeed(8);
+                    t.setType(towerType);
+                    t.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);
+                    int index = MapHandle::findBlockmap(currentLevelIndex, td.first, td.second);
+                    towerconstructed[index] = true;
 
-                        towers.push_back(t);
-                        MapHandle::setCmap(currentLevelIndex, *curMap, selectedTile.getRow(), selectedTile.getCol(), towerType + 3);
-                    }
+                    towers.push_back(t);
+                    MapHandle::setCmap(currentLevelIndex, *curMap, selectedTile.getRow(), selectedTile.getCol(), towerType + 3);
                 }
+
                 isChoosingTower = false;
                 return false;
             }
+            isChoosingTower = false;
+            return false;
         }
 
         // Handle tower upgrade button click
         if (showInfo && upgradeButton.getGlobalBounds().contains(mx, my)) {
             int tileC = selectedinfo;
-            if (player.spendMoney(GameConstants::UPGRADE_COSTS[tileC - 3])) {
-                if (tileC >= 3 && tileC <= 5) {
-                    // Find current tower's position based on C value
-                    int row = -1, col = -1;
-                    for (int i = 0; i < cpoint::MAP_ROW && row == -1; ++i) {
-                        for (int j = 0; j < cpoint::MAP_COL; ++j) {
-                            if (curMap->getMap()[i][j].getC() == tileC) {
-                                row = i;
-                                col = j;
-                                break;
-                            }
+            if (tileC >= 3 && tileC <= 5) {
+                // Get the designated tile and upgrade C value
+                int row = -1, col = -1;
+                td = MapHandle::getTowerdes(currentLevelIndex, selectedRow, selectedCol);
+                row = td.first;
+                col = td.second;
+                if (row != -1 && col != -1) {
+                    int newC = tileC + 3;
+                    MapHandle::setCmap(currentLevelIndex, *curMap, row, col, newC);
+
+
+                    // Update map C value for upgraded tower
+                // Update the tower's type and texture
+                    for (auto& t : towers) {
+                        if (t.getLocation().getRow() == row && t.getLocation().getCol() == col) {
+                            t.setType(newC - 3);
+                            t.init(*towerTexture[newC - 3],
+                                curMap->getMap()[row][col].getPixelX(),
+                                curMap->getMap()[row][col].getPixelY());
+                            break;
                         }
                     }
-
-                    // Get the designated tile and upgrade C value
-                    td = MapHandle::getTowerdes(currentLevelIndex, row, col);
-                    row = td.first;
-                    col = td.second;
-
-                    if (row != -1 && col != -1) {
-                        int newC = tileC + 3;
-                        MapHandle::setCmap(currentLevelIndex, *curMap, row, col, newC); // Update map C value for upgraded tower
-
-                        // Update the tower's type and texture
-                        for (auto& t : towers) {
-                            if (t.getLocation().getRow() == row && t.getLocation().getCol() == col) {
-                                t.setType(newC - 3);
-                                t.init(*towerTexture[newC - 3],
-                                    curMap->getMap()[row][col].getPixelX(),
-                                    curMap->getMap()[row][col].getPixelY());
-                                break;
-                            }
-                        }
-                    }
-
-                    showInfo = false;
-                    selectedinfo = -1;
-                    return false;
                 }
+
+                showInfo = false;
+                selectedinfo = -1;
+                return false;
             }
         }
 
@@ -402,6 +401,9 @@ bool GameState::handleEvent(const sf::Event& event)
             // If clicked on a tile that already has a tower (C >= 3)
             else if (c >= 3) {
                 selectedinfo = c;
+                selectedRow = clicked.getRow();
+                selectedCol = clicked.getCol();
+
 
                 // Get fixed display tile for showing info panel
                 pair<int, int> fixed = MapHandle::getTowerdes(currentLevelIndex, clicked.getRow(), clicked.getCol());
@@ -414,6 +416,7 @@ bool GameState::handleEvent(const sf::Event& event)
                     upgradeButton.setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 5.5f * cpoint::TILE_SIZE);
                 }
 
+
                 showInfo = true;
                 return false;
             }
@@ -425,11 +428,13 @@ bool GameState::handleEvent(const sf::Event& event)
 
         return true;
     }
-
 }
 
 bool GameState::update(sf::Time dt)
 {
+    // Set Icons
+    MapHandle::setIconsmap(currentLevelIndex, constructionicons);
+
     //Enemy update - modify tower damage logic
     for (auto it = enemies.begin(); it != enemies.end(); ) {
         cenemy& e = *it;

@@ -22,9 +22,19 @@ public:
     static pair <int, int> getTowerdes2(int a, int b);
     static pair <int, int> getTowerdes3(int a, int b);
     static pair <int, int> getTowerdes4(int a, int b);
+    static void setIconsmap1(Sprite* icon);
+    static void setIconsmap2(Sprite* icon);
+    static void setIconsmap3(Sprite* icon);
+    static void setIconsmap4(Sprite* icon);
+    static int findBlockmap1(int a, int b);
+    static int findBlockmap2(int a, int b);
+    static int findBlockmap3(int a, int b);
+    static int findBlockmap4(int a, int b);
 
     static void setCmap(int index, cmap& map, int a, int b, int C);
     static pair <int, int> getTowerdes(int index, int a, int b);
+    static void setIconsmap(int index, Sprite* icon);
+    static int findBlockmap(int index, int a, int b);
 
     static void initTowerButtonData();
     static vector<Vector2f> getTowerButtons(int levelIndex, int row, int col);

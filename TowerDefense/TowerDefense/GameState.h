@@ -75,6 +75,10 @@ private:
     Sprite waveIcon;
     Sprite currencyIcon;
 
+    // Construction Icons
+    Sprite constructionicons[7];
+    bool towerconstructed[7];
+
     // Tower Infos
     Texture* infoTexture[6];
     Sprite infoSprite[6];
@@ -86,4 +90,8 @@ private:
     cpoint selectedTile;  // cliked pixel
     // Player for money
     Player player;
+
+    // Upgrade Assistance
+    int selectedRow;
+    int selectedCol;
 };

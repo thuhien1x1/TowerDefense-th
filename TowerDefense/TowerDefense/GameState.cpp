@@ -9,7 +9,6 @@ GameState::GameState(StateStack& stack, Context context)
     TOWER_RANGE(300.f),
     currentLevelIndex(MapSelectionState::levelID),
     waveIndex(0),
-    mainTowerMaxHealth(0),
     levels(),
     isGameOver(false),
     isGameWin(false),
@@ -317,44 +316,46 @@ bool GameState::handleEvent(const sf::Event& event)
             }
 
             if (clickedButton && towerType != -1) {
-                if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
-                    ctower t;
-                    td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
+                if (player.spendMoney(GameConstants::TOWER_COSTS[towerType])) {
+                    if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
+                        ctower t;
+                        td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
 
-                    t.init(*towerTexture[towerType],
-                        curMap->getMap()[td.first][td.second].getPixelX(),
-                        curMap->getMap()[td.first][td.second].getPixelY());
-                    t.setLocation(cpoint(td.first, td.second, 1));
-                    t.setMapForBullet(curMap->getMap());
-                    t.getBullet().setSpeed(8);
-                    t.setType(towerType);
-                    t.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);
-                    int index = MapHandle::findBlockmap(currentLevelIndex, td.first, td.second);
-                    towerconstructed[index] = true;
+                        t.init(*towerTexture[towerType],
+                            curMap->getMap()[td.first][td.second].getPixelX(),
+                            curMap->getMap()[td.first][td.second].getPixelY());
+                        t.setLocation(cpoint(td.first, td.second, 1));
+                        t.setMapForBullet(curMap->getMap());
+                        t.getBullet().setSpeed(8);
+                        t.setType(towerType);
+                        t.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);
+                        int index = MapHandle::findBlockmap(currentLevelIndex, td.first, td.second);
+                        towerconstructed[index] = true;
 
-                    towers.push_back(t);
-                    MapHandle::setCmap(currentLevelIndex, *curMap, selectedTile.getRow(), selectedTile.getCol(), towerType + 3);
+                        towers.push_back(t);
+                        MapHandle::setCmap(currentLevelIndex, *curMap, selectedTile.getRow(), selectedTile.getCol(), towerType + 3);
 
-                    // NEW FEATURE: save when new tower placed
-                    int tCurLevel = currentLevelIndex;
-                    SaveManagement::playerResult[tCurLevel].status = -1; // not finished
-                    SaveManagement::playerResult[tCurLevel].stars = 0;
-                    SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
-                    SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
-                    SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
-                    SaveManagement::playerResult[tCurLevel].towers.clear();
-                    for (int i = 0; i < towers.size(); i++)
-                    {
-                        ctower tempTower;
-                        tempTower.setType(towers[i].getType());
-                        tempTower.setLocation(towers[i].getLocation());
-                        SaveManagement::playerResult[tCurLevel].towers.push_back(tempTower);
+                        // NEW FEATURE: save when new tower placed
+                        int tCurLevel = currentLevelIndex;
+                        SaveManagement::playerResult[tCurLevel].status = -1; // not finished
+                        SaveManagement::playerResult[tCurLevel].stars = 0;
+                        SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
+                        SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
+                        SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
+                        SaveManagement::playerResult[tCurLevel].towers.clear();
+                        for (int i = 0; i < towers.size(); i++)
+                        {
+                            ctower tempTower;
+                            tempTower.setType(towers[i].getType());
+                            tempTower.setLocation(towers[i].getLocation());
+                            SaveManagement::playerResult[tCurLevel].towers.push_back(tempTower);
+                        }
+                        SaveManagement::save(SaveManagement::playerName);
                     }
-                    SaveManagement::save(SaveManagement::playerName);
-                }
 
-                isChoosingTower = false;
-                return false;
+                    isChoosingTower = false;
+                    return false;
+                }
             }
             isChoosingTower = false;
             return false;
@@ -364,50 +365,52 @@ bool GameState::handleEvent(const sf::Event& event)
         if (showInfo && upgradeButton.getGlobalBounds().contains(mx, my)) {
             int tileC = selectedinfo;
             if (tileC >= 3 && tileC <= 5) {
-                // Get the designated tile and upgrade C value
-                int row = -1, col = -1;
-                td = MapHandle::getTowerdes(currentLevelIndex, selectedRow, selectedCol);
-                row = td.first;
-                col = td.second;
-                if (row != -1 && col != -1) {
-                    int newC = tileC + 3;
-                    MapHandle::setCmap(currentLevelIndex, *curMap, row, col, newC);
+                if (player.spendMoney(GameConstants::UPGRADE_COSTS[tileC - 3])) {
+                    // Get the designated tile and upgrade C value
+                    int row = -1, col = -1;
+                    td = MapHandle::getTowerdes(currentLevelIndex, selectedRow, selectedCol);
+                    row = td.first;
+                    col = td.second;
+                    if (row != -1 && col != -1) {
+                        int newC = tileC + 3;
+                        MapHandle::setCmap(currentLevelIndex, *curMap, row, col, newC);
 
 
-                    // Update map C value for upgraded tower
-                // Update the tower's type and texture
-                    for (auto& t : towers) {
-                        if (t.getLocation().getRow() == row && t.getLocation().getCol() == col) {
-                            t.setType(newC - 3);
-                            t.init(*towerTexture[newC - 3],
-                                curMap->getMap()[row][col].getPixelX(),
-                                curMap->getMap()[row][col].getPixelY());
+                        // Update map C value for upgraded tower
+                        // Update the tower's type and texture
+                        for (auto& t : towers) {
+                            if (t.getLocation().getRow() == row && t.getLocation().getCol() == col) {
+                                t.setType(newC - 3);
+                                t.init(*towerTexture[newC - 3],
+                                    curMap->getMap()[row][col].getPixelX(),
+                                    curMap->getMap()[row][col].getPixelY());
 
-                            // NEW FEATURE: save when a tower upgraded
-                            int tCurLevel = currentLevelIndex;
-                            SaveManagement::playerResult[tCurLevel].status = -1; // not finished
-                            SaveManagement::playerResult[tCurLevel].stars = 0;
-                            SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
-                            SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
-                            SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
-                            SaveManagement::playerResult[tCurLevel].towers.clear();
-                            for (int i = 0; i < towers.size(); i++)
-                            {
-                                ctower tempTower;
-                                tempTower.setType(towers[i].getType());
-                                tempTower.setLocation(towers[i].getLocation());
-                                SaveManagement::playerResult[tCurLevel].towers.push_back(tempTower);
+                                // NEW FEATURE: save when a tower upgraded
+                                int tCurLevel = currentLevelIndex;
+                                SaveManagement::playerResult[tCurLevel].status = -1; // not finished
+                                SaveManagement::playerResult[tCurLevel].stars = 0;
+                                SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
+                                SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
+                                SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
+                                SaveManagement::playerResult[tCurLevel].towers.clear();
+                                for (int i = 0; i < towers.size(); i++)
+                                {
+                                    ctower tempTower;
+                                    tempTower.setType(towers[i].getType());
+                                    tempTower.setLocation(towers[i].getLocation());
+                                    SaveManagement::playerResult[tCurLevel].towers.push_back(tempTower);
+                                }
+                                SaveManagement::save(SaveManagement::playerName);
+
+                                break;
                             }
-                            SaveManagement::save(SaveManagement::playerName);
-
-                            break;
                         }
                     }
-                }
 
-                showInfo = false;
-                selectedinfo = -1;
-                return false;
+                    showInfo = false;
+                    selectedinfo = -1;
+                    return false;
+                }
             }
         }
 
@@ -625,7 +628,7 @@ bool GameState::update(sf::Time dt)
         int tCurLevel = currentLevelIndex;
         SaveManagement::playerResult[tCurLevel].status = 1; // game done
         SaveManagement::playerResult[tCurLevel].stars = calStars();
-        SaveManagement::playerResult[tCurLevel].health = mainTowerMaxHealth;
+        SaveManagement::playerResult[tCurLevel].health = curMap->getMainTower().getMaxHealth();
         SaveManagement::playerResult[tCurLevel].curWave = 0;
         SaveManagement::playerResult[tCurLevel].curGold = levels[currentLevelIndex].getStartGold();
         SaveManagement::playerResult[tCurLevel].towers.clear();
@@ -870,7 +873,8 @@ void GameState::spawnEnemies() {
 
 int GameState::calStars() {
     int curHealth = curMap->getMainTower().getHealth();
-    float healthRatio = static_cast<float>(curHealth) / mainTowerMaxHealth;
+    int maxHealth = curMap->getMainTower().getMaxHealth();
+    float healthRatio = static_cast<float>(curHealth) / maxHealth;
 
     // If gameWin()
     // If currentMainTowerHealth >= 80% mainTowerMaxHealth -> 3 stars

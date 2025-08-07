@@ -50,7 +50,6 @@ private:
     cmap* curMap;
     int currentLevelIndex;
     int waveIndex;
-    int mainTowerMaxHealth;
     float TOWER_RANGE;
 
     bool isGameOver;

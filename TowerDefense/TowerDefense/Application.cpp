@@ -73,6 +73,9 @@ Application::Application()
     // Load Upgrade button
     mTextures.load(Textures::upgradeButton, "Media/UI/buttons/upgradeButton.png");
 
+    // Load construction icon
+    mTextures.load(Textures::constructionicon, "Media/Textures/ConstructionIcon.png");
+
     // Load UI in MenuState
     mTextures.load(Textures::MenuScreen, "Media/Textures/menuScreen.png");
     mTextures.load(Textures::newGameButton, "Media/UI/buttons/newGameButton.png");

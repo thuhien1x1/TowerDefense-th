@@ -11,6 +11,7 @@
 #include "cBaseTower.h"
 #include "MapHandle.h"
 #include "Player.h"
+#include "SaveManagement.h" // NEW FEATURE
 #include <vector>
 #include <map>
 #include <cmath>

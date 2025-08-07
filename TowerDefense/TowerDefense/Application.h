@@ -27,4 +27,6 @@ private:
     Player mPlayer;
     int mVictoryStars;
     StateStack mStateStack;
+    SoundBufferHolder mSoundBuffers;    // NEW FEATURE
+    MusicHolder mMusics;                // NEW FEATURE
 };

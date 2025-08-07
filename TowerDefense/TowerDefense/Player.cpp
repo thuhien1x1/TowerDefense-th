@@ -53,3 +53,8 @@ bool Player::spendMoney(int amount)
     }
     return false;
 }
+
+void Player::setMoney(int amount)
+{
+    this->mMoney = amount;
+}

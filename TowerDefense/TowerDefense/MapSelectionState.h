@@ -1,6 +1,7 @@
 #pragma once
 #include "State.h"
 #include "MenuState.h"
+#include "SaveManagement.h" // NEW FEATURE
 #include <vector>
 
 #include <SFML/Graphics/Sprite.hpp>
@@ -25,6 +26,11 @@ public:
     static int levelID;
 
 private:
-    sf::Text      inputName;
+    // NEW FEATURE
+    Font font;
+    vector<sf::Text>      stars;
+    vector<sf::Text>      currentWave;
+
+    sf::Text      playerName; // NEW FEATURE
 };
 

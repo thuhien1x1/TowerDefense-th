@@ -84,6 +84,12 @@
     <ClCompile Include="cBaseTower.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="InputNameState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SaveManagement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpoint.h">
@@ -162,6 +168,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cBaseTower.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputNameState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveManagement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

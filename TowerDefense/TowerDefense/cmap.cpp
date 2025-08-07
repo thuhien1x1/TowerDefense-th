@@ -57,7 +57,7 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
 
         // Set start, end, curr positions for enemy
         _ce.setStart(_m[19][0]);
-        _ce.setEnd(_m[9][43]);
+        _ce.setEnd(_m[9][42]);
         _ce.setCurr(_m[19][0]);
         _ce.findPath(_m, _ce.getStart(), _ce.getEnd());
 
@@ -66,13 +66,19 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         _ctw.setMapForBullet(_m);
         _ctw.calcPathBullet();
 
-        // Add
+        // Modified main tower initialization
         _mainTowerTile = _m[9][46];
         cpoint towerTile = getMainTowerTile();
         float towerX = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
         float towerY = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
-        towerY -= 120.f; // Move up 
-        _mainTower.initMainTower(mainTowerTexture, 20, towerX, towerY);
+        towerX -= 50.f;
+        towerY -= 120.f;
+
+        // Set up the base tower
+        _mainTower.setPixelPosition(towerX, towerY);
+        _mainTower.setTexture(*mainTowerTexture);
+        _mainTower.setMaxHealh(20);
+        _mainTower.setHealthBarSize(240, 20);
     }
 
     else if (levelID == 2) {
@@ -118,7 +124,7 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
 
         // Set start, end, curr positions for enemy
         _ce.setStart(_m[19][0]);
-        _ce.setEnd(_m[19][43]);
+        _ce.setEnd(_m[19][42]);
         _ce.setCurr(_m[19][0]);
         _ce.findPath(_m, _ce.getStart(), _ce.getEnd());
 
@@ -128,13 +134,18 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         _ctw.setMapForBullet(_m);
         _ctw.calcPathBullet();
 
-        // Add
+        // Modified main tower initialization
         _mainTowerTile = _m[19][46];
         cpoint towerTile = getMainTowerTile();
         float towerX = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
         float towerY = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
-        towerY -= 120.f; // Move up 
-        _mainTower.initMainTower(mainTowerTexture, 20, towerX, towerY);
+        towerX -= 50.f;
+        towerY -= 120.f;
+
+        _mainTower.setPixelPosition(towerX, towerY);
+        _mainTower.setTexture(*mainTowerTexture);
+        _mainTower.setMaxHealh(20);
+        _mainTower.setHealthBarSize(240, 20);
     }
 
     else if (levelID == 3) {
@@ -179,7 +190,7 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
 
         // Set start, end, curr positions for enemy
         _ce.setStart(_m[19][0]);
-        _ce.setEnd(_m[7][43]);
+        _ce.setEnd(_m[7][42]);
         _ce.setCurr(_m[19][0]);
         _ce.findPath(_m, _ce.getStart(), _ce.getEnd());
 
@@ -188,13 +199,18 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         _ctw.setMapForBullet(_m);
         _ctw.calcPathBullet();
 
-        // Add
+        // Modified main tower initialization
         _mainTowerTile = _m[7][46];
         cpoint towerTile = getMainTowerTile();
         float towerX = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
         float towerY = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
-        towerY -= 120.f; // Move up 
-        _mainTower.initMainTower(mainTowerTexture, 30, towerX, towerY);
+        towerX -= 50.f;
+        towerY -= 120.f;
+
+        _mainTower.setPixelPosition(towerX, towerY);
+        _mainTower.setTexture(*mainTowerTexture);
+        _mainTower.setMaxHealh(30);
+        _mainTower.setHealthBarSize(240, 20);
     }
 
     else if (levelID == 4) {
@@ -240,7 +256,7 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
 
         // Set start, end, curr positions for enemy
         _ce.setStart(_m[17][0]);
-        _ce.setEnd(_m[11][43]);
+        _ce.setEnd(_m[11][42]);
         _ce.setCurr(_m[17][0]);
         _ce.findPath(_m, _ce.getStart(), _ce.getEnd());
 
@@ -249,18 +265,19 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         _ctw.setMapForBullet(_m);
         _ctw.calcPathBullet();
 
-        // Add
+        // Modified
         _mainTowerTile = _m[11][46];
         cpoint towerTile = getMainTowerTile();
         float towerX = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelX();
         float towerY = getMap()[towerTile.getRow()][towerTile.getCol()].getPixelY();
+        towerX -= 50.f; // Move left
         towerY -= 120.f; // Move up 
-        _mainTower.initMainTower(mainTowerTexture, 40, towerX, towerY);
-    }
-}
 
-ctower& cmap::getMainTower() {
-    return _mainTower;
+        _mainTower.setPixelPosition(towerX, towerY);
+        _mainTower.setTexture(*mainTowerTexture);
+        _mainTower.setMaxHealh(40);
+        _mainTower.setHealthBarSize(240, 20);
+    }
 }
 
 void cmap::addPowerStation(const sf::Texture& tex, sf::Vector2f pos, int frameW, int frameH, float speed)

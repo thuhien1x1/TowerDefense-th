@@ -6,7 +6,13 @@
 using namespace std;
 
 cenemy::cenemy()
-    : _posX(0.f), _posY(0.f), _health(3), _speed(3), _currentTarget(1), _reachedEnd(false), _pathLength(0) {
+    : _posX(0.f), _posY(0.f), _health(3), _speed(3),
+    _currentTarget(1), _reachedEnd(false), _pathLength(0),
+    mRewardGiven(false),
+    mReward(0),
+    _isDead(false),
+    _isAttack(false)
+{
 
     // Directions: up, left, down, right for pathfinding
     dd[0] = -1; dd[1] = 0; dd[2] = 1; dd[3] = 0;
@@ -21,10 +27,7 @@ cenemy::cenemy()
     for (int i = 0; i < cpoint::MAP_ROW * cpoint::MAP_COL; i++)
         _p[i] = cpoint();
 
-    // Add
-    _state = WALK;
     _isDead = false;
-    _isAttackTriggered = false;
 }
 
 
@@ -130,6 +133,9 @@ void cenemy::init(EnemyType type, float x, float y, int hp, const EnemyAnimation
     _health = hp;
     _type = type;
 
+    mDamage = getDamageByType(type);
+    mHasDamagedTower = false;
+
     _sprite.setTexture(*_walkTex);
     _totalFrames = _walkFrames;
     _animationSpeed = _walkSpeed;
@@ -140,7 +146,6 @@ void cenemy::init(EnemyType type, float x, float y, int hp, const EnemyAnimation
     _animationTimer = 0.f;
     _state = WALK;
     _isDead = false;
-    _isAttackTriggered = false;
     _reachedEnd = false;
 
     _frameRect = sf::IntRect(0, 0, _frameWidth, _frameHeight);
@@ -148,6 +153,8 @@ void cenemy::init(EnemyType type, float x, float y, int hp, const EnemyAnimation
     _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 1.25f);
 
     updateSprite();
+
+    mReward = getResourcesByType(type); // Set reward based on type
 }
 
 void cenemy::loadFromData(const EnemyAnimationData& data) {
@@ -173,15 +180,14 @@ void cenemy::loadFromData(const EnemyAnimationData& data) {
     _sprite.setScale(data.scaleX, data.scaleY); // Because the sizes of the sprite sheets are not the same
 }
 
-void cenemy::triggerAttack(float towerX, float towerY) {
+void cenemy::triggerAttack() {
     if (_state != WALK) return;
 
     _sprite.setTexture(*_attackTex);
     _state = ATTACK;
+    _isAttack = false;
     _currentFrame = 0;
     _animationTimer = 0.f;
-    _isAttackingMainTower = true;
-    _attackTimer = 0.f;
 
     _totalFrames = _attackFrames;
     _animationSpeed = _attackSpeed;
@@ -202,10 +208,14 @@ void cenemy::updateAnimation(float deltaTime) {
         _currentFrame++;
 
         if (_currentFrame >= _totalFrames) {
-            if (_state == DEATH) {
-                _currentFrame = _totalFrames - 1;
+            _currentFrame = _totalFrames - 1;
+
+            if (_state == DEATH)
                 _isDead = true;
-            }
+
+            else if (_state == ATTACK)
+                _isAttack = true;
+
             else
                 _currentFrame = 0;
         }
@@ -257,5 +267,12 @@ int cenemy::getResourcesByType(EnemyType type) {
     }
 }
 
-
-
+int cenemy::getDamageByType(EnemyType type)
+{
+    switch (type) {
+    case FAST_SCOUT: return 1;
+    case RANGED_MECH: return 2;
+    case HEAVY_WALKER: return 3;
+    default: return 100;
+    }
+}

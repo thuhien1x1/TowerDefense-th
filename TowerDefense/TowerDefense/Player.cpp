@@ -1,9 +1,10 @@
 // TowerDefense\Player.cpp
 #include "Player.h"
+#include "ResourceIdentifiers.h"
 
 Player::Player()
     : mMousePosition(0.f, 0.f)
-    , mMoney(100)
+    , mMoney(GameConstants::STARTING_MONEY)
     , mSelectedTowerType(0)
 {
 }
@@ -32,4 +33,23 @@ void Player::setMousePosition(float x, float y)
 sf::Vector2f Player::getMousePosition() const
 {
     return mMousePosition;
+}
+
+int Player::getMoney() const
+{
+    return mMoney;
+}
+
+void Player::addMoney(int amount)
+{
+    mMoney += amount;
+}
+
+bool Player::spendMoney(int amount)
+{
+    if (mMoney >= amount) {
+        mMoney -= amount;
+        return true;
+    }
+    return false;
 }

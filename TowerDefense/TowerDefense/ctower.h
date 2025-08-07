@@ -47,9 +47,6 @@ public:
     void updateEffect(float deltaTime);
     bool isEffectPlaying() const { return _effectPlaying; }
 
-    // MainTower
-    void initMainTower(Texture* texture, int health, float x, float y);
-    void decreaseHealth() { _mainTowerHealth--; if (_mainTowerHealth <= 0)  _mainTowerHealth = 0; }
 
     // Getter
     int getTargetEnemyIdx() const { return _targetEnemyIdx; }

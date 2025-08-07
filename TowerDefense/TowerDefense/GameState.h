@@ -8,7 +8,9 @@
 #include "cenemy.h"
 #include "clevel.h"
 #include "cmap.h"
+#include "cBaseTower.h"
 #include "MapHandle.h"
+#include "Player.h"
 #include <vector>
 #include <map>
 #include <cmath>
@@ -37,7 +39,7 @@ private:
     Sprite backgroundSprite;
 
     Font font;
-    Text hpText, gold;
+    Text hp, gold, wave;
 
     vector<cenemy> enemies;
     vector<ctower> towers;
@@ -69,7 +71,13 @@ private:
     Sprite upgradeButton;
     Sprite towerChoosingButtons[3];
     Sprite towerChoosingCircle;
+    Sprite heartIcon;
+    Sprite waveIcon;
+    Sprite currencyIcon;
 
+    // Construction Icons
+    Sprite constructionicons[7];
+    bool towerconstructed[7];
 
     // Tower Infos
     Texture* infoTexture[6];
@@ -80,4 +88,10 @@ private:
     // Icon appear when click
     bool isChoosingTower = false;
     cpoint selectedTile;  // cliked pixel
+    // Player for money
+    Player player;
+
+    // Upgrade Assistance
+    int selectedRow;
+    int selectedCol;
 };

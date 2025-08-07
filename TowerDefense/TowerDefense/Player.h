@@ -33,4 +33,11 @@ private:
     // Add other player state here (money, selected tower type, etc.)
     int mMoney;
     int mSelectedTowerType;
+
+public:
+    int getMoney() const;
+    void addMoney(int amount);
+    bool spendMoney(int amount);
+
+    // Other player-related methods...
 };

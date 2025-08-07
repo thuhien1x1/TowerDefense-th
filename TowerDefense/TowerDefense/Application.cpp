@@ -55,7 +55,7 @@ Application::Application()
     // Load bullet textures
     mTextures.load(Textures::Bullet1, "Media/Textures/bomb_sprite_sheet.png");
     mTextures.load(Textures::Bullet2, "Media/Textures/fire_bullet_sprite_sheet.png");
-    mTextures.load(Textures::Bullet3, "Media/Textures/bomb_sprite_sheet.png");
+    mTextures.load(Textures::Bullet3, "Media/Textures/ice_bullet_sprite_sheet.png");
     mTextures.load(Textures::Bomb, "Media/Textures/bomb_sprite_sheet.png");
 
 
@@ -72,6 +72,9 @@ Application::Application()
 
     // Load Upgrade button
     mTextures.load(Textures::upgradeButton, "Media/UI/buttons/upgradeButton.png");
+
+    // Load construction icon
+    mTextures.load(Textures::constructionicon, "Media/Textures/ConstructionIcon.png");
 
     // Load UI in MenuState
     mTextures.load(Textures::MenuScreen, "Media/Textures/menuScreen.png");
@@ -109,6 +112,9 @@ Application::Application()
 
     // Load UI in GameState
     mTextures.load(Textures::commingWave, "Media/UI/icons/commingWave.png");
+    mTextures.load(Textures::heartIcon, "Media/UI/icons/heartIcon.png");
+    mTextures.load(Textures::waveIcon, "Media/UI/icons/waveIcon.png");
+    mTextures.load(Textures::currencyIcon, "Media/UI/icons/currencyIcon.png");
 
     // Load UI in VictoryState
     mTextures.load(Textures::victory, "Media/UI/icons/victory.png");
@@ -133,6 +139,7 @@ void Application::run()
     while (mWindow.isOpen())
     {
         sf::Time dt = clock.restart();
+        dt = dt * gameSpeed;
         processInput();
         update(dt);
         render();

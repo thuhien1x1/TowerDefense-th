@@ -36,6 +36,10 @@ void cBaseTower::setPixelPosition(float x, float y) {
     updateSpritePosition();
 }
 
+void cBaseTower::setHealth(int hp) {
+    currentHealth = hp;
+}
+
 void cBaseTower::setMaxHealh(int hp)
 {
     maxHealth = hp;

@@ -78,6 +78,7 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         _mainTower.setPixelPosition(towerX, towerY);
         _mainTower.setTexture(*mainTowerTexture);
         _mainTower.setMaxHealh(20);
+        _mainTower.setHealth(20);
         _mainTower.setHealthBarSize(240, 20);
     }
 
@@ -145,6 +146,7 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         _mainTower.setPixelPosition(towerX, towerY);
         _mainTower.setTexture(*mainTowerTexture);
         _mainTower.setMaxHealh(20);
+        _mainTower.setHealth(20);
         _mainTower.setHealthBarSize(240, 20);
     }
 
@@ -210,6 +212,7 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         _mainTower.setPixelPosition(towerX, towerY);
         _mainTower.setTexture(*mainTowerTexture);
         _mainTower.setMaxHealh(30);
+        _mainTower.setHealth(30);
         _mainTower.setHealthBarSize(240, 20);
     }
 
@@ -276,6 +279,7 @@ void cmap::makeMapData(sf::Texture* mainTowerTexture, sf::Texture* mapTexture, i
         _mainTower.setPixelPosition(towerX, towerY);
         _mainTower.setTexture(*mainTowerTexture);
         _mainTower.setMaxHealh(40);
+        _mainTower.setHealth(40);
         _mainTower.setHealthBarSize(240, 20);
     }
 }

@@ -25,6 +25,7 @@ public:
     void setTexture(const sf::Texture& texture);
     void setPosition(int row, int col);
     void setPixelPosition(float x, float y);
+    void setHealth(int hp);
     void setMaxHealh(int hp);
     void takeDamage(int damage);
     void heal(int amount);

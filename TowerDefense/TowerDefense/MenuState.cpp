@@ -15,6 +15,17 @@ MenuState::MenuState(StateStack& stack, Context context)
 	sf::Texture& texture = context.textures->get(Textures::MenuScreen);
 	mBackgroundSprite.setTexture(texture);
 
+	// Set music - sound
+	sf::SoundBuffer buffer;
+	buffer.loadFromFile("Audio/UIclick.wav");
+	mClickSound.setBuffer(buffer);
+
+	//sf::Music mMusic;
+	mMenuMusic.openFromFile("Audio/MusicMenu.wav");
+	mMenuMusic.setLoop(true);      // Loop it for background music
+	//mMusic.setVolume(50.f);    // Optional: Adjust volume
+	mMenuMusic.play();             // Start playing
+
 	// New Game Button
 	sf::Sprite newGameSprite;
 	newGameSprite.setTexture(context.textures->get(Textures::newGameButton));

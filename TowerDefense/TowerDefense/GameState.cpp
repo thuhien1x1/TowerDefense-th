@@ -338,9 +338,10 @@ bool GameState::handleEvent(const sf::Event& event)
                     // NEW FEATURE: save when new tower placed
                     int tCurLevel = currentLevelIndex;
                     SaveManagement::playerResult[tCurLevel].status = -1; // not finished
-                    SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
                     SaveManagement::playerResult[tCurLevel].stars = 0;
-                    SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? 0 : player.getMoney();
+                    SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
+                    SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
+                    SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
                     SaveManagement::playerResult[tCurLevel].towers.clear();
                     for (int i = 0; i < towers.size(); i++)
                     {
@@ -385,9 +386,10 @@ bool GameState::handleEvent(const sf::Event& event)
                             // NEW FEATURE: save when a tower upgraded
                             int tCurLevel = currentLevelIndex;
                             SaveManagement::playerResult[tCurLevel].status = -1; // not finished
-                            SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
                             SaveManagement::playerResult[tCurLevel].stars = 0;
-                            SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? 0 : player.getMoney();
+                            SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
+                            SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
+                            SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
                             SaveManagement::playerResult[tCurLevel].towers.clear();
                             for (int i = 0; i < towers.size(); i++)
                             {
@@ -580,10 +582,10 @@ bool GameState::update(sf::Time dt)
             // NEW FEATURE: save every new wave
             int tCurLevel = currentLevelIndex;
             SaveManagement::playerResult[tCurLevel].status = -1; // not finished
-            SaveManagement::playerResult[tCurLevel].curWave = level.getCurrentWaveIndex();
-            SaveManagement::playerResult[tCurLevel].health = (isGameOver || isGameWin) ? 0 : curMap->getMainTower().getHealth();
             SaveManagement::playerResult[tCurLevel].stars = 0;
-            SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? 0 : player.getMoney();
+            SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
+            SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
+            SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
             SaveManagement::playerResult[tCurLevel].towers.clear();
             for (int i = 0; i < towers.size(); i++)
             {
@@ -622,9 +624,9 @@ bool GameState::update(sf::Time dt)
         // NEW FEATURE
         int tCurLevel = currentLevelIndex;
         SaveManagement::playerResult[tCurLevel].status = 1; // game done
-        SaveManagement::playerResult[tCurLevel].curWave = 0;
-        SaveManagement::playerResult[tCurLevel].health = mainTowerMaxHealth;
         SaveManagement::playerResult[tCurLevel].stars = calStars();
+        SaveManagement::playerResult[tCurLevel].health = mainTowerMaxHealth;
+        SaveManagement::playerResult[tCurLevel].curWave = 0;
         SaveManagement::playerResult[tCurLevel].curGold = levels[currentLevelIndex].getStartGold();
         SaveManagement::playerResult[tCurLevel].towers.clear();
         SaveManagement::save(SaveManagement::playerName);
@@ -765,6 +767,23 @@ void GameState::loadLevel(int index) {
     towers.clear();
     bullets.clear();
 
+    // Reset game flags and wave index
+    isGameOver = false;
+    isGameWin = false;
+    hasPressedPlay = false; // Reset play state for new level
+    //waveIndex = 0;
+    //levels[currentLevelIndex].resetWave(); // Start from wave 0
+
+    // NEW FEATURE: load wave, health, gold
+    waveIndex = SaveManagement::playerResult[currentLevelIndex].curWave; // old: waveIndex = 0
+    levels[currentLevelIndex].setCurrentWaveIndex(SaveManagement::playerResult[currentLevelIndex].curWave);
+    if (SaveManagement::playerResult[currentLevelIndex].health != 0)
+        curMap->getMainTower().setCurrentHealth(SaveManagement::playerResult[currentLevelIndex].health);
+    curMap->getMainTower().takeDamage(0);
+    curMap->getMainTower().drawHealthBar(window);
+    if (SaveManagement::playerResult[currentLevelIndex].curGold != 0)
+        player.setMoney(SaveManagement::playerResult[currentLevelIndex].curGold);
+
     // NEW FEATURE
     int savedTowers = SaveManagement::playerResult[currentLevelIndex].towers.size();
     for (int i = 0; i < savedTowers; i++)
@@ -788,17 +807,6 @@ void GameState::loadLevel(int index) {
 
         MapHandle::setCmap(currentLevelIndex, *curMap, tLoc.getRow(), tLoc.getCol(), tType + 3);
     }
-
-    // Reset game flags and wave index
-    isGameOver = false;
-    isGameWin = false;
-    hasPressedPlay = false; // Reset play state for new level
-    //waveIndex = 0;
-    //levels[currentLevelIndex].resetWave(); // Start from wave 0
-
-    // NEW FEATURE
-    waveIndex = SaveManagement::playerResult[currentLevelIndex].curWave; // old: waveIndex = 0
-    levels[currentLevelIndex].setCurrentWaveIndex(SaveManagement::playerResult[currentLevelIndex].curWave); // NEW FEATURE
 
     // Set up text to display main tower hp (demo)
     hp.setFont(font);

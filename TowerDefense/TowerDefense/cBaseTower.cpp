@@ -92,6 +92,11 @@ bool cBaseTower::recentlyDamaged() const {
     return mRecentlyDamaged && mDamageTimer.getElapsedTime().asSeconds() < 0.5f;
 }
 
+void cBaseTower::setCurrentHealth(int curHP)
+{
+    this->currentHealth = curHP;
+}
+
 void cBaseTower::setHealthBarSize(float width, float height) {
     healthBarBackground.setSize(sf::Vector2f(width, height));
     healthBarFill.setSize(sf::Vector2f(width, height));

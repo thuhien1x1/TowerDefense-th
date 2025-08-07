@@ -38,6 +38,7 @@ public:
     int getMoney() const;
     void addMoney(int amount);
     bool spendMoney(int amount);
+    void setMoney(int amount); // NEW FEATURE
 
     // Other player-related methods...
 };

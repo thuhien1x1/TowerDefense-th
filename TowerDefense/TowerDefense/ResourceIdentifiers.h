@@ -2,6 +2,10 @@
 
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Font.hpp>
+#include <SFML/Audio/SoundBuffer.hpp>
+#include <SFML/Audio/Sound.hpp>
+#include <SFML/Audio/Music.hpp>
+
 #include "ResourceHolder.h"
 
 
@@ -161,6 +165,42 @@ namespace GameConstants
     const float INCOME_INTERVAL = 10.0f; // Seconds between passive income
 }
 
+// NEW FEATURE
+namespace SoundBuffers
+{
+    enum ID
+    {
+        // Bullet
+        BulletBomb,
+        BulletFire,
+        BulletLaser,
+
+        // Enemy
+        EnemyAttack,
+        EnemyDead,
+        EnemyWalk,
+
+        // GameEnd
+        GameOver,
+        GameWin,
+
+        // Mouse Click
+        UIclick
+    };
+}
+// NEW FEATURE
+namespace Musics
+{
+    enum ID
+    {
+        MusicGame,
+        MusicMenu
+    };
+}
+
 // Type aliases for easy access
 using TextureHolder = ResourceHolder<sf::Texture, Textures::ID>;
 using FontHolder = ResourceHolder<sf::Font, Fonts::ID>;
+// NEW FEATURE
+using SoundBufferHolder = ResourceHolder<sf::SoundBuffer, SoundBuffers::ID>;
+using MusicHolder = ResourceHolder<sf::Music, Musics::ID>;

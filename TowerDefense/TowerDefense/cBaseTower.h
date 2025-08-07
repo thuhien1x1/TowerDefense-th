@@ -30,6 +30,7 @@ public:
     void heal(int amount);
     bool isDestroyed() const;
     bool recentlyDamaged() const;
+    void setCurrentHealth(int curHP); // NEW FEATURE
 
     int getHealth() const { return currentHealth; }
     int getMaxHealth() const { return maxHealth; }

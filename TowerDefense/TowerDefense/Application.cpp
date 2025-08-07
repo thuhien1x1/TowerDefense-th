@@ -138,6 +138,22 @@ Application::Application()
     // Load Texture in InputNameState 
     mTextures.load(Textures::inputNameBackground, "Media/Textures/inputNameBackground.png");
     mTextures.load(Textures::nextButton, "Media/UI/buttons/nextButton.png");
+
+    // NEW FEATURE
+    // Load sound and music
+    mSoundBuffers.load(SoundBuffers::BulletBomb, "Audio/BulletBomb.wav");
+    mSoundBuffers.load(SoundBuffers::BulletFire, "Audio/BulletFire.wav");
+    mSoundBuffers.load(SoundBuffers::BulletLaser, "Audio/BulletLaser.wav");
+
+    mSoundBuffers.load(SoundBuffers::EnemyAttack, "Audio/EnemyAttack.wav");
+    mSoundBuffers.load(SoundBuffers::EnemyDead, "Audio/EnemyDead.wav");
+    mSoundBuffers.load(SoundBuffers::EnemyWalk, "Audio/EnemyWalk.wav");
+
+    mSoundBuffers.load(SoundBuffers::GameOver, "Audio/GameOver.wav");
+    mSoundBuffers.load(SoundBuffers::GameWin, "Audio/GameWin.wav");
+
+    mMusics.open(Musics::MusicGame, "Audio/MusicGame.wav");
+    mMusics.open(Musics::MusicMenu, "Audio/MusicMenu.wav");
 }
 
 void Application::run()

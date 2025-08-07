@@ -2,6 +2,7 @@
 
 #include "State.h"
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Audio/Sound.hpp>
 
 class MenuState : public State
 {
@@ -16,4 +17,11 @@ public:
 private:
 	sf::Sprite				mBackgroundSprite;
 	std::vector<sf::Sprite> mOptionSprites;
+
+	// NEW FEATURE
+	sf::Sound				mClickSound;
+	sf::Music				mMenuMusic;
+
+public: // NEW FEATURE
+	static bool isNewPlayer;
 };

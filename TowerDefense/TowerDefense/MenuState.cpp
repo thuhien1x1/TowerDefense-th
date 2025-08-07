@@ -6,12 +6,25 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/View.hpp>
 
+bool MenuState::isNewPlayer = true;
+
 MenuState::MenuState(StateStack& stack, Context context)
 	: State(stack, context)
 {
 	// Set background
 	sf::Texture& texture = context.textures->get(Textures::MenuScreen);
 	mBackgroundSprite.setTexture(texture);
+
+	// Set music - sound
+	sf::SoundBuffer buffer;
+	buffer.loadFromFile("Audio/UIclick.wav");
+	mClickSound.setBuffer(buffer);
+
+	//sf::Music mMusic;
+	mMenuMusic.openFromFile("Audio/MusicMenu.wav");
+	mMenuMusic.setLoop(true);      // Loop it for background music
+	//mMusic.setVolume(50.f);    // Optional: Adjust volume
+	mMenuMusic.play();             // Start playing
 
 	// New Game Button
 	sf::Sprite newGameSprite;
@@ -84,12 +97,15 @@ bool MenuState::handleEvent(const sf::Event& event)
 			if (mOptionSprites[i].getGlobalBounds().contains(mousePos)) {
 				if (i == 0) {
 					requestStackPop();
-					requestStackPush(States::MapSelection); // New game
+					if (MenuState::isNewPlayer) // NEW FEATURE
+						requestStackPush(States::InputName); // New game
+					else
+						requestStackPush(States::MapSelection); // New game
 				}
 
 				else if (i == 1) {
 					requestStackPop();
-					requestStackPush(States::MapSelection); // Load game, change to State::Load later
+					requestStackPush(States::Load); // NEW FEATURE
 				}
 
 				else if (i == 2)

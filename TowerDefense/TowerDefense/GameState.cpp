@@ -334,6 +334,23 @@ bool GameState::handleEvent(const sf::Event& event)
 
                     towers.push_back(t);
                     MapHandle::setCmap(currentLevelIndex, *curMap, selectedTile.getRow(), selectedTile.getCol(), towerType + 3);
+
+                    // NEW FEATURE: save when new tower placed
+                    int tCurLevel = currentLevelIndex;
+                    SaveManagement::playerResult[tCurLevel].status = -1; // not finished
+                    SaveManagement::playerResult[tCurLevel].stars = 0;
+                    SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
+                    SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
+                    SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
+                    SaveManagement::playerResult[tCurLevel].towers.clear();
+                    for (int i = 0; i < towers.size(); i++)
+                    {
+                        ctower tempTower;
+                        tempTower.setType(towers[i].getType());
+                        tempTower.setLocation(towers[i].getLocation());
+                        SaveManagement::playerResult[tCurLevel].towers.push_back(tempTower);
+                    }
+                    SaveManagement::save(SaveManagement::playerName);
                 }
 
                 isChoosingTower = false;
@@ -365,6 +382,24 @@ bool GameState::handleEvent(const sf::Event& event)
                             t.init(*towerTexture[newC - 3],
                                 curMap->getMap()[row][col].getPixelX(),
                                 curMap->getMap()[row][col].getPixelY());
+
+                            // NEW FEATURE: save when a tower upgraded
+                            int tCurLevel = currentLevelIndex;
+                            SaveManagement::playerResult[tCurLevel].status = -1; // not finished
+                            SaveManagement::playerResult[tCurLevel].stars = 0;
+                            SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
+                            SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
+                            SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
+                            SaveManagement::playerResult[tCurLevel].towers.clear();
+                            for (int i = 0; i < towers.size(); i++)
+                            {
+                                ctower tempTower;
+                                tempTower.setType(towers[i].getType());
+                                tempTower.setLocation(towers[i].getLocation());
+                                SaveManagement::playerResult[tCurLevel].towers.push_back(tempTower);
+                            }
+                            SaveManagement::save(SaveManagement::playerName);
+
                             break;
                         }
                     }
@@ -534,7 +569,7 @@ bool GameState::update(sf::Time dt)
                     || e.hasReachedEnd();
             }),
         enemies.end()
-    );
+                );
 
 
     // The wave must be the last wave
@@ -543,6 +578,24 @@ bool GameState::update(sf::Time dt)
 
         if (!level.isLastWave()) {
             level.nextWave();
+
+            // NEW FEATURE: save every new wave
+            int tCurLevel = currentLevelIndex;
+            SaveManagement::playerResult[tCurLevel].status = -1; // not finished
+            SaveManagement::playerResult[tCurLevel].stars = 0;
+            SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
+            SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
+            SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
+            SaveManagement::playerResult[tCurLevel].towers.clear();
+            for (int i = 0; i < towers.size(); i++)
+            {
+                ctower tempTower;
+                tempTower.setType(towers[i].getType());
+                tempTower.setLocation(towers[i].getLocation());
+                SaveManagement::playerResult[tCurLevel].towers.push_back(tempTower);
+            }
+            SaveManagement::save(SaveManagement::playerName);
+
             spawnEnemies();
         }
 
@@ -560,12 +613,24 @@ bool GameState::update(sf::Time dt)
     }
 
     if (isGameOver) {
+        SaveManagement::playerResult[currentLevelIndex].status = 0; // locked // NEW FEATURE
         requestStackPush(States::Defeat);
         isGameOver = false;
     }
 
     // Push VictoryState
-    if (isGameWin) {
+    if (isGameWin)
+    {
+        // NEW FEATURE
+        int tCurLevel = currentLevelIndex;
+        SaveManagement::playerResult[tCurLevel].status = 1; // game done
+        SaveManagement::playerResult[tCurLevel].stars = calStars();
+        SaveManagement::playerResult[tCurLevel].health = mainTowerMaxHealth;
+        SaveManagement::playerResult[tCurLevel].curWave = 0;
+        SaveManagement::playerResult[tCurLevel].curGold = levels[currentLevelIndex].getStartGold();
+        SaveManagement::playerResult[tCurLevel].towers.clear();
+        SaveManagement::save(SaveManagement::playerName);
+
         *getContext().victoryStars = calStars();
         requestStackPush(States::Victory);
         isGameWin = false;
@@ -706,8 +771,42 @@ void GameState::loadLevel(int index) {
     isGameOver = false;
     isGameWin = false;
     hasPressedPlay = false; // Reset play state for new level
-    waveIndex = 0;
-    levels[currentLevelIndex].resetWave(); // Start from wave 0
+    //waveIndex = 0;
+    //levels[currentLevelIndex].resetWave(); // Start from wave 0
+
+    // NEW FEATURE: load wave, health, gold
+    waveIndex = SaveManagement::playerResult[currentLevelIndex].curWave; // old: waveIndex = 0
+    levels[currentLevelIndex].setCurrentWaveIndex(SaveManagement::playerResult[currentLevelIndex].curWave);
+    if (SaveManagement::playerResult[currentLevelIndex].health != 0)
+        curMap->getMainTower().setCurrentHealth(SaveManagement::playerResult[currentLevelIndex].health);
+    curMap->getMainTower().takeDamage(0);
+    curMap->getMainTower().drawHealthBar(window);
+    if (SaveManagement::playerResult[currentLevelIndex].curGold != 0)
+        player.setMoney(SaveManagement::playerResult[currentLevelIndex].curGold);
+
+    // NEW FEATURE
+    int savedTowers = SaveManagement::playerResult[currentLevelIndex].towers.size();
+    for (int i = 0; i < savedTowers; i++)
+    {
+        ctower tTower;
+        int tType = SaveManagement::playerResult[currentLevelIndex].towers[i].getType();
+        cpoint tLoc = SaveManagement::playerResult[currentLevelIndex].towers[i].getLocation();
+
+        tTower.setType(tType);
+        tTower.setLocation(tLoc);
+        tTower.init(*towerTexture[tType],
+            tLoc.getPixelX(),
+            tLoc.getPixelY());
+        tTower.setMapForBullet(curMap->getMap());
+        tTower.getBullet().setSpeed(8);
+        tTower.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);
+        int index = MapHandle::findBlockmap(currentLevelIndex, tLoc.getRow(), tLoc.getCol());
+        towerconstructed[index] = true;
+
+        towers.push_back(tTower);
+
+        MapHandle::setCmap(currentLevelIndex, *curMap, tLoc.getRow(), tLoc.getCol(), tType + 3);
+    }
 
     // Set up text to display main tower hp (demo)
     hp.setFont(font);

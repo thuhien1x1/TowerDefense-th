@@ -118,6 +118,10 @@ namespace Textures
         tower2Button,
         tower3Button,
         circle,
+
+        // InputNameState // NEW FEATURE
+        inputNameBackground,
+        nextButton,
     };
 }
 

@@ -8,6 +8,9 @@
 #include "SettingState.h"
 #include "InformationState.h"
 #include "MapSelectionState.h"
+// NEW FEATURE
+#include "InputNameState.h"
+#include "SaveManagement.h"
 
 Application::Application()
     : mWindow(sf::VideoMode(1920, 1080), "Tower Defense", sf::Style::Close)
@@ -130,6 +133,11 @@ Application::Application()
     mTextures.load(Textures::tower2Button, "Media/UI/buttons/tower2Button.png");
     mTextures.load(Textures::tower3Button, "Media/UI/buttons/tower3Button.png");
     mTextures.load(Textures::circle, "Media/UI/icons/circle.png");
+
+    // NEW FEATURE
+    // Load Texture in InputNameState 
+    mTextures.load(Textures::inputNameBackground, "Media/Textures/inputNameBackground.png");
+    mTextures.load(Textures::nextButton, "Media/UI/buttons/nextButton.png");
 }
 
 void Application::run()
@@ -156,6 +164,9 @@ void Application::registerStates()
     mStateStack.registerState<MapSelectionState>(States::MapSelection);
     mStateStack.registerState<VictoryState>(States::Victory);
     mStateStack.registerState<DefeatState>(States::Defeat);
+    // NEW FEATURE
+    mStateStack.registerState<InputNameState>(States::InputName);
+    mStateStack.registerState<SaveManagement>(States::Load);
 }
 
 void Application::processInput()

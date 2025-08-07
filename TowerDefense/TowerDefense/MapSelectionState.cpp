@@ -63,6 +63,67 @@ MapSelectionState::MapSelectionState(StateStack& stack, Context context)
 	level4Locked.setPosition(1380.0f, 800.0f);
 	centerOrigin(level4Locked);
 	lockedLevels.push_back(level4Locked);
+
+	// NEW FEATURE: Load Text shown for 4 maps
+	font = getContext().fonts->get(Fonts::BruceForever);
+
+	for (int i = 0; i < 4; i++)
+	{
+		if (SaveManagement::playerResult[i].status == -1) // not done playing
+		{
+			string temp = to_string(SaveManagement::playerResult[i].curWave + 1);
+
+			Text wave;
+			if (i == 0)
+			{
+				wave.setString(temp + "/" + to_string(3));
+				wave.setPosition(580.0f, 360.0f);
+			}
+			else if (i == 1)
+			{
+				wave.setString(temp + "/" + to_string(3));
+				wave.setPosition(1380.0f, 360.0f);
+			}
+			else if (i == 2)
+			{
+				wave.setString(temp + "/" + to_string(4));
+				wave.setPosition(580.0f, 800.0f);
+			}
+			else if (i == 3)
+			{
+				wave.setString(temp + "/" + to_string(5));
+				wave.setPosition(1380.0f, 800.0f);
+			}
+
+			wave.setFont(font);
+			wave.setCharacterSize(20);
+			wave.setFillColor(Color::Yellow);
+			currentWave.push_back(wave);
+		}
+		else if (SaveManagement::playerResult[i].status == 1) // done playing
+		{
+			string temp = to_string(SaveManagement::playerResult[i].stars);
+			Text star;
+			star.setString("STAR" + temp);
+
+			if (i == 0) star.setPosition(580.0f, 360.0f);
+			else if (i == 1) star.setPosition(1380.0f, 360.0f);
+			else if (i == 2) star.setPosition(580.0f, 800.0f);
+			else star.setPosition(1380.0f, 800.0f);
+
+			star.setFont(font);
+			star.setCharacterSize(20);
+			star.setFillColor(Color::Yellow);
+			stars.push_back(star);
+		}
+	}
+
+	// NEW FEATURE: Set up text to display name
+	playerName.setFont(font);
+	playerName.setCharacterSize(50);
+	playerName.setFillColor(Color::White);
+	playerName.setPosition(80.f, 45.f);
+	playerName.setString(SaveManagement::playerName);
 }
 
 void MapSelectionState::draw()
@@ -72,6 +133,7 @@ void MapSelectionState::draw()
 
 	window.setView(window.getDefaultView());
 	window.draw(backgroundSprite);
+	window.draw(playerName); // NEW FEATURE
 
 	// Home button
 	if (homeButton.getGlobalBounds().contains(mousePos))
@@ -80,12 +142,70 @@ void MapSelectionState::draw()
 		homeButton.setScale(1.f, 1.f);
 	window.draw(homeButton);
 
-	for (size_t i = 0; i < unlockedLevels.size(); i++) {
-		if (unlockedLevels[i].getGlobalBounds().contains(mousePos))
-			unlockedLevels[i].setScale(1.1f, 1.1f);
+	// 4 Mini maps - NEW FEATURE
+	int currentWaveIndex = 0;
+	int starsIndex = 0;
+
+	for (int i = 0; i < 4; i++)
+	{
+		if (i == 0)			// Map 1: always unlocked
+		{
+			if (unlockedLevels[i].getGlobalBounds().contains(mousePos))
+				unlockedLevels[i].setScale(1.1f, 1.1f);
+			else
+				unlockedLevels[i].setScale(1.f, 1.f);
+
+			window.draw(unlockedLevels[i]);
+
+			if (SaveManagement::playerResult[i].status == -1)
+			{
+				if (currentWaveIndex < currentWave.size())
+					window.draw(currentWave[currentWaveIndex]);
+				currentWaveIndex++;
+			}
+			else if (SaveManagement::playerResult[i].status == 1)
+			{
+				if (starsIndex < stars.size())
+					window.draw(stars[starsIndex]);
+				starsIndex++;
+			}
+			continue;
+		}
 		else
-			unlockedLevels[i].setScale(1.f, 1.f);
-		window.draw(unlockedLevels[i]);
+		{
+			if (SaveManagement::playerResult[i - 1].status != 1 && // Locked: previous level is not done
+				(SaveManagement::playerResult[i].stars == 0 && SaveManagement::playerResult[i].curWave == 0))
+			{
+				if (lockedLevels[i - 1].getGlobalBounds().contains(mousePos))
+					lockedLevels[i - 1].setScale(1.1f, 1.1f);
+				else
+					lockedLevels[i - 1].setScale(1.f, 1.f);
+
+				window.draw(lockedLevels[i - 1]);
+			}
+			else // Unlocked
+			{
+				if (unlockedLevels[i].getGlobalBounds().contains(mousePos))
+					unlockedLevels[i].setScale(1.1f, 1.1f);
+				else
+					unlockedLevels[i].setScale(1.f, 1.f);
+
+				window.draw(unlockedLevels[i]);
+
+				if (SaveManagement::playerResult[i].status == -1)
+				{
+					if (currentWaveIndex < currentWave.size())
+						window.draw(currentWave[currentWaveIndex]);
+					currentWaveIndex++;
+				}
+				else if (SaveManagement::playerResult[i].status == 1)
+				{
+					if (starsIndex < stars.size())
+						window.draw(stars[starsIndex]);
+					starsIndex++;
+				}
+			}
+		}
 	}
 }
 
@@ -109,11 +229,14 @@ bool MapSelectionState::handleEvent(const sf::Event& event)
 
 		// Choose level
 		for (size_t i = 0; i < unlockedLevels.size(); i++) {
-			if (unlockedLevels[i].getGlobalBounds().contains(mousePos))
+			if (i == 0 || SaveManagement::playerResult[i - 1].status == 1) // NEW FEATURE: check if last level was done
 			{
-				levelID = i;
-				requestStackPop();
-				requestStackPush(States::Game);
+				if (unlockedLevels[i].getGlobalBounds().contains(mousePos))
+				{
+					levelID = i;
+					requestStackPop();
+					requestStackPush(States::Game);
+				}
 			}
 		}
 	}

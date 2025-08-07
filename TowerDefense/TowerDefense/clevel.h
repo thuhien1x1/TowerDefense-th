@@ -50,5 +50,6 @@ public:
 	void setMap(cmap map) { _map = map; }
 	void setWaves(const vector<pair<EnemyType, int>>& waves) { _waves = waves; }
 	void resetWave() { _currentWaveIndex = 0; }
+	void setCurrentWaveIndex(int curWave) { _currentWaveIndex = curWave; } // NEW FEATURE
 };
 

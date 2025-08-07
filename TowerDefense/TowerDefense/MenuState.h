@@ -16,4 +16,7 @@ public:
 private:
 	sf::Sprite				mBackgroundSprite;
 	std::vector<sf::Sprite> mOptionSprites;
+
+public: // NEW FEATURE
+	static bool isNewPlayer;
 };

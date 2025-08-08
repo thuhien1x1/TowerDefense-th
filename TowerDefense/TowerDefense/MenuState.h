@@ -18,10 +18,6 @@ private:
 	sf::Sprite				mBackgroundSprite;
 	std::vector<sf::Sprite> mOptionSprites;
 
-	// NEW FEATURE
-	sf::Sound				mClickSound;
-	sf::Music				mMenuMusic;
-
-public: // NEW FEATURE
+public:
 	static bool isNewPlayer;
 };

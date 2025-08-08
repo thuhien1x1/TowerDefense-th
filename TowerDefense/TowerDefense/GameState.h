@@ -11,7 +11,7 @@
 #include "cBaseTower.h"
 #include "MapHandle.h"
 #include "Player.h"
-#include "SaveManagement.h" // NEW FEATURE
+#include "SaveManagement.h"
 #include <vector>
 #include <map>
 #include <cmath>
@@ -29,6 +29,8 @@ public:
     virtual void draw();
     virtual bool update(Time dt);
     virtual bool handleEvent(const Event& event);
+
+    ~GameState();
 
 private:
     Event event;
@@ -94,4 +96,16 @@ private:
     // Upgrade Assistance
     int selectedRow;
     int selectedCol;
+
+    // Sound - NEW FEATURE
+    sf::Sound bulletBombSound;
+    sf::Sound bulletFireSound;
+    sf::Sound bulletLaserSound;
+
+    sf::Sound enemyAttackSound;
+    sf::Sound enemyDeadSound;
+    sf::Sound enemyWalkSound;
+
+    sf::Sound towerPlaceSound;
+    sf::Sound TowerUpgradeSound;
 };

@@ -2,12 +2,17 @@
 #include "StateStack.h"
 
 
-State::Context::Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, Player& player, int& stars)
+State::Context::Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, Player& player, int& stars, SoundBufferHolder& sfx, MusicHolder& music, bool& musicFlag, bool& sfxFlag, MusicState& musicState)
 	: window(&window)
 	, textures(&textures)
 	, fonts(&fonts)
 	, player(&player)
 	, victoryStars(&stars)
+	, soundBuffers(&sfx)
+	, musics(&music)
+	, isMusicOn(&musicFlag)
+	, isSoundOn(&sfxFlag)
+	, currentMusic(&musicState)
 {
 }
 

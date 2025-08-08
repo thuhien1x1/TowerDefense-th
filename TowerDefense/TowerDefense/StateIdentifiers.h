@@ -14,7 +14,7 @@ namespace States
 		Pause,
 		Victory,
 		Defeat,
-		InputName,	// NEW FEATURE
-		Load,		// NEW FEATURE
+		InputName,
+		Load,
 	};
 }

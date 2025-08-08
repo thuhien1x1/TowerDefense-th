@@ -16,6 +16,23 @@ GameState::GameState(StateStack& stack, Context context)
     isWaitingForNextLevel(false),
     showEndButtons(false)
 {
+    // NEW FEATURE: Load music
+    auto& musicFlag = *getContext().isMusicOn;
+    auto& musicState = *getContext().currentMusic;
+    auto& musicHolder = *getContext().musics;
+
+    // Stop menu music if it was playing
+    if (musicState == MusicState::Menu)
+    {
+        musicHolder.get(Musics::MusicMenu).stop();
+    }
+    if (musicFlag) {
+        auto& gameMusic = musicHolder.get(Musics::MusicGame);
+        gameMusic.setLoop(true);
+        gameMusic.play();
+        musicState = MusicState::Game;
+    }
+
     // Load textures
     backgroundTexture[0] = &getContext().textures->get(Textures::Map1);
     backgroundTexture[1] = &getContext().textures->get(Textures::Map2);
@@ -152,6 +169,21 @@ GameState::GameState(StateStack& stack, Context context)
         212, 210,
         0.5f, 0.5f,
     };
+
+    // Load Sound - NEW FEATURE
+    if (*getContext().isSoundOn)
+    {
+        bulletBombSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::BulletBomb));
+        bulletFireSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::BulletFire));
+        bulletLaserSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::BulletLaser));
+
+        enemyAttackSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::EnemyAttack));
+        enemyDeadSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::EnemyDead));
+        enemyWalkSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::EnemyWalk));
+
+        towerPlaceSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::TowerPlace));
+        TowerUpgradeSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::TowerUpgrade));
+    }
 
     loadLevel(currentLevelIndex);
 }
@@ -315,7 +347,12 @@ bool GameState::handleEvent(const sf::Event& event)
                 towerType = 2;
             }
 
-            if (clickedButton && towerType != -1) {
+            if (clickedButton && towerType != -1)
+            {
+                // NEW FEATURE: Play sound when place tower
+                if (*getContext().isSoundOn == true)
+                    towerPlaceSound.play();
+
                 if (player.spendMoney(GameConstants::TOWER_COSTS[towerType])) {
                     if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
                         ctower t;
@@ -335,13 +372,12 @@ bool GameState::handleEvent(const sf::Event& event)
                         towers.push_back(t);
                         MapHandle::setCmap(currentLevelIndex, *curMap, selectedTile.getRow(), selectedTile.getCol(), towerType + 3);
 
-                        // NEW FEATURE: save when new tower placed
+                        // Save when new tower placed
                         int tCurLevel = currentLevelIndex;
                         SaveManagement::playerResult[tCurLevel].status = -1; // not finished
                         SaveManagement::playerResult[tCurLevel].stars = 0;
-                        SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
                         SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
-                        SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
+                        SaveManagement::playerResult[tCurLevel].curGold = (player.getMoney() == 0) ? -1 : player.getMoney();
                         SaveManagement::playerResult[tCurLevel].towers.clear();
                         for (int i = 0; i < towers.size(); i++)
                         {
@@ -363,6 +399,10 @@ bool GameState::handleEvent(const sf::Event& event)
 
         // Handle tower upgrade button click
         if (showInfo && upgradeButton.getGlobalBounds().contains(mx, my)) {
+            // NEW FEATURE: Play sound when upgrade tower
+            if (*getContext().isSoundOn == true)
+                TowerUpgradeSound.play();
+
             int tileC = selectedinfo;
             if (tileC >= 3 && tileC <= 5) {
                 if (player.spendMoney(GameConstants::UPGRADE_COSTS[tileC - 3])) {
@@ -385,11 +425,10 @@ bool GameState::handleEvent(const sf::Event& event)
                                     curMap->getMap()[row][col].getPixelX(),
                                     curMap->getMap()[row][col].getPixelY());
 
-                                // NEW FEATURE: save when a tower upgraded
+                                // Save when a tower upgraded
                                 int tCurLevel = currentLevelIndex;
                                 SaveManagement::playerResult[tCurLevel].status = -1; // not finished
                                 SaveManagement::playerResult[tCurLevel].stars = 0;
-                                SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
                                 SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
                                 SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
                                 SaveManagement::playerResult[tCurLevel].towers.clear();
@@ -521,6 +560,8 @@ bool GameState::update(sf::Time dt)
                         // If not already attacking, trigger attack
                         if (e.getState() != ATTACK)
                             e.triggerAttack();
+                        if (*getContext().isSoundOn) // NEW FEATURE
+                            bulletLaserSound.play();
 
                         // Check if attack animation has finished
                         if (e.hasFinishedAttackAnim()) {
@@ -582,7 +623,7 @@ bool GameState::update(sf::Time dt)
         if (!level.isLastWave()) {
             level.nextWave();
 
-            // NEW FEATURE: save every new wave
+            // Save every new wave
             int tCurLevel = currentLevelIndex;
             SaveManagement::playerResult[tCurLevel].status = -1; // not finished
             SaveManagement::playerResult[tCurLevel].stars = 0;
@@ -616,7 +657,9 @@ bool GameState::update(sf::Time dt)
     }
 
     if (isGameOver) {
-        SaveManagement::playerResult[currentLevelIndex].status = 0; // locked // NEW FEATURE
+        if (!SaveManagement::playerResult[currentLevelIndex].win)       // NEW FEATURE
+            SaveManagement::playerResult[currentLevelIndex].status = 0; // locked
+
         requestStackPush(States::Defeat);
         isGameOver = false;
     }
@@ -624,8 +667,9 @@ bool GameState::update(sf::Time dt)
     // Push VictoryState
     if (isGameWin)
     {
-        // NEW FEATURE
+        // Save results
         int tCurLevel = currentLevelIndex;
+        SaveManagement::playerResult[tCurLevel].win = true;
         SaveManagement::playerResult[tCurLevel].status = 1; // game done
         SaveManagement::playerResult[tCurLevel].stars = calStars();
         SaveManagement::playerResult[tCurLevel].health = curMap->getMainTower().getMaxHealth();
@@ -713,7 +757,14 @@ bool GameState::update(sf::Time dt)
             continue;
         }
 
-        if (b.checkCollision(enemies[idx])) {
+        if (b.checkCollision(enemies[idx]))
+        {
+            if (*getContext().isSoundOn) // NEW FEATURE
+            {
+                bulletBombSound.setVolume(25);
+                bulletBombSound.play();
+            }
+
             b.deactivate();
             enemies[idx].takeDamage(b.getDamage());
         }
@@ -777,17 +828,26 @@ void GameState::loadLevel(int index) {
     //waveIndex = 0;
     //levels[currentLevelIndex].resetWave(); // Start from wave 0
 
-    // NEW FEATURE: load wave, health, gold
-    waveIndex = SaveManagement::playerResult[currentLevelIndex].curWave; // old: waveIndex = 0
-    levels[currentLevelIndex].setCurrentWaveIndex(SaveManagement::playerResult[currentLevelIndex].curWave);
-    if (SaveManagement::playerResult[currentLevelIndex].health != 0)
-        curMap->getMainTower().setCurrentHealth(SaveManagement::playerResult[currentLevelIndex].health);
+    // SaveManagement: Load wave, health, gold
+    int loadWave = SaveManagement::playerResult[currentLevelIndex].curWave;
+    int loadHealth = SaveManagement::playerResult[currentLevelIndex].health;
+    int loadGold = SaveManagement::playerResult[currentLevelIndex].curGold;
+
+    levels[currentLevelIndex].setCurrentWaveIndex(loadWave);            //wave
+
+    if (loadHealth != 0)                                                // health
+        curMap->getMainTower().setCurrentHealth(loadHealth);
     curMap->getMainTower().takeDamage(0);
     curMap->getMainTower().drawHealthBar(window);
-    if (SaveManagement::playerResult[currentLevelIndex].curGold != 0)
-        player.setMoney(SaveManagement::playerResult[currentLevelIndex].curGold);
 
-    // NEW FEATURE
+    if (loadGold == 0)                                                  // gold
+        player.setMoney(levels[currentLevelIndex].getStartGold());
+    else if (loadGold == -1)
+        player.setMoney(0);
+    else
+        player.setMoney(loadGold);
+
+    // SaveManagement: Load towers' properties
     int savedTowers = SaveManagement::playerResult[currentLevelIndex].towers.size();
     for (int i = 0; i < savedTowers; i++)
     {
@@ -891,3 +951,26 @@ int GameState::calStars() {
         return 0;
 }
 
+// NEW FEATURE
+GameState::~GameState()
+{
+    auto& musicFlag = *getContext().isMusicOn;
+    auto& musicState = *getContext().currentMusic;
+    auto& musicHolder = *getContext().musics;
+
+    // Stop game music if it was playing
+    if (musicState == MusicState::Game) {
+        musicHolder.get(Musics::MusicGame).stop();
+
+        // Resume menu music if it was playing before
+        if (musicFlag) {
+            auto& menuMusic = musicHolder.get(Musics::MusicMenu);
+            menuMusic.setLoop(true);
+            menuMusic.play();
+            musicState = MusicState::Menu;
+        }
+        else {
+            musicState = MusicState::None;
+        }
+    }
+}

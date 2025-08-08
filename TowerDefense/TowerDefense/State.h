@@ -23,13 +23,23 @@ public:
 
 	struct Context
 	{
-		Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, Player& player, int& stars);
+		Context(sf::RenderWindow& window, TextureHolder& textures, FontHolder& fonts, 
+					Player& player, int& stars,
+					SoundBufferHolder& sfx, MusicHolder& music,
+					bool& menuMusicFlag, bool& sfxFlag,
+					MusicState& musicState);
 
 		sf::RenderWindow* window;
 		TextureHolder* textures;
 		FontHolder* fonts;
 		Player* player;
 		int* victoryStars;
+
+		SoundBufferHolder* soundBuffers;
+		MusicHolder* musics;
+		bool* isMusicOn;
+		bool* isSoundOn;
+		MusicState* currentMusic;
 	};
 
 

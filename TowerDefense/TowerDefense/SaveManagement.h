@@ -44,9 +44,10 @@ public:
 	// process save file
 	struct levelResult
 	{
-		int status; // isGameOver = 0, isGameWin = 1, else = -1
-		int curGold; // startGold = 
-		int stars; // if (!status) = 0, else = 
+		bool win = false;	// ever win? // NEW FEATURE
+		int status;			// isGameOver = 0, isGameWin = 1, isNotFinished = -1
+		int curGold;
+		int stars;			// (status != 1) => (stars = 0)
 		int health;
 		int curWave;
 		vector<ctower> towers;

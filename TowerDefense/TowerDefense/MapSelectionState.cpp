@@ -173,8 +173,7 @@ void MapSelectionState::draw()
 		}
 		else
 		{
-			if (SaveManagement::playerResult[i - 1].status != 1 && // Locked: previous level is not done
-				(SaveManagement::playerResult[i].stars == 0 && SaveManagement::playerResult[i].curWave == 0))
+			if (!(SaveManagement::playerResult[i - 1].win)) // Locked: previous level is not done
 			{
 				if (lockedLevels[i - 1].getGlobalBounds().contains(mousePos))
 					lockedLevels[i - 1].setScale(1.1f, 1.1f);
@@ -228,8 +227,8 @@ bool MapSelectionState::handleEvent(const sf::Event& event)
 		}
 
 		// Choose level
-		for (size_t i = 0; i < unlockedLevels.size(); i++) {
-			if (i == 0 || SaveManagement::playerResult[i - 1].status == 1) // NEW FEATURE: check if last level was done
+		for (size_t i = 0; i < 4; i++) {
+			if (i == 0 || SaveManagement::playerResult[i - 1].win) // NEW FEATURE: check if previous level was done
 			{
 				if (unlockedLevels[i].getGlobalBounds().contains(mousePos))
 				{

@@ -103,7 +103,7 @@ bool InputNameState::handleEvent(const sf::Event& event)
 
 		return true;
 	}
-
+	// Mouse click: Next / X button
 	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
 		Vector2f mousePos = getContext().window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 

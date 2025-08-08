@@ -15,16 +15,22 @@ MenuState::MenuState(StateStack& stack, Context context)
 	sf::Texture& texture = context.textures->get(Textures::MenuScreen);
 	mBackgroundSprite.setTexture(texture);
 
-	// Set music - sound
-	sf::SoundBuffer buffer;
-	buffer.loadFromFile("Audio/UIclick.wav");
-	mClickSound.setBuffer(buffer);
+	// NEW FEATURE: Load Music
+	auto& musicHolder = *getContext().musics;
+	auto& musicFlag = *getContext().isMusicOn;
+	auto& musicState = *getContext().currentMusic;
 
-	//sf::Music mMusic;
-	mMenuMusic.openFromFile("Audio/MusicMenu.wav");
-	mMenuMusic.setLoop(true);      // Loop it for background music
-	//mMusic.setVolume(50.f);    // Optional: Adjust volume
-	mMenuMusic.play();             // Start playing
+	// Stop game music if it was playing
+	if (musicState == MusicState::Game) {
+		musicHolder.get(Musics::MusicGame).stop();
+	}
+	if (musicFlag) {
+		auto& menuMusic = musicHolder.get(Musics::MusicMenu);
+		menuMusic.setLoop(true);
+		menuMusic.setVolume(10);
+		menuMusic.play();
+		musicState = MusicState::Menu;
+	}
 
 	// New Game Button
 	sf::Sprite newGameSprite;
@@ -97,7 +103,7 @@ bool MenuState::handleEvent(const sf::Event& event)
 			if (mOptionSprites[i].getGlobalBounds().contains(mousePos)) {
 				if (i == 0) {
 					requestStackPop();
-					if (MenuState::isNewPlayer) // NEW FEATURE
+					if (MenuState::isNewPlayer)
 						requestStackPush(States::InputName); // New game
 					else
 						requestStackPush(States::MapSelection); // New game
@@ -105,7 +111,7 @@ bool MenuState::handleEvent(const sf::Event& event)
 
 				else if (i == 1) {
 					requestStackPop();
-					requestStackPush(States::Load); // NEW FEATURE
+					requestStackPush(States::Load);
 				}
 
 				else if (i == 2)

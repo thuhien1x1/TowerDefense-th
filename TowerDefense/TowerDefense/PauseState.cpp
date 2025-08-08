@@ -35,19 +35,19 @@ PauseState::PauseState(StateStack& stack, Context context)
 
 	// On / Off button (for music background & sound effect)
 	musicOnButton.setTexture(context.textures->get(Textures::onButton));
-	musicOnButton.setPosition(1140.f, 390.f);
+	musicOnButton.setPosition(1140.f, 540.f);
 	centerOrigin(musicOnButton);
 
 	musicOffButton.setTexture(context.textures->get(Textures::offButton));
-	musicOffButton.setPosition(1140.f, 390.f);
+	musicOffButton.setPosition(1140.f, 540.f);
 	centerOrigin(musicOffButton);
 
 	soundEffectOnButton.setTexture(context.textures->get(Textures::onButton));
-	soundEffectOnButton.setPosition(1140.f, 540.f);
+	soundEffectOnButton.setPosition(1140.f, 390.f);
 	centerOrigin(soundEffectOnButton);
 
 	soundEffectOffButton.setTexture(context.textures->get(Textures::offButton));
-	soundEffectOffButton.setPosition(1140.f, 540.f);
+	soundEffectOffButton.setPosition(1140.f, 390.f);
 	centerOrigin(soundEffectOffButton);
 }
 
@@ -87,15 +87,14 @@ void PauseState::draw()
 		quitButton.setScale(1.f, 1.f);
 	window.draw(quitButton);
 
-	// On / Off button
-	if (isMusicOn) {
+	// On / Off button - NEW FEATURE
+	if (*getContext().isMusicOn) {
 		if (musicOnButton.getGlobalBounds().contains(mousePos))
 			musicOnButton.setScale(1.5f, 1.5f);
 		else
 			musicOnButton.setScale(1.4f, 1.4f);
 		window.draw(musicOnButton);
 	}
-
 	else {
 		if (musicOffButton.getGlobalBounds().contains(mousePos))
 			musicOffButton.setScale(1.5f, 1.5f);
@@ -104,14 +103,13 @@ void PauseState::draw()
 		window.draw(musicOffButton);
 	}
 
-	if (isSoundEffectOn) {
+	if (*getContext().isSoundOn) {
 		if (soundEffectOnButton.getGlobalBounds().contains(mousePos))
 			soundEffectOnButton.setScale(1.5f, 1.5f);
 		else
 			soundEffectOnButton.setScale(1.4f, 1.4f);
 		window.draw(soundEffectOnButton);
 	}
-
 	else {
 		if (soundEffectOffButton.getGlobalBounds().contains(mousePos))
 			soundEffectOffButton.setScale(1.5f, 1.5f);
@@ -137,17 +135,47 @@ bool PauseState::handleEvent(const sf::Event& event)
 			return true;
 		}
 
-		// Click SOUND ON/OFF
-		if (musicOnButton.getGlobalBounds().contains(mousePos)) {
-			isMusicOn = !isMusicOn;
-			// TODO: mute/unmute sound effects
+		// Click MUSIC ON/OFF - NEW FEATURE
+		if (musicOnButton.getGlobalBounds().contains(mousePos))
+		{
+			auto& globalMusicFlag = *getContext().isMusicOn;
+			auto& musics = getContext().musics->get(Musics::MusicGame);
+			auto& musicState = *getContext().currentMusic;
+
+			if (globalMusicFlag)
+			{
+				globalMusicFlag = false;
+				if (musics.getStatus() == sf::Music::Playing)
+				{
+					musics.stop();
+				}
+			}
+			else
+			{
+				globalMusicFlag = true;
+				if (musics.getStatus() != sf::Music::Playing)
+				{
+					musics.setLoop(true);
+					musics.play();
+				}
+			}
+
 			return true;
 		}
 
-		// Click MUSIC ON/OFF
+		// Click SOUND ON/OFF
 		if (soundEffectOnButton.getGlobalBounds().contains(mousePos)) {
-			isSoundEffectOn = !isSoundEffectOn;
-			// TODO: mute/unmute sound effects
+			auto& globalSoundFlag = *getContext().isSoundOn;
+
+			if (globalSoundFlag)
+			{
+				globalSoundFlag = false;
+			}
+			else
+			{
+				globalSoundFlag = true;
+			}
+
 			return true;
 		}
 

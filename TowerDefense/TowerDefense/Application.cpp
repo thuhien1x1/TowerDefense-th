@@ -17,7 +17,7 @@ Application::Application()
     , mTextures()
     , mFonts()
     , mPlayer()
-    , mStateStack(State::Context(mWindow, mTextures, mFonts, mPlayer, mVictoryStars))
+    , mStateStack(State::Context(mWindow, mTextures, mFonts, mPlayer, mVictoryStars, mSoundBuffers, mMusics, isMusicOn, isSoundOn, currentMusic))
 {
     mWindow.setVerticalSyncEnabled(true); // Smoother rendering
 
@@ -152,6 +152,10 @@ Application::Application()
     mSoundBuffers.load(SoundBuffers::GameOver, "Audio/GameOver.wav");
     mSoundBuffers.load(SoundBuffers::GameWin, "Audio/GameWin.wav");
 
+    mSoundBuffers.load(SoundBuffers::TowerPlace, "Audio/TowerPlace.wav");
+    mSoundBuffers.load(SoundBuffers::TowerUpgrade, "Audio/TowerUpgrade.wav");
+
+    mSoundBuffers.load(SoundBuffers::UIclick, "Audio/UIclick.wav");
     mMusics.open(Musics::MusicGame, "Audio/MusicGame.wav");
     mMusics.open(Musics::MusicMenu, "Audio/MusicMenu.wav");
 }
@@ -180,7 +184,6 @@ void Application::registerStates()
     mStateStack.registerState<MapSelectionState>(States::MapSelection);
     mStateStack.registerState<VictoryState>(States::Victory);
     mStateStack.registerState<DefeatState>(States::Defeat);
-    // NEW FEATURE
     mStateStack.registerState<InputNameState>(States::InputName);
     mStateStack.registerState<SaveManagement>(States::Load);
 }
@@ -190,6 +193,14 @@ void Application::processInput()
     sf::Event event;
     while (mWindow.pollEvent(event))
     {
+        // NEW FEATURE: Global click sound logic
+        if (event.type == sf::Event::MouseButtonPressed) {
+            if (isSoundOn) {
+                mClickSound.setBuffer(mSoundBuffers.get(SoundBuffers::UIclick));
+                mClickSound.play();
+            }
+        }
+
         mStateStack.handleEvent(event);
 
         if (event.type == sf::Event::Closed)

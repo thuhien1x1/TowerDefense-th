@@ -26,11 +26,10 @@ public:
     static int levelID;
 
 private:
-    // NEW FEATURE
     Font font;
     vector<sf::Text>      stars;
     vector<sf::Text>      currentWave;
 
-    sf::Text      playerName; // NEW FEATURE
+    sf::Text      playerName;
 };
 

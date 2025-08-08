@@ -18,4 +18,7 @@ private:
 	sf::Sprite				defeatSprite;
 	sf::Sprite				restartButton;
 	sf::Sprite				quitButton;
+
+private:
+	sf::Sound				GameOverSound;
 };

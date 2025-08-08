@@ -21,8 +21,5 @@ private:
 	sf::Sprite				mMusicOnButton;
 	sf::Sprite				mMusicOffButton;
 	sf::Sprite				mCloseOptionsPanelButton;
-
-	bool					isSoundOn = true;
-	bool					isMusicOn = true;
 };
 

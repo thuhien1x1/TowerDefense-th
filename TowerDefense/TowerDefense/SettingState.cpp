@@ -47,7 +47,7 @@ void SettingState::draw()
 	window.draw(mBackgroundSprite);
 
 	// Sound button
-	if (isSoundOn) {
+	if (*getContext().isSoundOn) {
 		if (mSoundOnButton.getGlobalBounds().contains(mousePos))
 			mSoundOnButton.setScale(1.8f, 1.8f);
 		else
@@ -64,7 +64,7 @@ void SettingState::draw()
 	}
 
 	// Music button
-	if (isMusicOn) {
+	if (*getContext().isMusicOn) {
 		if (mMusicOnButton.getGlobalBounds().contains(mousePos))
 			mMusicOnButton.setScale(1.8f, 1.8f);
 		else
@@ -99,21 +99,48 @@ bool SettingState::handleEvent(const sf::Event& event)
 		// Convert mouse position from screen pixels to world coordinates (considering the current view)
 		sf::Vector2f mousePos = getContext().window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 
-		// Click SOUND ON/OFF
-		if (mSoundOnButton.getGlobalBounds().contains(mousePos) ||
-			mSoundOffButton.getGlobalBounds().contains(mousePos))
-		{
-			isSoundOn = !isSoundOn;
-			// TODO: mute/unmute sound effects
-			return true;
-		}
-
-		// Click MUSIC ON/OFF
+		// Click MUSIC ON/OFF - NEW FEATURE
 		if (mMusicOnButton.getGlobalBounds().contains(mousePos) ||
 			mMusicOffButton.getGlobalBounds().contains(mousePos))
 		{
-			isMusicOn = !isMusicOn;
-			// TODO: mute/unmute background music
+			auto& globalMusicFlag = *getContext().isMusicOn;
+			auto& menuMusic = getContext().musics->get(Musics::MusicMenu);
+
+			if (globalMusicFlag)
+			{
+				globalMusicFlag = false;
+				if (menuMusic.getStatus() == sf::Music::Playing)
+				{
+					menuMusic.stop();
+				}
+			}
+			else
+			{
+				globalMusicFlag = true;
+				if (menuMusic.getStatus() != sf::Music::Playing)
+				{
+					menuMusic.setLoop(true);
+					menuMusic.play();
+				}
+			}
+
+			return true;
+		}
+		// Click SOUND ON/OFF - NEW FEATURE
+		if (mSoundOnButton.getGlobalBounds().contains(mousePos) ||
+			mSoundOffButton.getGlobalBounds().contains(mousePos))
+		{
+			auto& globalSoundFlag = *getContext().isSoundOn;
+
+			if (globalSoundFlag)
+			{
+				globalSoundFlag = false;
+			}
+			else
+			{
+				globalSoundFlag = true;
+			}
+
 			return true;
 		}
 

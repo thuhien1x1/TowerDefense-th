@@ -399,6 +399,10 @@ bool GameState::handleEvent(const sf::Event& event)
 
         // Handle tower upgrade button click
         if (showInfo && upgradeButton.getGlobalBounds().contains(mx, my)) {
+            // NEW FEATURE: Play sound when upgrade tower
+            if (*getContext().isSoundOn == true)
+                TowerUpgradeSound.play();
+
             int tileC = selectedinfo;
             if (tileC >= 3 && tileC <= 5) {
                 if (player.spendMoney(GameConstants::UPGRADE_COSTS[tileC - 3])) {

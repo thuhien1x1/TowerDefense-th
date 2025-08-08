@@ -8,6 +8,13 @@
 
 #include "ResourceHolder.h"
 
+// NEW FEATURE
+enum class MusicState
+{
+    None,
+    Menu,
+    Game
+};
 
 namespace Textures
 {
@@ -126,6 +133,10 @@ namespace Textures
         // InputNameState // NEW FEATURE
         inputNameBackground,
         nextButton,
+
+        // Load UI for SaveManagemner (Loading)
+        loadBackground,
+        nameBar,
     };
 }
 
@@ -183,6 +194,10 @@ namespace SoundBuffers
         // GameEnd
         GameOver,
         GameWin,
+
+        // Tower
+        TowerPlace,
+        TowerUpgrade,
 
         // Mouse Click
         UIclick

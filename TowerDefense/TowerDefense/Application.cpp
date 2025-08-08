@@ -17,7 +17,7 @@ Application::Application()
     , mTextures()
     , mFonts()
     , mPlayer()
-    , mStateStack(State::Context(mWindow, mTextures, mFonts, mPlayer, mVictoryStars))
+    , mStateStack(State::Context(mWindow, mTextures, mFonts, mPlayer, mVictoryStars, mSoundBuffers, mMusics, isMusicOn, isSoundOn, currentMusic))
 {
     mWindow.setVerticalSyncEnabled(true); // Smoother rendering
 
@@ -60,7 +60,6 @@ Application::Application()
     mTextures.load(Textures::Bullet2, "Media/Textures/fire_bullet_sprite_sheet.png");
     mTextures.load(Textures::Bullet3, "Media/Textures/ice_bullet_sprite_sheet.png");
     mTextures.load(Textures::Bomb, "Media/Textures/bomb_sprite_sheet.png");
-
 
     // Load enemy's animation textures
     mTextures.load(Textures::Enemy1_Walk, "Media/Textures/enemy_1_walk_126_123_6.png");
@@ -135,9 +134,13 @@ Application::Application()
     mTextures.load(Textures::circle, "Media/UI/icons/circle.png");
 
     // NEW FEATURE
-    // Load Texture in InputNameState 
+    // Load UI in InputNameState 
     mTextures.load(Textures::inputNameBackground, "Media/Textures/inputNameBackground.png");
     mTextures.load(Textures::nextButton, "Media/UI/buttons/nextButton.png");
+
+    // Load UI in SaveMangement for Loading
+    mTextures.load(Textures::loadBackground, "Media/UI/loadBackground.png");
+    mTextures.load(Textures::nameBar, "Media/UI/buttons/nameBar.png");
 
     // NEW FEATURE
     // Load sound and music
@@ -152,6 +155,10 @@ Application::Application()
     mSoundBuffers.load(SoundBuffers::GameOver, "Audio/GameOver.wav");
     mSoundBuffers.load(SoundBuffers::GameWin, "Audio/GameWin.wav");
 
+    mSoundBuffers.load(SoundBuffers::TowerPlace, "Audio/TowerPlace.wav");
+    mSoundBuffers.load(SoundBuffers::TowerUpgrade, "Audio/TowerUpgrade.wav");
+
+    mSoundBuffers.load(SoundBuffers::UIclick, "Audio/UIclick.wav");
     mMusics.open(Musics::MusicGame, "Audio/MusicGame.wav");
     mMusics.open(Musics::MusicMenu, "Audio/MusicMenu.wav");
 }
@@ -180,7 +187,6 @@ void Application::registerStates()
     mStateStack.registerState<MapSelectionState>(States::MapSelection);
     mStateStack.registerState<VictoryState>(States::Victory);
     mStateStack.registerState<DefeatState>(States::Defeat);
-    // NEW FEATURE
     mStateStack.registerState<InputNameState>(States::InputName);
     mStateStack.registerState<SaveManagement>(States::Load);
 }
@@ -190,6 +196,14 @@ void Application::processInput()
     sf::Event event;
     while (mWindow.pollEvent(event))
     {
+        // NEW FEATURE: Global click sound logic
+        if (event.type == sf::Event::MouseButtonPressed) {
+            if (isSoundOn) {
+                mClickSound.setBuffer(mSoundBuffers.get(SoundBuffers::UIclick));
+                mClickSound.play();
+            }
+        }
+
         mStateStack.handleEvent(event);
 
         if (event.type == sf::Event::Closed)

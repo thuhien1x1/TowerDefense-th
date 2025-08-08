@@ -22,6 +22,13 @@ DefeatState::DefeatState(StateStack& stack, Context context)
 	quitButton.setTexture(context.textures->get(Textures::quitButton2));
 	quitButton.setPosition(1100.f, 680.f);
 	centerOrigin(quitButton);
+
+	if (*getContext().isSoundOn)
+	{
+		GameOverSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::GameOver));
+		GameOverSound.setVolume(60);
+		GameOverSound.play();
+	}
 }
 
 void DefeatState::draw() {

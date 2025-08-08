@@ -26,6 +26,14 @@ VictoryState::VictoryState(StateStack& stack, Context context)
 	centerOrigin(quitButton);
 
 	star.setTexture(context.textures->get(Textures::star));
+
+	// NEW FEATURE
+	if (*getContext().isSoundOn)
+	{
+		GameWinSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::GameWin));
+		GameWinSound.setVolume(60);
+		GameWinSound.play();
+	}
 }
 
 void VictoryState::draw() {

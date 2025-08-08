@@ -2,6 +2,8 @@
 #include "Utility.h"
 #include "ResourceHolder.h"
 #include "Application.h"
+#include "SaveManagement.h"
+#include "MapSelectionState.h"
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -180,8 +182,21 @@ bool PauseState::handleEvent(const sf::Event& event)
 		}
 
 		// Restart button
-		if (restartButton.getGlobalBounds().contains(mousePos)) {
+		if (restartButton.getGlobalBounds().contains(mousePos))
+		{
 			requestStateClear();
+
+			// Reset saved progress
+			int tCurLevel = MapSelectionState::levelID;
+			if (!SaveManagement::playerResult[tCurLevel].win)
+				SaveManagement::playerResult[tCurLevel].status = 0;
+			SaveManagement::playerResult[tCurLevel].stars = 0;
+			SaveManagement::playerResult[tCurLevel].health = 0;
+			SaveManagement::playerResult[tCurLevel].curWave = 0;
+			SaveManagement::playerResult[tCurLevel].curGold = 0;
+			SaveManagement::playerResult[tCurLevel].towers.clear();
+			SaveManagement::save(SaveManagement::playerName);
+
 			requestStackPush(States::Game); // Back to current Game
 			return true;
 		}

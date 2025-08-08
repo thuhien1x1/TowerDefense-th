@@ -73,6 +73,7 @@ namespace Textures
 
         // Upgrade Button
         upgradeButton,
+        sellButton,
 
         // Construction Icon
         constructionicon,

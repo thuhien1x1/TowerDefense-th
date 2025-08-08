@@ -77,8 +77,9 @@ GameState::GameState(StateStack& stack, Context context)
     for (int i = 0; i < 6; ++i)
         infoSprite[i].setTexture(*infoTexture[i]);
 
-    // Load Upgrade
+    // Load Functional Button
     upgradeButton.setTexture(context.textures->get(Textures::upgradeButton));
+    sellButton.setTexture(context.textures->get(Textures::sellButton));
 
     // Load Construction Icon
     for (int i = 0; i < 7; ++i) {
@@ -293,9 +294,11 @@ void GameState::draw()
     // Draw Tower Infos
     if (showInfo && selectedinfo >= 3) {
         window.draw(infoSprite[selectedinfo - 3]);
+        window.draw(sellButton);
         if (selectedinfo - 3 < 3)
             window.draw(upgradeButton);
     }
+
 }
 bool GameState::handleEvent(const sf::Event& event)
 {
@@ -357,10 +360,10 @@ bool GameState::handleEvent(const sf::Event& event)
                     if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
                         ctower t;
                         td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
-
+                        int itower = MapHandle::findBlockmap(currentLevelIndex, td.first, td.second);
                         t.init(*towerTexture[towerType],
                             curMap->getMap()[td.first][td.second].getPixelX(),
-                            curMap->getMap()[td.first][td.second].getPixelY());
+                            curMap->getMap()[td.first][td.second].getPixelY(), currentLevelIndex, itower);
                         t.setLocation(cpoint(td.first, td.second, 1));
                         t.setMapForBullet(curMap->getMap());
                         t.getBullet().setSpeed(8);
@@ -413,17 +416,16 @@ bool GameState::handleEvent(const sf::Event& event)
                     col = td.second;
                     if (row != -1 && col != -1) {
                         int newC = tileC + 3;
-                        MapHandle::setCmap(currentLevelIndex, *curMap, row, col, newC);
-
-
                         // Update map C value for upgraded tower
+                        MapHandle::setCmap(currentLevelIndex, *curMap, row, col, newC);
                         // Update the tower's type and texture
                         for (auto& t : towers) {
                             if (t.getLocation().getRow() == row && t.getLocation().getCol() == col) {
                                 t.setType(newC - 3);
+                                int itower = MapHandle::findBlockmap(currentLevelIndex, row, col);
                                 t.init(*towerTexture[newC - 3],
                                     curMap->getMap()[row][col].getPixelX(),
-                                    curMap->getMap()[row][col].getPixelY());
+                                    curMap->getMap()[row][col].getPixelY(), currentLevelIndex, itower);
 
                                 // Save when a tower upgraded
                                 int tCurLevel = currentLevelIndex;
@@ -453,6 +455,51 @@ bool GameState::handleEvent(const sf::Event& event)
             }
         }
 
+        // Handle tower sell button click
+        if (showInfo && sellButton.getGlobalBounds().contains(mx, my)) {
+            int tileC = selectedinfo;
+            int row = -1, col = -1;
+            td = MapHandle::getTowerdes(currentLevelIndex, selectedRow, selectedCol);
+            row = td.first;
+            col = td.second;
+            if (row != -1 && col != -1) {
+                for (auto t = towers.begin(); t != towers.end(); ++t) {
+                    // Update map C value for upgraded tower
+                    MapHandle::setCmap(currentLevelIndex, *curMap, row, col, 2);
+                    // Sell tower
+                    if (t->getLocation().getRow() == row && t->getLocation().getCol() == col) {
+                        towers.erase(t);
+                        if (tileC >= 3 && tileC <= 5)
+                            player.addMoney(GameConstants::TOWER_COSTS[tileC - 3] / 10 * 7);
+                        else
+                            player.addMoney(GameConstants::UPGRADE_COSTS[tileC - 6] / 10 * 7);
+                        int index = MapHandle::findBlockmap(currentLevelIndex, row, col);
+                        towerconstructed[index] = false;
+                        // NEW FEATURE: save when a tower upgraded
+                        int tCurLevel = currentLevelIndex;
+                        SaveManagement::playerResult[tCurLevel].status = -1; // not finished
+                        SaveManagement::playerResult[tCurLevel].stars = 0;
+                        SaveManagement::playerResult[tCurLevel].health = (isGameWin || isGameOver) ? curMap->getMainTower().getMaxHealth() : curMap->getMainTower().getHealth();
+                        SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
+                        SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
+                        SaveManagement::playerResult[tCurLevel].towers.clear();
+                        for (int i = 0; i < towers.size(); i++)
+                        {
+                            ctower tempTower;
+                            tempTower.setType(towers[i].getType());
+                            tempTower.setLocation(towers[i].getLocation());
+                            SaveManagement::playerResult[tCurLevel].towers.push_back(tempTower);
+                        }
+                        SaveManagement::save(SaveManagement::playerName);
+
+                        break;
+                    }
+                }
+                showInfo = false;
+                selectedinfo = -1;
+                return false;
+            }
+        }
         // Handle click on map tiles
         cpoint clicked = cpoint::fromXYToRowCol(mx, my);
         if (clicked.getRow() >= 0 && clicked.getRow() < cpoint::MAP_ROW &&
@@ -489,8 +536,9 @@ bool GameState::handleEvent(const sf::Event& event)
 
                 // Display tower info panel and upgrade button if upgradeable
                 infoSprite[c - 3].setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 4 * cpoint::TILE_SIZE);
+                sellButton.setPosition((float)fx + cpoint::TILE_SIZE * 3.5f, (float)fy - 4.85f * cpoint::TILE_SIZE);
                 if (c >= 3 && c <= 5) {
-                    upgradeButton.setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 5.5f * cpoint::TILE_SIZE);
+                    upgradeButton.setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 4.85f * cpoint::TILE_SIZE);
                 }
 
 
@@ -613,7 +661,7 @@ bool GameState::update(sf::Time dt)
                     || e.hasReachedEnd();
             }),
         enemies.end()
-                );
+    );
 
 
     // The wave must be the last wave
@@ -857,9 +905,10 @@ void GameState::loadLevel(int index) {
 
         tTower.setType(tType);
         tTower.setLocation(tLoc);
+        int itower = MapHandle::findBlockmap(currentLevelIndex, tLoc.getRow(), tLoc.getCol());
         tTower.init(*towerTexture[tType],
             tLoc.getPixelX(),
-            tLoc.getPixelY());
+            tLoc.getPixelY(), currentLevelIndex, itower);
         tTower.setMapForBullet(curMap->getMap());
         tTower.getBullet().setSpeed(8);
         tTower.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);

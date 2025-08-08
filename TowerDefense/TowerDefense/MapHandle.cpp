@@ -75,7 +75,10 @@ void MapHandle::setIconsmap1(Sprite* icon)
 		float x = positions[i].second * cpoint::TILE_SIZE;
 		float y = positions[i].first * cpoint::TILE_SIZE;
 		icon[i].setPosition(x, y);
-		icon[i].setOrigin(icon[i].getTexture()->getSize().x * 0.07f, icon[i].getTexture()->getSize().y * 0.7f);
+		if (i == 2)
+			icon[i].setOrigin(icon[i].getTexture()->getSize().x - 107.0f, icon[i].getTexture()->getSize().y * 0.5f);
+		else
+			icon[i].setOrigin(icon[i].getTexture()->getSize().x * 0.07f, icon[i].getTexture()->getSize().y * 0.7f);
 	}
 }
 
@@ -105,9 +108,9 @@ void MapHandle::setCmap2(cmap& map, int a, int b, int C) {
 			for (int j = 6; j <= 9; ++j)
 				map.getMap()[i][j].setC(C);
 	}
-	else if (a >= 16 && a <= 19 && b >= 20 && b <= 22) {
+	else if (a >= 16 && a <= 19 && b >= 19 && b <= 21) {
 		for (int i = 16; i <= 19; ++i)
-			for (int j = 20; j <= 22; ++j)
+			for (int j = 19; j <= 21; ++j)
 				map.getMap()[i][j].setC(C);
 	}
 	else if (a >= 22 && a <= 24 && b >= 9 && b <= 12) {
@@ -120,9 +123,9 @@ void MapHandle::setCmap2(cmap& map, int a, int b, int C) {
 			for (int j = 23; j <= 26; ++j)
 				map.getMap()[i][j].setC(C);
 	}
-	else if (a >= 16 && a <= 19 && b >= 28 && b <= 30) {
+	else if (a >= 16 && a <= 19 && b >= 27 && b <= 29) {
 		for (int i = 16; i <= 19; ++i)
-			for (int j = 28; j <= 30; ++j)
+			for (int j = 27; j <= 29; ++j)
 				map.getMap()[i][j].setC(C);
 	}
 	else if (a >= 14 && a <= 16 && b >= 36 && b <= 39) {
@@ -135,14 +138,14 @@ void MapHandle::setCmap2(cmap& map, int a, int b, int C) {
 pair<int, int> MapHandle::getTowerdes2(int a, int b) {
 	if (a >= 14 && a <= 16 && b >= 6 && b <= 9)
 		return { 16, 7 };
-	else if (a >= 16 && a <= 19 && b >= 20 && b <= 22)
-		return { 18, 20 };
+	else if (a >= 16 && a <= 19 && b >= 19 && b <= 21)
+		return { 18, 19 };
 	else if (a >= 22 && a <= 24 && b >= 9 && b <= 12)
 		return { 24, 10 };
 	else if (a >= 5 && a <= 7 && b >= 23 && b <= 26)
 		return { 7, 24 };
-	else if (a >= 16 && a <= 19 && b >= 28 && b <= 30)
-		return { 18, 28 };
+	else if (a >= 16 && a <= 19 && b >= 27 && b <= 29)
+		return { 18, 27 };
 	else if (a >= 14 && a <= 16 && b >= 36 && b <= 39)
 		return { 16, 37 };
 
@@ -152,10 +155,10 @@ pair<int, int> MapHandle::getTowerdes2(int a, int b) {
 void MapHandle::setIconsmap2(Sprite* icon) {
 	std::pair<int, int> positions[6] = {
 		{16, 7},
-		{18, 20},
+		{18, 19},
 		{24, 10},
 		{7, 24},
-		{18, 28},
+		{18, 27},
 		{16, 37}
 	};
 
@@ -163,17 +166,20 @@ void MapHandle::setIconsmap2(Sprite* icon) {
 		float x = positions[i].second * cpoint::TILE_SIZE;
 		float y = positions[i].first * cpoint::TILE_SIZE;
 		icon[i].setPosition(x, y);
-		icon[i].setOrigin(icon[i].getTexture()->getSize().x * 0.07f, icon[i].getTexture()->getSize().y * 0.7f);
+		if (i == 1 || i == 4)
+			icon[i].setOrigin(icon[i].getTexture()->getSize().x - 107.0f, icon[i].getTexture()->getSize().y * 0.5f);
+		else
+			icon[i].setOrigin(icon[i].getTexture()->getSize().x * 0.07f, icon[i].getTexture()->getSize().y * 0.7f);
 	}
 }
 
 int MapHandle::findBlockmap2(int a, int b) {
 	std::pair<int, int> positions[6] = {
 		{16, 7},
-		{18, 20},
+		{18, 19},
 		{24, 10},
 		{7, 24},
-		{18, 28},
+		{18, 27},
 		{16, 37}
 	};
 
@@ -249,7 +255,10 @@ void MapHandle::setIconsmap3(Sprite* icon) {
 		float x = positions[i].second * cpoint::TILE_SIZE;
 		float y = positions[i].first * cpoint::TILE_SIZE;
 		icon[i].setPosition(x, y);
-		icon[i].setOrigin(icon[i].getTexture()->getSize().x * 0.07f, icon[i].getTexture()->getSize().y * 0.7f);
+		if (i == 4 || i == 5)
+			icon[i].setOrigin(icon[i].getTexture()->getSize().x - 107.0f, icon[i].getTexture()->getSize().y * 0.5f);
+		else
+			icon[i].setOrigin(icon[i].getTexture()->getSize().x * 0.07f, icon[i].getTexture()->getSize().y * 0.7f);
 	}
 }
 
@@ -315,7 +324,7 @@ void MapHandle::setCmap4(cmap& map, int a, int b, int C) {
 
 pair<int, int> MapHandle::getTowerdes4(int a, int b) {
 	if (a >= 9 && a <= 12 && b >= 9 && b <= 11)
-		return { 12, 10 };
+		return { 11, 9 };
 	else if (a >= 20 && a <= 22 && b >= 7 && b <= 10)
 		return { 22, 8 };
 	else if (a >= 11 && a <= 13 && b >= 18 && b <= 21)
@@ -334,7 +343,7 @@ pair<int, int> MapHandle::getTowerdes4(int a, int b) {
 
 void MapHandle::setIconsmap4(Sprite* icon) {
 	std::pair<int, int> positions[7] = {
-		{12, 10},
+		{11, 9},
 		{22, 8},
 		{13, 19},
 		{20, 20},
@@ -347,13 +356,16 @@ void MapHandle::setIconsmap4(Sprite* icon) {
 		float x = positions[i].second * cpoint::TILE_SIZE;
 		float y = positions[i].first * cpoint::TILE_SIZE;
 		icon[i].setPosition(x, y);
-		icon[i].setOrigin(icon[i].getTexture()->getSize().x * 0.07f, icon[i].getTexture()->getSize().y * 0.7f);
+		if (i == 0 || i == 3 || i == 4)
+			icon[i].setOrigin(icon[i].getTexture()->getSize().x - 107.0f, icon[i].getTexture()->getSize().y * 0.5f);
+		else
+			icon[i].setOrigin(icon[i].getTexture()->getSize().x * 0.07f, icon[i].getTexture()->getSize().y * 0.7f);
 	}
 }
 
 int MapHandle::findBlockmap4(int a, int b) {
 	std::pair<int, int> positions[7] = {
-		{12, 10},
+		{11, 9},
 		{22, 8},
 		{13, 19},
 		{20, 20},
@@ -552,10 +564,10 @@ vector<Vector2f> MapHandle::getTowerButtons(int levelIndex, int row, int col)
 
 	else if (levelIndex == 1) {
 		if (towerPos == make_pair(16, 7)) index = 0;
-		else if (towerPos == make_pair(18, 20)) index = 1;
+		else if (towerPos == make_pair(18, 19)) index = 1;
 		else if (towerPos == make_pair(24, 10)) index = 2;
 		else if (towerPos == make_pair(7, 24)) index = 3;
-		else if (towerPos == make_pair(18, 28)) index = 4;
+		else if (towerPos == make_pair(18, 27)) index = 4;
 		else if (towerPos == make_pair(16, 37)) index = 5;
 	}
 
@@ -569,7 +581,7 @@ vector<Vector2f> MapHandle::getTowerButtons(int levelIndex, int row, int col)
 	}
 
 	else if (levelIndex == 3) {
-		if (towerPos == make_pair(12, 10)) index = 0;
+		if (towerPos == make_pair(11, 9)) index = 0;
 		else if (towerPos == make_pair(22, 8)) index = 1;
 		else if (towerPos == make_pair(13, 19)) index = 2;
 		else if (towerPos == make_pair(20, 20)) index = 3;

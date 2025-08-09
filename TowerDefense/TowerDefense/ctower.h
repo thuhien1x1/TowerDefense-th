@@ -48,7 +48,6 @@ public:
     void updateEffect(float deltaTime);
     bool isEffectPlaying() const { return _effectPlaying; }
 
-
     // Getter
     int getTargetEnemyIdx() const { return _targetEnemyIdx; }
     int getType() const { return Type; } // Tower 1 = 0 ...

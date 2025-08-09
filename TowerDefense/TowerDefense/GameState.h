@@ -75,6 +75,7 @@ private:
     Sprite heartIcon;
     Sprite waveIcon;
     Sprite currencyIcon;
+    CircleShape circleRange;
 
     // Construction Icons
     Sprite constructionicons[7];
@@ -84,11 +85,12 @@ private:
     Texture* infoTexture[6];
     Sprite infoSprite[6];
     bool showInfo = false;
+    bool showTowerRange = false;
     int selectedinfo;
 
     // Icon appear when click
     bool isChoosingTower = false;
-    cpoint selectedTile;  // cliked pixel
+    cpoint selectedTile;  // clicked pixel
     // Player for money
     Player player;
 

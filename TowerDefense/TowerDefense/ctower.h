@@ -2,6 +2,7 @@
 #include "cpoint.h"
 #include "cbullet.h"
 #include <SFML/Graphics.hpp>
+#include "FrameAnimator.h"
 
 using namespace sf;
 using namespace std;
@@ -13,6 +14,7 @@ private:
     cbullet _cb;
     float _shootTimer;
     int _targetEnemyIdx;
+    int _type;
 
     // MainTower
     Sprite _mainTowerSprite;
@@ -22,17 +24,9 @@ private:
 
     // Animation 
     Sprite _effectSprite;
-    IntRect _effectFrameRect;
-    int _effectFrameWidth;
-    int _effectFrameHeight;
-    int _effectTotalFrames;
-    int _effectCurrentFrame;
-    float _effectTimer;
-    float _effectSpeed;
+    FrameAnimator _effectAnim;
     bool _effectPlaying;
 
-    // Type tower
-    int Type;
 public:
     ctower();
 
@@ -50,7 +44,7 @@ public:
 
     // Getter
     int getTargetEnemyIdx() const { return _targetEnemyIdx; }
-    int getType() const { return Type; } // Tower 1 = 0 ...
+    int getType() const { return _type; } // Tower 1 = 0 ...
     cbullet& getBullet() { return _cb; }
     cpoint getLocation() const { return _location; }
     float getShootTimer() const { return _shootTimer; } // Get the current value of the shoot timer to check if the tower is ready to shoot
@@ -62,7 +56,7 @@ public:
     // Setter
     void setTargetEnemyIdx(int idx) { _targetEnemyIdx = idx; }
     void setMapForBullet(cpoint map[][cpoint::MAP_COL]) { _cb.updateMap(map); }
-    void setType(int n) { Type = n; }
+    void setType(int n) { _type = n; }
     void setLocation(const cpoint& loc) { _location = loc; }
     void setHealth(int health) { _mainTowerHealth = health; }
 };

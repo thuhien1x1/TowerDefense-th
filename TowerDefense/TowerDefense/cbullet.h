@@ -2,31 +2,22 @@
 #include "cpoint.h"
 #include "cenemy.h" 
 #include <SFML/Graphics.hpp>
+#include "FrameAnimator.h"
 
 class cbullet
 {
-    int _n, _speed;
     cpoint _p[cpoint::MAP_ROW * cpoint::MAP_COL];
     cpoint _m[cpoint::MAP_ROW][cpoint::MAP_COL];
     cpoint _curr;
+
+    int _n, _speed;
     float _posX, _posY;
     bool _active;
     int _targetIdx;
     int _damage;
+
     sf::Sprite _sprite;
-
-    // Animation
-    sf::IntRect _frameRect;   // Current frame of the sprite sheet
-    int _frameWidth;
-    int _frameHeight;
-    int _currentFrame;
-    int _totalFrames;
-    float _animationTimer;
-    float _animationSpeed; // Time for per frame
-
-    // Bomb: 16, 15, 7, scale 4.f
-    // Fire bullet: 1667, 1167, 4, scale 0.1f
-    // Ice bullet: 705, 114, 5, scale 0.8f
+    FrameAnimator _anim;
 
 public:
     cbullet();
@@ -61,8 +52,8 @@ public:
     void trackEnemy(const cenemy& enemy, float deltaTime);
 
     // Position and movement
-    void init(const sf::Texture& tex, float x, float y, int frameWidth, int frameHeight, int totalFrames, float animSpeed);
-    void updateAnimation(float deltaTime); // Add
+    void init(const sf::Texture& tex, float x, float y, int frameWidth, int frameHeight, int totalFrames, float animSpeed, float scale);
+    void updateAnimation(float deltaTime); 
     void updateSprite();
     void move(float dx, float dy);
 

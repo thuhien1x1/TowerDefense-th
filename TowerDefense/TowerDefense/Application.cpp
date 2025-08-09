@@ -56,11 +56,9 @@ Application::Application()
     mTextures.load(Textures::Info3plus, "Media/Textures/infotower3+.png");
 
     // Load bullet textures
-    mTextures.load(Textures::Bullet1, "Media/Textures/bomb_sprite_sheet.png");
-    mTextures.load(Textures::Bullet2, "Media/Textures/fire_bullet_sprite_sheet.png");
-    mTextures.load(Textures::Bullet3, "Media/Textures/ice_bullet_sprite_sheet.png");
     mTextures.load(Textures::Bomb, "Media/Textures/bomb_sprite_sheet.png");
-
+    mTextures.load(Textures::Fire, "Media/Textures/fire_bullet_sprite_sheet.png");
+    mTextures.load(Textures::Ice, "Media/Textures/ice_bullet_sprite_sheet.png");
 
     // Load enemy's animation textures
     mTextures.load(Textures::Enemy1_Walk, "Media/Textures/enemy_1_walk_126_123_6.png");
@@ -107,6 +105,7 @@ Application::Application()
     mTextures.load(Textures::miniMap2Locked, "Media/UI/miniMapLocked/miniMap2Locked.png");
     mTextures.load(Textures::miniMap3Locked, "Media/UI/miniMapLocked/miniMap3Locked.png");
     mTextures.load(Textures::miniMap4Locked, "Media/UI/miniMapLocked/miniMap4Locked.png");
+    mTextures.load(Textures::wave, "Media/UI/icons/wave.png");
 
     // Load UI in PauseState 
     mTextures.load(Textures::pauseButton, "Media/UI/buttons/pauseButton.png");

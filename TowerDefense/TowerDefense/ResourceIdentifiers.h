@@ -44,10 +44,7 @@ namespace Textures
         // Bullet
         Bomb,
         Fire,
-        Laser,
-        Bullet1,
-        Bullet2,
-        Bullet3,
+        Ice,
 
         // Effect
         ShootEffect,
@@ -104,6 +101,7 @@ namespace Textures
         miniMap2Locked,
         miniMap3Locked,
         miniMap4Locked,
+        wave,
 
         // UI for GameState
         pauseButton,

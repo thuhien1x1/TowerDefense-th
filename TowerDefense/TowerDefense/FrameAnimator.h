@@ -12,6 +12,10 @@ public:
     void reset();
     bool isFinished() const;
 
+    // Getter
+    int getFrameWidth() const { return _frameWidth; }
+    int getFrameHeight() const { return _frameHeight; }
+
 private:
     int _frameWidth;
     int _frameHeight;

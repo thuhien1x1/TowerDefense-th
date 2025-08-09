@@ -63,11 +63,11 @@ GameState::GameState(StateStack& stack, Context context)
 
     // Load Bullet textures
     bulletTexture[0] = &getContext().textures->get(Textures::Bomb);
-    bulletTexture[1] = &getContext().textures->get(Textures::Bullet2);
-    bulletTexture[2] = &getContext().textures->get(Textures::Bullet3);
-    bulletTexture[3] = &getContext().textures->get(Textures::Bullet1);
-    bulletTexture[4] = &getContext().textures->get(Textures::Bullet2);
-    bulletTexture[5] = &getContext().textures->get(Textures::Bullet3);
+    bulletTexture[1] = &getContext().textures->get(Textures::Fire);
+    bulletTexture[2] = &getContext().textures->get(Textures::Ice);
+    bulletTexture[3] = &getContext().textures->get(Textures::Bomb);
+    bulletTexture[4] = &getContext().textures->get(Textures::Fire);
+    bulletTexture[5] = &getContext().textures->get(Textures::Ice);
     shootEffectTexture = &getContext().textures->get(Textures::ShootEffect);
     font = getContext().fonts->get(Fonts::BruceForever);
 
@@ -109,6 +109,10 @@ GameState::GameState(StateStack& stack, Context context)
     waveIcon.setTexture(context.textures->get(Textures::waveIcon));
     waveIcon.setPosition(140.f, 130.f);
     centerOrigin(waveIcon);
+
+    circleRange.setFillColor(Color(0, 0, 0, 100));
+    circleRange.setRadius(TOWER_RANGE);
+    circleRange.setOrigin(TOWER_RANGE, TOWER_RANGE);
 
     // Initialize 4 levels (levelID, enemyCount, waveCount, towerMaxCount, startGold) 
     clevel level1(1, 45, 3, 5, 200);
@@ -221,6 +225,16 @@ void GameState::draw()
         pauseButton.setScale(1.f, 1.f);
     window.draw(pauseButton);
 
+    if (showTowerRange)
+        window.draw(circleRange);
+
+    for (const auto& tower : towers)
+        window.draw(tower.getSprite());
+
+    for (const auto& tower : towers)
+        if (tower.isEffectPlaying())
+            window.draw(tower.getEffectSprite());
+
     for (const auto& e : enemies) {
         if (!e.hasReachedEnd() || e.getState() == DEATH) {
 
@@ -251,13 +265,6 @@ void GameState::draw()
         }
     }
 
-    for (const auto& tower : towers)
-        window.draw(tower.getSprite());
-
-    for (const auto& tower : towers)
-        if (tower.isEffectPlaying())
-            window.draw(tower.getEffectSprite());
-
     for (int i = 0; i < bullets.size(); ++i) {
         if (!bullets[i].isActive())
             continue;
@@ -267,14 +274,14 @@ void GameState::draw()
 
     // Draw Construction Icons
     int numbericons;
+
     if (currentLevelIndex == 0) numbericons = 5;
     else if (currentLevelIndex == 3) numbericons = 7;
     else numbericons = 6;
-    for (int i = 0; i < numbericons; ++i) {
-        if (towerconstructed[i] == false) {
+
+    for (int i = 0; i < numbericons; ++i) 
+        if (towerconstructed[i] == false) 
             window.draw(constructionicons[i]);
-        }
-    }
 
     // Draw choosingTowerButton
     if (isChoosingTower) {
@@ -307,8 +314,8 @@ void GameState::draw()
             window.draw(upgradeButton);
         }
     }
-
 }
+
 bool GameState::handleEvent(const Event& event)
 {
     RenderWindow& window = *getContext().window;
@@ -351,7 +358,7 @@ bool GameState::handleEvent(const Event& event)
                 towerType = 0;
             }
             else if (towerChoosingButtons[1].getGlobalBounds().contains(mx, my)) {
-                clickedButton = &towerChoosingButtons[2];
+                clickedButton = &towerChoosingButtons[1];
                 towerType = 1;
             }
             else if (towerChoosingButtons[2].getGlobalBounds().contains(mx, my)) {
@@ -361,11 +368,11 @@ bool GameState::handleEvent(const Event& event)
 
             if (clickedButton && towerType != -1)
             {
-                // NEW FEATURE: Play sound when place tower
-                if (*getContext().isSoundOn == true)
-                    towerPlaceSound.play();
-
                 if (player.spendMoney(GameConstants::TOWER_COSTS[towerType])) {
+                    // NEW FEATURE: Play sound when place tower
+                    if (*getContext().isSoundOn == true)
+                        towerPlaceSound.play();
+
                     if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
                         ctower t;
                         td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
@@ -405,19 +412,20 @@ bool GameState::handleEvent(const Event& event)
                     return false;
                 }
             }
+
             isChoosingTower = false;
             return false;
         }
 
         // Handle tower upgrade button click
         if (showInfo && upgradeButton.getGlobalBounds().contains(mx, my)) {
-            // NEW FEATURE: Play sound when upgrade tower
-            if (*getContext().isSoundOn == true)
-                TowerUpgradeSound.play();
-
             int tileC = selectedinfo;
             if (tileC >= 3 && tileC <= 5) {
                 if (player.spendMoney(GameConstants::UPGRADE_COSTS[tileC - 3])) {
+                    // NEW FEATURE: Play sound when upgrade tower
+                    if (*getContext().isSoundOn == true)
+                        TowerUpgradeSound.play();
+
                     // Get the designated tile and upgrade C value
                     int row = -1, col = -1;
                     td = MapHandle::getTowerdes(currentLevelIndex, selectedRow, selectedCol);
@@ -443,6 +451,7 @@ bool GameState::handleEvent(const Event& event)
                                 SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
                                 SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
                                 SaveManagement::playerResult[tCurLevel].towers.clear();
+
                                 for (int i = 0; i < towers.size(); i++)
                                 {
                                     ctower tempTower;
@@ -450,6 +459,7 @@ bool GameState::handleEvent(const Event& event)
                                     tempTower.setLocation(towers[i].getLocation());
                                     SaveManagement::playerResult[tCurLevel].towers.push_back(tempTower);
                                 }
+
                                 SaveManagement::save(SaveManagement::playerName);
 
                                 break;
@@ -468,9 +478,11 @@ bool GameState::handleEvent(const Event& event)
         if (showInfo && sellButton.getGlobalBounds().contains(mx, my)) {
             int tileC = selectedinfo;
             int row = -1, col = -1;
+
             td = MapHandle::getTowerdes(currentLevelIndex, selectedRow, selectedCol);
             row = td.first;
             col = td.second;
+
             if (row != -1 && col != -1) {
                 for (auto t = towers.begin(); t != towers.end(); ++t) {
                     // Update map C value for upgraded tower
@@ -478,12 +490,15 @@ bool GameState::handleEvent(const Event& event)
                     // Sell tower
                     if (t->getLocation().getRow() == row && t->getLocation().getCol() == col) {
                         towers.erase(t);
+
                         if (tileC >= 3 && tileC <= 5)
                             player.addMoney(GameConstants::TOWER_COSTS[tileC - 3] / 10 * 7);
                         else
                             player.addMoney(GameConstants::UPGRADE_COSTS[tileC - 6] / 10 * 7);
+
                         int index = MapHandle::findBlockmap(currentLevelIndex, row, col);
                         towerconstructed[index] = false;
+
                         // NEW FEATURE: save when a tower upgraded
                         int tCurLevel = currentLevelIndex;
                         SaveManagement::playerResult[tCurLevel].status = -1; // not finished
@@ -492,6 +507,7 @@ bool GameState::handleEvent(const Event& event)
                         SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
                         SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
                         SaveManagement::playerResult[tCurLevel].towers.clear();
+
                         for (int i = 0; i < towers.size(); i++)
                         {
                             ctower tempTower;
@@ -499,11 +515,13 @@ bool GameState::handleEvent(const Event& event)
                             tempTower.setLocation(towers[i].getLocation());
                             SaveManagement::playerResult[tCurLevel].towers.push_back(tempTower);
                         }
+
                         SaveManagement::save(SaveManagement::playerName);
 
                         break;
                     }
                 }
+
                 showInfo = false;
                 selectedinfo = -1;
                 return false;
@@ -537,7 +555,6 @@ bool GameState::handleEvent(const Event& event)
                 selectedRow = clicked.getRow();
                 selectedCol = clicked.getCol();
 
-
                 // Get fixed display tile for showing info panel
                 pair<int, int> fixed = MapHandle::getTowerdes(currentLevelIndex, clicked.getRow(), clicked.getCol());
                 float fx = (float)fixed.second * cpoint::TILE_SIZE;
@@ -545,18 +562,22 @@ bool GameState::handleEvent(const Event& event)
 
                 // Display tower info panel and upgrade button if upgradeable
                 infoSprite[c - 3].setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 4 * cpoint::TILE_SIZE);
-                sellButton.setPosition((float)fx + cpoint::TILE_SIZE * 3.5f, (float)fy - 4.85f * cpoint::TILE_SIZE);
-                if (c >= 3 && c <= 5) {
-                    upgradeButton.setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 4.85f * cpoint::TILE_SIZE);
-                }
+                sellButton.setPosition((float)fx + cpoint::TILE_SIZE * 3.5f, (float)fy - 4.85f * cpoint::TILE_SIZE - 50.f);
+                circleRange.setPosition((float)fx + cpoint::TILE_SIZE * 0.5f, (float)fy + cpoint::TILE_SIZE * 0.5f - 80.f);
+
+                if (c >= 3 && c <= 5) 
+                    upgradeButton.setPosition((float)fx + cpoint::TILE_SIZE + 20.f, (float)fy - 4.85f * cpoint::TILE_SIZE - 50.f);
+
 
                 showInfo = true;
+                showTowerRange = true;
                 return false;
             }
         }
 
         // Hide info panel if clicked outside
         showInfo = false;
+        showTowerRange = false;
         selectedinfo = -1;
 
         return true;
@@ -769,15 +790,60 @@ bool GameState::update(Time dt)
             tower.resetShootTimer();
 
             cbullet b;
-            b.init(*bulletTexture[0], tower.getSprite().getPosition().x, tower.getSprite().getPosition().y, 16, 15, 7, 0.05f);
+            int t = tower.getType();
+
+            const Texture* tex = nullptr;
+            int frameW = 0, frameH = 0, totalFrames = 0;
+            float animSpeed = 0.f, scale = 1.f;
+
+            switch (t) {
+            case 0: // Tower type 1 - Bomb
+                tex = bulletTexture[0];
+                frameW = 16; frameH = 15; totalFrames = 7;
+                animSpeed = 0.05f; scale = 4.f;
+                break;
+
+            case 1: // Tower type 2 - Fire
+                tex = bulletTexture[1];
+                frameW = 1667; frameH = 1167; totalFrames = 4;
+                animSpeed = 0.05f; scale = 0.1f;
+                break;
+
+            case 2: // Tower type 3 - Ice
+                tex = bulletTexture[2];
+                frameW = 141; frameH = 114; totalFrames = 5;
+                animSpeed = 0.05f; scale = 0.8f;
+                break;
+
+            default:
+                tex = bulletTexture[0];
+                frameW = 16; frameH = 15; totalFrames = 7;
+                animSpeed = 0.05f; scale = 4.f;
+                break;
+            }
+
+            b.init(*tex, 
+                   tower.getSprite().getPosition().x, tower.getSprite().getPosition().y - 40.f, 
+                   frameW, frameH, totalFrames, animSpeed, scale);
+
             b.setTargetIdx(tower.getTargetEnemyIdx());
-            b.setSpeed(5);
+
+            // Set speed for bullet by tower type
+            if (tower.getType() == 1) b.setSpeed(4);
+            else if (tower.getType() == 2) b.setSpeed(3);
+            else if (tower.getType() == 3) b.setSpeed(6);
+            else if (tower.getType() == 4) b.setSpeed(5);
+            else if (tower.getType() == 5) b.setSpeed(4);
+            else b.setSpeed(5);
+
+            // Set dmg for bullet by tower type
             if (tower.getType() == 1) b.setDamage(2);
             else if (tower.getType() == 2) b.setDamage(3);
             else if (tower.getType() == 3) b.setDamage(4);
             else if (tower.getType() == 4) b.setDamage(5);
             else if (tower.getType() == 5) b.setDamage(6);
             else b.setDamage(1);
+
             bullets.push_back(b);         
         }
     }
@@ -860,15 +926,13 @@ void GameState::loadLevel(int index) {
     isGameOver = false;
     isGameWin = false;
     hasPressedPlay = false; // Reset play state for new level
-    //waveIndex = 0;
-    //levels[currentLevelIndex].resetWave(); // Start from wave 0
 
     // SaveManagement: Load wave, health, gold
     int loadWave = SaveManagement::playerResult[currentLevelIndex].curWave;
     int loadHealth = SaveManagement::playerResult[currentLevelIndex].health;
     int loadGold = SaveManagement::playerResult[currentLevelIndex].curGold;
 
-    levels[currentLevelIndex].setCurrentWaveIndex(loadWave);            //wave
+    levels[currentLevelIndex].setCurrentWaveIndex(loadWave);            // wave
 
     if (loadHealth != 0)                                                // health
         curMap->getMainTower().setCurrentHealth(loadHealth);

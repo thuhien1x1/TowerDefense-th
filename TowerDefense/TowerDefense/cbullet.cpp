@@ -99,43 +99,26 @@ void cbullet::move(float dx, float dy) {
     updateSprite();
 }
 
-void cbullet::init(const sf::Texture& tex, float x, float y, int frameWidth, int frameHeight, int totalFrames, float animSpeed) {
+void cbullet::init(const sf::Texture& tex, float x, float y, int frameWidth, int frameHeight, int totalFrames, float animSpeed, float scale)
+{
     _sprite.setTexture(tex);
-    _frameWidth = frameWidth;
-    _frameHeight = frameHeight;
-    _totalFrames = totalFrames;
-    _animationSpeed = animSpeed;
-    _currentFrame = 0;
-    _animationTimer = 0.f;
 
-    _frameRect = sf::IntRect(0, 0, _frameWidth, _frameHeight);
-    _sprite.setTextureRect(_frameRect);
-    _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 2.f);
-    _sprite.setScale(4.f, 4.f);
+    _anim.init(frameWidth, frameHeight, animSpeed, totalFrames, /*loop*/ true);
+    _anim.applyTo(_sprite);
 
-    _posX = x;
-    _posY = y;
+    _sprite.setOrigin(frameWidth / 2.f, frameHeight / 2.f);
+    _sprite.setScale(scale, scale);
+
+    _posX = x; _posY = y;
     _sprite.setPosition(_posX, _posY);
-
     _curr = cpoint::fromXYToRowCol(x, y);
+
+    _active = true;
 }
 
 void cbullet::updateAnimation(float deltaTime) {
-    _animationTimer += deltaTime;
-
-    if (_animationTimer >= _animationSpeed) {
-        _animationTimer -= _animationSpeed;
-        _currentFrame++;
-
-        if (_currentFrame >= _totalFrames)
-            _currentFrame = 0;
-
-        int col = _currentFrame;
-        _frameRect.left = col * _frameWidth;
-        _frameRect.top = 0;
-
-        _sprite.setTextureRect(_frameRect);
-    }
+    _anim.update(deltaTime);
+    _anim.applyTo(_sprite);
 }
 
 

@@ -134,6 +134,10 @@ namespace Textures
         // InputNameState // NEW FEATURE
         inputNameBackground,
         nextButton,
+
+        // Load UI for SaveManagemner (Loading)
+        loadBackground,
+        nameBar,
     };
 }
 

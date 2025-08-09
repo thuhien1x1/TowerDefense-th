@@ -140,6 +140,10 @@ Application::Application()
     mTextures.load(Textures::inputNameBackground, "Media/Textures/inputNameBackground.png");
     mTextures.load(Textures::nextButton, "Media/UI/buttons/nextButton.png");
 
+    // Load UI in SaveMangement for Loading
+    mTextures.load(Textures::loadBackground, "Media/UI/loadBackground.png");
+    mTextures.load(Textures::nameBar, "Media/UI/buttons/nameBar.png");
+
     // NEW FEATURE
     // Load sound and music
     mSoundBuffers.load(SoundBuffers::BulletBomb, "Audio/BulletBomb.wav");

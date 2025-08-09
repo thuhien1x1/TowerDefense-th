@@ -1,4 +1,4 @@
-﻿#include "SaveManagement.h"
+#include "SaveManagement.h"
 #include "Utility.h"
 #include "Foreach.h"
 #include "ResourceHolder.h"
@@ -9,7 +9,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/View.hpp>
 
-namespace fs = filesystem;
+namespace fs = std::filesystem;
 
 vector<SaveManagement::levelResult> SaveManagement::playerResult(4);
 string SaveManagement::playerName = "";
@@ -19,8 +19,8 @@ SaveManagement::SaveManagement(StateStack& stack, Context context)
 	, mOptions()
 	, mOptionIndex(0)
 {
-	Texture& texture = context.textures->get(Textures::loadBackground);
-	Font& font = context.fonts->get(Fonts::RobotTraffic);
+	sf::Texture& texture = context.textures->get(Textures::Map1);
+	sf::Font& font = context.fonts->get(Fonts::KnightWarrior);
 
 	mBackgroundSprite.setTexture(texture);
 
@@ -28,133 +28,111 @@ SaveManagement::SaveManagement(StateStack& stack, Context context)
 	scanSaveFolder();
 
 	// Display player names
-	int maxSlots = 6;
-	for (int i = 0; i < maxSlots; ++i)
+	int nameSize = fmin(savedNames.size(), 6); // show 6 or less
+	for (int i = 0; i < nameSize; ++i)
 	{
-		Text name;
+		sf::Text name;
 		name.setFont(font);
-		name.setCharacterSize(40);
-
-		if (i < static_cast<int>(savedNames.size()))
-			name.setString(savedNames[i]); 
-		else
-			name.setString("Empty");        
-
+		name.setString(savedNames[i]);
 		centerOrigin(name);
+
+		if (i == 0)
+			name.setPosition(sf::Vector2f(200.f, 100.f)); // first name to appear on left col
+		else if (i == 1)
+			name.setPosition(sf::Vector2f(400.f, 100.f)); // first name to appear on right col
+		else
+			name.setPosition(mOptions[i - 2].getPosition() + sf::Vector2f(0.f, 40.f));
+
 		mOptions.push_back(name);
 	}
 
-	// Clone panel button
-	closePanelButton.setTexture(context.textures->get(Textures::closeButton));
-	closePanelButton.setPosition(1570.f, 200.f);
-	centerOrigin(closePanelButton);
+	// Exit
+	sf::Text exitOption;
+	exitOption.setFont(font);
+	exitOption.setString("Exit");
+	centerOrigin(exitOption);
+	exitOption.setPosition(mOptions[mOptions.size() - 1].getPosition() + sf::Vector2f(0.f, 30.f));
+	mOptions.push_back(exitOption);
 
-	// Name bar
-	Sprite nameBar1;
-	nameBar1.setPosition(740.f, 360.f);
-	nameBar.push_back(nameBar1);
-
-	Sprite nameBar2;
-	nameBar2.setPosition(1300.f, 360.f);
-	nameBar.push_back(nameBar2);
-
-	Sprite nameBar3;
-	nameBar3.setPosition(740.f, 560.f);
-	nameBar.push_back(nameBar3);
-
-	Sprite nameBar4;
-	nameBar4.setPosition(1300.f, 560.f);
-	nameBar.push_back(nameBar4);
-
-	Sprite nameBar5;
-	nameBar5.setPosition(740.f, 760.f);
-	nameBar.push_back(nameBar5);
-
-	Sprite nameBar6;
-	nameBar6.setPosition(1300.f, 760.f);
-	nameBar.push_back(nameBar6);
-
-	for (auto &nb : nameBar) {
-		nb.setTexture(context.textures->get(Textures::nameBar));
-		centerOrigin(nb);
-	}
-
-	layoutNamesOnBars();
-}
-
-void SaveManagement::layoutNamesOnBars()
-{
-	for (size_t i = 0; i < mOptions.size() && i < nameBar.size(); ++i) {
-		float barWidth = nameBar[i].getGlobalBounds().width * 0.85f;
-
-		while (mOptions[i].getLocalBounds().width > barWidth && mOptions[i].getCharacterSize() > 12) 
-			mOptions[i].setCharacterSize(mOptions[i].getCharacterSize() - 1);
-
-		centerOrigin(mOptions[i]);
-		mOptions[i].setPosition(nameBar[i].getPosition());
-	}
+	updateOptionText();
 }
 
 void SaveManagement::draw()
 {
-	RenderWindow& window = *getContext().window;
-	Vector2f mousePos = window.mapPixelToCoords(Mouse::getPosition(window));
+	sf::RenderWindow& window = *getContext().window;
 
 	window.setView(window.getDefaultView());
 	window.draw(mBackgroundSprite);
 
-	// Name bar
-	for (auto &nb : nameBar) {
-		if (nb.getGlobalBounds().contains(mousePos))
-			nb.setScale(1.1f, 1.1f);
-		else
-			nb.setScale(1.f, 1.f);
-		window.draw(nb);
-	}
-
-	// Text
-	FOREACH(const Text & text, mOptions)
+	FOREACH(const sf::Text & text, mOptions)
 		window.draw(text);
-
-	// Close panel button
-	if (closePanelButton.getGlobalBounds().contains(mousePos))
-		closePanelButton.setScale(1.3f, 1.3f);
-	else
-		closePanelButton.setScale(1.2f, 1.2f);
-	window.draw(closePanelButton);
 }
 
-bool SaveManagement::update(Time dt)
+bool SaveManagement::update(sf::Time dt)
 {
 	return true;
 }
 
-bool SaveManagement::handleEvent(const Event& event)
+bool SaveManagement::handleEvent(const sf::Event& event)
 {
-	if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
-		Vector2f mousePos = getContext().window->mapPixelToCoords(Vector2i(event.mouseButton.x, event.mouseButton.y));
+	// The demonstration menu logic
+	if (event.type != sf::Event::KeyPressed)
+		return false;
 
-		if (closePanelButton.getGlobalBounds().contains(mousePos)) {
+	if (event.key.code == sf::Keyboard::Return)
+	{
+		if (mOptions[mOptionIndex].getString() == "Exit")
+		{
+			// The exit option was chosen, by removing itself, the stack will be empty, and the game will know it is time to close.
 			requestStackPop();
 			requestStackPush(States::Menu);
-			return true;
+		}
+		else
+		{
+			SaveManagement::setName(mOptions[mOptionIndex].getString());
+			SaveManagement::load(SaveManagement::playerName);
+			MenuState::isNewPlayer = false;
+			requestStackPop();
+			requestStackPush(States::MapSelection);
 		}
 
-		for (size_t i = 0; i < nameBar.size() && i < mOptions.size(); ++i) {
-			if (nameBar[i].getGlobalBounds().contains(mousePos)) {
-				mOptionIndex = static_cast<int>(i);
-				SaveManagement::setName(mOptions[i].getString());
+	}
+	else if (event.key.code == sf::Keyboard::Up)
+	{
+		// Decrement and wrap-around
+		if (mOptionIndex > 0)
+			mOptionIndex--;
+		else
+			mOptionIndex = mOptions.size() - 1;
 
-				SaveManagement::load(SaveManagement::playerName);
-				MenuState::isNewPlayer = false;
-				requestStackPop();
-				requestStackPush(States::MapSelection);
-				return true;
-			}
-		}
+		updateOptionText();
+	}
+
+	else if (event.key.code == sf::Keyboard::Down)
+	{
+		// Increment and wrap-around
+		if (mOptionIndex < mOptions.size() - 1)
+			mOptionIndex++;
+		else
+			mOptionIndex = 0;
+
+		updateOptionText();
 	}
 
 	return true;
+}
+
+void SaveManagement::updateOptionText()
+{
+	if (mOptions.empty())
+		return;
+
+	// White all texts
+	FOREACH(sf::Text & text, mOptions)
+		text.setFillColor(sf::Color::White);
+
+	// Red the selected text
+	mOptions[mOptionIndex].setFillColor(sf::Color::Red);
 }
 
 void SaveManagement::scanSaveFolder()
@@ -164,13 +142,13 @@ void SaveManagement::scanSaveFolder()
 #include <filesystem>
 #include <algorithm>
 
-	namespace fs = filesystem;
+	namespace fs = std::filesystem;
 
 	savedNames.clear();
 	if (!fs::exists("saves")) fs::create_directory("saves");
 
 	// Temporary vector to store pairs of (file_path, last_write_time)
-	vector<pair<fs::path, fs::file_time_type>> fileEntries;
+	std::vector<std::pair<fs::path, fs::file_time_type>> fileEntries;
 
 	for (auto& p : fs::directory_iterator("saves")) {
 		if (p.is_regular_file() && p.path().extension() == ".txt") {
@@ -179,7 +157,7 @@ void SaveManagement::scanSaveFolder()
 	}
 
 	// Sort by last_write_time (oldest first)
-	sort(fileEntries.begin(), fileEntries.end(),
+	std::sort(fileEntries.begin(), fileEntries.end(),
 		[](const auto& a, const auto& b) {
 			return a.second > b.second;
 		});
@@ -203,9 +181,6 @@ bool SaveManagement::load(string pName)
 		getline(fin, line);
 		stringstream ss(line);
 		string temp;
-
-		getline(ss, temp, ' ');
-		SaveManagement::playerResult[i].win = stoi(temp);
 
 		getline(ss, temp, ' ');
 		SaveManagement::playerResult[i].status = stoi(temp);
@@ -247,12 +222,11 @@ void SaveManagement::save(const string playerName)
 
 	for (int i = 0; i < 4; i++)
 	{
-		fout << SaveManagement::playerResult[i].win << " "
-			 << SaveManagement::playerResult[i].status << " "
-			 << SaveManagement::playerResult[i].stars << " "
-			 << SaveManagement::playerResult[i].health << " "
-			 << SaveManagement::playerResult[i].curWave << " "
-			 << SaveManagement::playerResult[i].curGold << " ";
+		fout << SaveManagement::playerResult[i].status << " "
+			<< SaveManagement::playerResult[i].stars << " "
+			<< SaveManagement::playerResult[i].health << " "
+			<< SaveManagement::playerResult[i].curWave << " "
+			<< SaveManagement::playerResult[i].curGold << " ";
 		for (int j = 0; j < SaveManagement::playerResult[i].towers.size(); j++)
 		{
 			fout << SaveManagement::playerResult[i].towers[j].getType() << " "

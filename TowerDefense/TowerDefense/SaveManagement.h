@@ -10,7 +10,6 @@
 #include <fstream>
 
 using namespace std;
-using namespace sf;
 
 class SaveManagement : public State
 {
@@ -18,8 +17,10 @@ public:
 	SaveManagement(StateStack& stack, Context context);
 
 	virtual void			draw();
-	virtual bool			update(Time dt);
-	virtual bool			handleEvent(const Event& event);
+	virtual bool			update(sf::Time dt);
+	virtual bool			handleEvent(const sf::Event& event);
+
+	void					updateOptionText();
 
 private:
 	enum fileState
@@ -29,21 +30,17 @@ private:
 	};
 
 private:
-	Sprite				mBackgroundSprite;
-	Sprite				closePanelButton;
-	vector<Sprite>		nameBar;
+	sf::Sprite				mBackgroundSprite;
 
-	vector<Text>		mOptions;
-	size_t				mOptionIndex;
+	std::vector<sf::Text>	mOptions;
+	std::size_t				mOptionIndex;
 
 private:
 	// process load file
-	vector<string>		savedNames;
-	void				scanSaveFolder();
-	void				layoutNamesOnBars();
+	vector<string> savedNames;
+	void scanSaveFolder();
 
 public:
-
 	// process save file
 	struct levelResult
 	{

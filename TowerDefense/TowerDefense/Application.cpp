@@ -61,6 +61,7 @@ Application::Application()
     mTextures.load(Textures::Bullet3, "Media/Textures/ice_bullet_sprite_sheet.png");
     mTextures.load(Textures::Bomb, "Media/Textures/bomb_sprite_sheet.png");
 
+
     // Load enemy's animation textures
     mTextures.load(Textures::Enemy1_Walk, "Media/Textures/enemy_1_walk_126_123_6.png");
     mTextures.load(Textures::Enemy1_Attack, "Media/Textures/enemy_1_attack_125_125_6.png");
@@ -72,8 +73,9 @@ Application::Application()
     mTextures.load(Textures::Enemy3_Attack, "Media/Textures/enemy_3_attack_212_210_6.png");
     mTextures.load(Textures::Enemy3_Death, "Media/Textures/enemy_3_death_212_210_6.png");
 
-    // Load Upgrade button
+    // Load functional button
     mTextures.load(Textures::upgradeButton, "Media/UI/buttons/upgradeButton.png");
+    mTextures.load(Textures::sellButton, "Media/UI/buttons/SellButton.png");
 
     // Load construction icon
     mTextures.load(Textures::constructionicon, "Media/Textures/ConstructionIcon.png");
@@ -134,13 +136,9 @@ Application::Application()
     mTextures.load(Textures::circle, "Media/UI/icons/circle.png");
 
     // NEW FEATURE
-    // Load UI in InputNameState 
+    // Load Texture in InputNameState 
     mTextures.load(Textures::inputNameBackground, "Media/Textures/inputNameBackground.png");
     mTextures.load(Textures::nextButton, "Media/UI/buttons/nextButton.png");
-
-    // Load UI in SaveMangement for Loading
-    mTextures.load(Textures::loadBackground, "Media/UI/loadBackground.png");
-    mTextures.load(Textures::nameBar, "Media/UI/buttons/nameBar.png");
 
     // NEW FEATURE
     // Load sound and music

@@ -73,6 +73,7 @@ namespace Textures
 
         // Upgrade Button
         upgradeButton,
+        sellButton,
 
         // Construction Icon
         constructionicon,
@@ -133,10 +134,6 @@ namespace Textures
         // InputNameState // NEW FEATURE
         inputNameBackground,
         nextButton,
-
-        // Load UI for SaveManagemner (Loading)
-        loadBackground,
-        nameBar,
     };
 }
 

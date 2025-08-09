@@ -56,6 +56,8 @@ private:
 
     bool isGameOver;
     bool isGameWin;
+    bool isWaitingForNextLevel = false;
+    bool showEndButtons = false;
     bool hasPressedPlay = false;
 
     map<EnemyType, EnemyAnimationData> enemyData;
@@ -96,14 +98,14 @@ private:
     int selectedCol;
 
     // Sound - NEW FEATURE
-    Sound bulletBombSound;
-    Sound bulletFireSound;
-    Sound bulletLaserSound;
+    sf::Sound bulletBombSound;
+    sf::Sound bulletFireSound;
+    sf::Sound bulletLaserSound;
 
-    Sound enemyAttackSound;
-    Sound enemyDeadSound;
-    Sound enemyWalkSound;
+    sf::Sound enemyAttackSound;
+    sf::Sound enemyDeadSound;
+    sf::Sound enemyWalkSound;
 
-    Sound towerPlaceSound;
-    Sound TowerUpgradeSound;
+    sf::Sound towerPlaceSound;
+    sf::Sound TowerUpgradeSound;
 };

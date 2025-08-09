@@ -32,6 +32,7 @@ VictoryState::VictoryState(StateStack& stack, Context context)
 	{
 		GameWinSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::GameWin));
 		GameWinSound.setVolume(60);
+		GameWinSound.setLoop(true);
 		GameWinSound.play();
 	}
 }

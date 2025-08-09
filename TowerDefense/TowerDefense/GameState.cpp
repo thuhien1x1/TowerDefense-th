@@ -292,9 +292,20 @@ void GameState::draw()
     // Draw Tower Infos
     if (showInfo && selectedinfo >= 3) {
         window.draw(infoSprite[selectedinfo - 3]);
+
+        if (sellButton.getGlobalBounds().contains(mousePos))
+            sellButton.setScale(1.1f, 1.1f);
+        else
+            sellButton.setScale(1.f, 1.f);
         window.draw(sellButton);
-        if (selectedinfo - 3 < 3)
+
+        if (selectedinfo - 3 < 3) {
+            if (upgradeButton.getGlobalBounds().contains(mousePos))
+                upgradeButton.setScale(1.1f, 1.1f);
+            else
+                upgradeButton.setScale(1.f, 1.f);
             window.draw(upgradeButton);
+        }
     }
 
 }
@@ -539,7 +550,6 @@ bool GameState::handleEvent(const Event& event)
                     upgradeButton.setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 4.85f * cpoint::TILE_SIZE);
                 }
 
-
                 showInfo = true;
                 return false;
             }
@@ -688,10 +698,13 @@ bool GameState::update(Time dt)
 
             spawnEnemies();
         }
+
+        else 
+            isGameWin = true;
     }
 
     if (isGameOver) {
-        if (!SaveManagement::playerResult[currentLevelIndex].win)       // NEW FEATURE
+        if (!SaveManagement::playerResult[currentLevelIndex].win)       // NEW FEATUREh
             SaveManagement::playerResult[currentLevelIndex].status = 0; // locked
 
         requestStackPush(States::Defeat);

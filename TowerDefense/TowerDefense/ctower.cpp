@@ -46,8 +46,6 @@ void ctower::changeOrigin(int index, int itower, const Texture& tex)
     }
 }
 
-
-
 void ctower::initEffect(const Texture& tex, int frameWidth, int frameHeight, int totalFrames, float speed) {
     _effectSprite.setTexture(tex);
     _effectFrameWidth = frameWidth;

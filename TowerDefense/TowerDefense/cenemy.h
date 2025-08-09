@@ -87,7 +87,7 @@ public:
     int getHealth() const { return _health; }
     int getResources() const { return mReward; }
     int getCurrentTarget() const { return _currentTarget; }
-    int getDamage() const { return mDamage; } // Add getter for damage
+    int getDamage() const { return mDamage; } 
     float getX() const { return _posX; }
     float getY() const { return _posY; }
     EnemyState getState() const { return _state; }
@@ -96,7 +96,7 @@ public:
     static int getHealthByType(EnemyType type);
     static int getSpeedByType(EnemyType type);
     static int getResourcesByType(EnemyType type);
-    static int getDamageByType(EnemyType type); // Add static method to get damage by type
+    static int getDamageByType(EnemyType type); 
 
     // Setters 
     void setSpeed(int tspeed) { if (tspeed > 0 && tspeed < 10) _speed = tspeed; }

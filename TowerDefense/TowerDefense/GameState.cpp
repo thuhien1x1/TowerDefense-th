@@ -63,11 +63,11 @@ GameState::GameState(StateStack& stack, Context context)
 
     // Load Bullet textures
     bulletTexture[0] = &getContext().textures->get(Textures::Bomb);
-    bulletTexture[1] = &getContext().textures->get(Textures::Bullet2);
-    bulletTexture[2] = &getContext().textures->get(Textures::Bullet3);
-    bulletTexture[3] = &getContext().textures->get(Textures::Bullet1);
-    bulletTexture[4] = &getContext().textures->get(Textures::Bullet2);
-    bulletTexture[5] = &getContext().textures->get(Textures::Bullet3);
+    bulletTexture[1] = &getContext().textures->get(Textures::Fire);
+    bulletTexture[2] = &getContext().textures->get(Textures::Ice);
+    bulletTexture[3] = &getContext().textures->get(Textures::Bomb);
+    bulletTexture[4] = &getContext().textures->get(Textures::Fire);
+    bulletTexture[5] = &getContext().textures->get(Textures::Ice);
     shootEffectTexture = &getContext().textures->get(Textures::ShootEffect);
     font = getContext().fonts->get(Fonts::BruceForever);
 
@@ -361,11 +361,11 @@ bool GameState::handleEvent(const Event& event)
 
             if (clickedButton && towerType != -1)
             {
-                // NEW FEATURE: Play sound when place tower
-                if (*getContext().isSoundOn == true)
-                    towerPlaceSound.play();
-
                 if (player.spendMoney(GameConstants::TOWER_COSTS[towerType])) {
+                    // NEW FEATURE: Play sound when place tower
+                    if (*getContext().isSoundOn == true)
+                        towerPlaceSound.play();
+
                     if (towers.size() < levels[currentLevelIndex].getTowerMaxCount()) {
                         ctower t;
                         td = MapHandle::getTowerdes(currentLevelIndex, selectedTile.getRow(), selectedTile.getCol());
@@ -405,19 +405,20 @@ bool GameState::handleEvent(const Event& event)
                     return false;
                 }
             }
+
             isChoosingTower = false;
             return false;
         }
 
         // Handle tower upgrade button click
         if (showInfo && upgradeButton.getGlobalBounds().contains(mx, my)) {
-            // NEW FEATURE: Play sound when upgrade tower
-            if (*getContext().isSoundOn == true)
-                TowerUpgradeSound.play();
-
             int tileC = selectedinfo;
             if (tileC >= 3 && tileC <= 5) {
                 if (player.spendMoney(GameConstants::UPGRADE_COSTS[tileC - 3])) {
+                    // NEW FEATURE: Play sound when upgrade tower
+                    if (*getContext().isSoundOn == true)
+                        TowerUpgradeSound.play();
+
                     // Get the designated tile and upgrade C value
                     int row = -1, col = -1;
                     td = MapHandle::getTowerdes(currentLevelIndex, selectedRow, selectedCol);
@@ -468,9 +469,11 @@ bool GameState::handleEvent(const Event& event)
         if (showInfo && sellButton.getGlobalBounds().contains(mx, my)) {
             int tileC = selectedinfo;
             int row = -1, col = -1;
+
             td = MapHandle::getTowerdes(currentLevelIndex, selectedRow, selectedCol);
             row = td.first;
             col = td.second;
+
             if (row != -1 && col != -1) {
                 for (auto t = towers.begin(); t != towers.end(); ++t) {
                     // Update map C value for upgraded tower
@@ -478,12 +481,15 @@ bool GameState::handleEvent(const Event& event)
                     // Sell tower
                     if (t->getLocation().getRow() == row && t->getLocation().getCol() == col) {
                         towers.erase(t);
+
                         if (tileC >= 3 && tileC <= 5)
                             player.addMoney(GameConstants::TOWER_COSTS[tileC - 3] / 10 * 7);
                         else
                             player.addMoney(GameConstants::UPGRADE_COSTS[tileC - 6] / 10 * 7);
+
                         int index = MapHandle::findBlockmap(currentLevelIndex, row, col);
                         towerconstructed[index] = false;
+
                         // NEW FEATURE: save when a tower upgraded
                         int tCurLevel = currentLevelIndex;
                         SaveManagement::playerResult[tCurLevel].status = -1; // not finished
@@ -492,6 +498,7 @@ bool GameState::handleEvent(const Event& event)
                         SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
                         SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
                         SaveManagement::playerResult[tCurLevel].towers.clear();
+
                         for (int i = 0; i < towers.size(); i++)
                         {
                             ctower tempTower;
@@ -499,6 +506,7 @@ bool GameState::handleEvent(const Event& event)
                             tempTower.setLocation(towers[i].getLocation());
                             SaveManagement::playerResult[tCurLevel].towers.push_back(tempTower);
                         }
+
                         SaveManagement::save(SaveManagement::playerName);
 
                         break;

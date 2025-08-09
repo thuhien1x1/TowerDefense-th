@@ -44,10 +44,7 @@ namespace Textures
         // Bullet
         Bomb,
         Fire,
-        Laser,
-        Bullet1,
-        Bullet2,
-        Bullet3,
+        Ice,
 
         // Effect
         ShootEffect,

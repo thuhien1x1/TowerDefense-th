@@ -1,4 +1,4 @@
-#include "ctower.h"
+﻿#include "ctower.h"
 
 ctower::ctower() : _shootTimer(0.f), _targetEnemyIdx(-1), _mainTowerHealth(5), _mainTowerTexture(nullptr) {}
 
@@ -46,48 +46,34 @@ void ctower::changeOrigin(int index, int itower, const Texture& tex)
     }
 }
 
-void ctower::initEffect(const Texture& tex, int frameWidth, int frameHeight, int totalFrames, float speed) {
+void ctower::initEffect(const Texture& tex, int frameW, int frameH, int totalFrames, float animSpeed) {
     _effectSprite.setTexture(tex);
-    _effectFrameWidth = frameWidth;
-    _effectFrameHeight = frameHeight;
-    _effectTotalFrames = totalFrames;
-    _effectSpeed = speed;
-    _effectCurrentFrame = 0;
-    _effectTimer = 0.f;
-    _effectPlaying = false;
-
-    _effectFrameRect = IntRect(0, 0, _effectFrameWidth, _effectFrameHeight);
-    _effectSprite.setTextureRect(_effectFrameRect);
-    _effectSprite.setOrigin(_effectFrameWidth / 3.f, _effectFrameHeight);
+    _effectSprite.setOrigin(frameW / 3.f, frameH); 
     _effectSprite.setScale(3.f, 3.f);
+
+    _effectAnim.init(frameW, frameH, animSpeed, totalFrames, /*loop*/ false);
+    _effectAnim.applyTo(_effectSprite);
+
+    _effectPlaying = false;
 }
 
 void ctower::startEffect() {
     if (_effectPlaying) return;
     _effectPlaying = true;
-    _effectCurrentFrame = 0;
-    _effectTimer = 0.f;
-    _effectFrameRect.left = 0;
-    _effectSprite.setTextureRect(_effectFrameRect);
-    _effectSprite.setPosition(_sprite.getPosition());
+
+    _effectAnim.reset();
+    _effectAnim.applyTo(_effectSprite);
+    _effectSprite.setPosition(_sprite.getPosition().x, _sprite.getPosition().y - 40.f);
 }
 
 void ctower::updateEffect(float deltaTime) {
     if (!_effectPlaying) return;
 
-    _effectTimer += deltaTime;
-    if (_effectTimer >= _effectSpeed) {
-        _effectTimer -= _effectSpeed;
-        _effectCurrentFrame++;
+    _effectAnim.update(deltaTime);
+    _effectAnim.applyTo(_effectSprite);
 
-        if (_effectCurrentFrame >= _effectTotalFrames) {
-            _effectPlaying = false;
-            return;
-        }
-
-        _effectFrameRect.left = _effectCurrentFrame * _effectFrameWidth;
-        _effectSprite.setTextureRect(_effectFrameRect);
-    }
+    if (_effectAnim.isFinished())
+        _effectPlaying = false;
 }
 
 

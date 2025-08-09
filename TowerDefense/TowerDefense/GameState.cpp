@@ -110,6 +110,10 @@ GameState::GameState(StateStack& stack, Context context)
     waveIcon.setPosition(140.f, 130.f);
     centerOrigin(waveIcon);
 
+    circleRange.setFillColor(Color(0, 0, 0, 100));
+    circleRange.setRadius(TOWER_RANGE);
+    circleRange.setOrigin(TOWER_RANGE, TOWER_RANGE);
+
     // Initialize 4 levels (levelID, enemyCount, waveCount, towerMaxCount, startGold) 
     clevel level1(1, 45, 3, 5, 200);
     level1.setWaves({ {FAST_SCOUT, 10}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1} }); // 10, 15, 20
@@ -251,6 +255,9 @@ void GameState::draw()
         }
     }
 
+    if (showTowerRange)
+        window.draw(circleRange);
+
     for (const auto& tower : towers)
         window.draw(tower.getSprite());
 
@@ -267,14 +274,14 @@ void GameState::draw()
 
     // Draw Construction Icons
     int numbericons;
+
     if (currentLevelIndex == 0) numbericons = 5;
     else if (currentLevelIndex == 3) numbericons = 7;
     else numbericons = 6;
-    for (int i = 0; i < numbericons; ++i) {
-        if (towerconstructed[i] == false) {
+
+    for (int i = 0; i < numbericons; ++i) 
+        if (towerconstructed[i] == false) 
             window.draw(constructionicons[i]);
-        }
-    }
 
     // Draw choosingTowerButton
     if (isChoosingTower) {
@@ -307,8 +314,8 @@ void GameState::draw()
             window.draw(upgradeButton);
         }
     }
-
 }
+
 bool GameState::handleEvent(const Event& event)
 {
     RenderWindow& window = *getContext().window;
@@ -351,7 +358,7 @@ bool GameState::handleEvent(const Event& event)
                 towerType = 0;
             }
             else if (towerChoosingButtons[1].getGlobalBounds().contains(mx, my)) {
-                clickedButton = &towerChoosingButtons[2];
+                clickedButton = &towerChoosingButtons[1];
                 towerType = 1;
             }
             else if (towerChoosingButtons[2].getGlobalBounds().contains(mx, my)) {
@@ -444,6 +451,7 @@ bool GameState::handleEvent(const Event& event)
                                 SaveManagement::playerResult[tCurLevel].curWave = levels[tCurLevel].getCurrentWaveIndex();
                                 SaveManagement::playerResult[tCurLevel].curGold = (isGameOver || isGameWin) ? levels[currentLevelIndex].getStartGold() : player.getMoney();
                                 SaveManagement::playerResult[tCurLevel].towers.clear();
+
                                 for (int i = 0; i < towers.size(); i++)
                                 {
                                     ctower tempTower;
@@ -451,6 +459,7 @@ bool GameState::handleEvent(const Event& event)
                                     tempTower.setLocation(towers[i].getLocation());
                                     SaveManagement::playerResult[tCurLevel].towers.push_back(tempTower);
                                 }
+
                                 SaveManagement::save(SaveManagement::playerName);
 
                                 break;
@@ -512,6 +521,7 @@ bool GameState::handleEvent(const Event& event)
                         break;
                     }
                 }
+
                 showInfo = false;
                 selectedinfo = -1;
                 return false;
@@ -545,7 +555,6 @@ bool GameState::handleEvent(const Event& event)
                 selectedRow = clicked.getRow();
                 selectedCol = clicked.getCol();
 
-
                 // Get fixed display tile for showing info panel
                 pair<int, int> fixed = MapHandle::getTowerdes(currentLevelIndex, clicked.getRow(), clicked.getCol());
                 float fx = (float)fixed.second * cpoint::TILE_SIZE;
@@ -554,17 +563,21 @@ bool GameState::handleEvent(const Event& event)
                 // Display tower info panel and upgrade button if upgradeable
                 infoSprite[c - 3].setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 4 * cpoint::TILE_SIZE);
                 sellButton.setPosition((float)fx + cpoint::TILE_SIZE * 3.5f, (float)fy - 4.85f * cpoint::TILE_SIZE);
-                if (c >= 3 && c <= 5) {
+                circleRange.setPosition((float)fx + cpoint::TILE_SIZE * 0.5f, (float)fy + cpoint::TILE_SIZE * 0.5f - 80.f);
+
+                if (c >= 3 && c <= 5) 
                     upgradeButton.setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 4.85f * cpoint::TILE_SIZE);
-                }
+
 
                 showInfo = true;
+                showTowerRange = true;
                 return false;
             }
         }
 
         // Hide info panel if clicked outside
         showInfo = false;
+        showTowerRange = false;
         selectedinfo = -1;
 
         return true;
@@ -777,15 +790,60 @@ bool GameState::update(Time dt)
             tower.resetShootTimer();
 
             cbullet b;
-            b.init(*bulletTexture[0], tower.getSprite().getPosition().x, tower.getSprite().getPosition().y, 16, 15, 7, 0.05f);
+            int t = tower.getType();
+
+            const Texture* tex = nullptr;
+            int frameW = 0, frameH = 0, totalFrames = 0;
+            float animSpeed = 0.f, scale = 1.f;
+
+            switch (t) {
+            case 0: // Tower type 1 - Bomb
+                tex = bulletTexture[0];
+                frameW = 16; frameH = 15; totalFrames = 7;
+                animSpeed = 0.05f; scale = 4.f;
+                break;
+
+            case 1: // Tower type 2 - Fire
+                tex = bulletTexture[1];
+                frameW = 1667; frameH = 1167; totalFrames = 4;
+                animSpeed = 0.05f; scale = 0.1f;
+                break;
+
+            case 2: // Tower type 3 - Ice
+                tex = bulletTexture[2];
+                frameW = 141; frameH = 114; totalFrames = 5;
+                animSpeed = 0.05f; scale = 0.8f;
+                break;
+
+            default:
+                tex = bulletTexture[0];
+                frameW = 16; frameH = 15; totalFrames = 7;
+                animSpeed = 0.05f; scale = 4.f;
+                break;
+            }
+
+            b.init(*tex, 
+                   tower.getSprite().getPosition().x, tower.getSprite().getPosition().y - 40.f, 
+                   frameW, frameH, totalFrames, animSpeed, scale);
+
             b.setTargetIdx(tower.getTargetEnemyIdx());
-            b.setSpeed(5);
+
+            // Set speed for bullet by tower type
+            if (tower.getType() == 1) b.setSpeed(4);
+            else if (tower.getType() == 2) b.setSpeed(3);
+            else if (tower.getType() == 3) b.setSpeed(6);
+            else if (tower.getType() == 4) b.setSpeed(5);
+            else if (tower.getType() == 5) b.setSpeed(4);
+            else b.setSpeed(5);
+
+            // Set dmg for bullet by tower type
             if (tower.getType() == 1) b.setDamage(2);
             else if (tower.getType() == 2) b.setDamage(3);
             else if (tower.getType() == 3) b.setDamage(4);
             else if (tower.getType() == 4) b.setDamage(5);
             else if (tower.getType() == 5) b.setDamage(6);
             else b.setDamage(1);
+
             bullets.push_back(b);         
         }
     }
@@ -868,15 +926,13 @@ void GameState::loadLevel(int index) {
     isGameOver = false;
     isGameWin = false;
     hasPressedPlay = false; // Reset play state for new level
-    //waveIndex = 0;
-    //levels[currentLevelIndex].resetWave(); // Start from wave 0
 
     // SaveManagement: Load wave, health, gold
     int loadWave = SaveManagement::playerResult[currentLevelIndex].curWave;
     int loadHealth = SaveManagement::playerResult[currentLevelIndex].health;
     int loadGold = SaveManagement::playerResult[currentLevelIndex].curGold;
 
-    levels[currentLevelIndex].setCurrentWaveIndex(loadWave);            //wave
+    levels[currentLevelIndex].setCurrentWaveIndex(loadWave);            // wave
 
     if (loadHealth != 0)                                                // health
         curMap->getMainTower().setCurrentHealth(loadHealth);

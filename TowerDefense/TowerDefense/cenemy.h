@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "cpoint.h"
 #include <SFML/Graphics.hpp>
+#include "FrameAnimator.h"
 
 using namespace sf;
 
@@ -39,36 +40,33 @@ private:
     int mReward;
     EnemyType _type;
 
+    // Money logic
     int mDamage;  // Add damage property
     bool mHasDamagedTower; // To prevent multiple hits
+    bool mRewardGiven;
 
     // Position
     float _posX, _posY;
     bool _reachedEnd;
 
-    // Frame data
-    Sprite _sprite;
-    IntRect _frameRect;
-    int _frameWidth, _frameHeight;
-    int _currentFrame, _totalFrames;
-    float _animationTimer, _animationSpeed;
+    // Animation
+    FrameAnimator _anim;
+    EnemyState _state;
+    bool _isDead;
+    bool _isAttack;
 
+    // Sprite & textures
+    Sprite _sprite;
     const Texture* _walkTex;
     const Texture* _attackTex;
     const Texture* _deathTex;
 
-    int _walkFrames, _attackFrames, _deathFrames;
-    int _walkCols, _attackCols, _deathCols;
-    int _walkRows, _attackRows, _deathRows;
-    float _walkAnimSpeed, _attackAnimSpeed, _deathAnimSpeed;
+    // Frames & timing (per sheet)
+    int   _walkFrames, _attackFrames, _deathFrames;
     float _walkSpeed, _attackSpeed, _deathSpeed;
-    float _walkFrameWidth, _walkFrameHeight, _attackFrameWidth, _attackFrameHeight, _deathFrameWidth, _deathFrameHeight;
-
-    // Animation
-    EnemyState _state;
-    bool _isDead;
-    bool _isAttack;
-    bool mRewardGiven;
+    int   _walkFrameWidth, _walkFrameHeight;
+    int   _attackFrameWidth, _attackFrameHeight;
+    int   _deathFrameWidth, _deathFrameHeight;
 
 public:
     cenemy();
@@ -139,6 +137,12 @@ public:
     // Prevent duplicate
     bool hasGivenReward() const { return mRewardGiven; }
     void markRewardGiven() { mRewardGiven = true; }
+
+    // Helpers to switch animation state
+    void startWalk();
+    void startAttack();
+    void startDeath();
+    void refreshOriginByCurrentFrames(int fw, int fh);
 
 private:
     void calcPath(int a[][cpoint::MAP_COL], int n, cpoint s, cpoint e);

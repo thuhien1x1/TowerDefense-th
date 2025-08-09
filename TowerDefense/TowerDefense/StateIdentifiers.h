@@ -10,7 +10,6 @@ namespace States
 		Information,
 		MapSelection,
 		Game,
-		Loading,
 		Pause,
 		Victory,
 		Defeat,

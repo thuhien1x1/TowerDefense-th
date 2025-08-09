@@ -110,51 +110,28 @@ void cenemy::takeDamage(int damage) {
     if (_state == DEATH) return;
 
     _health -= damage;
-    if (_health <= 0) {
-        _sprite.setTexture(*_deathTex);
-        _state = DEATH;
-        _currentFrame = 0;
-        _animationTimer = 0.f;
-
-        _totalFrames = _deathFrames;
-        _animationSpeed = _deathSpeed;
-        _frameWidth = _deathFrameWidth;
-        _frameHeight = _deathFrameHeight;
-
-        _frameRect = sf::IntRect(0, 0, _frameWidth, _frameHeight);
-        _sprite.setTextureRect(_frameRect);
-        _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 1.25f);
-    }
+    if (_health <= 0)
+        startDeath();
 }
 
 void cenemy::init(EnemyType type, float x, float y, int hp, const EnemyAnimationData& data) {
-    _posX = x;
-    _posY = y;
+    _posX = x; _posY = y;
     _health = hp;
     _type = type;
 
     mDamage = getDamageByType(type);
     mHasDamagedTower = false;
 
-    _sprite.setTexture(*_walkTex);
-    _totalFrames = _walkFrames;
-    _animationSpeed = _walkSpeed;
-    _frameWidth = _walkFrameWidth;
-    _frameHeight = _walkFrameHeight;
+    loadFromData(data);
 
-    _currentFrame = 0;
-    _animationTimer = 0.f;
-    _state = WALK;
     _isDead = false;
     _reachedEnd = false;
+    _isAttack = false;
+    mReward = getResourcesByType(type);
 
-    _frameRect = sf::IntRect(0, 0, _frameWidth, _frameHeight);
-    _sprite.setTextureRect(_frameRect);
-    _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 1.25f);
+    _sprite.setPosition(_posX, _posY);
 
-    updateSprite();
-
-    mReward = getResourcesByType(type); // Set reward based on type
+    startWalk();
 }
 
 void cenemy::loadFromData(const EnemyAnimationData& data) {
@@ -180,50 +157,54 @@ void cenemy::loadFromData(const EnemyAnimationData& data) {
     _sprite.setScale(data.scaleX, data.scaleY); // Because the sizes of the sprite sheets are not the same
 }
 
-void cenemy::triggerAttack() {
-    if (_state != WALK) return;
+void cenemy::startWalk() {
+    _sprite.setTexture(*_walkTex);
+    _state = WALK;
+    _anim.init(_walkFrameWidth, _walkFrameHeight, _walkSpeed, _walkFrames, /*loop*/true);
+    refreshOriginByCurrentFrames(_anim.getFrameWidth(), _anim.getFrameHeight());
+    _anim.applyTo(_sprite); // set initial rect
+}
 
+void cenemy::startAttack() {
     _sprite.setTexture(*_attackTex);
     _state = ATTACK;
-    _isAttack = false;
-    _currentFrame = 0;
-    _animationTimer = 0.f;
+    _isAttack = false; // will flip true when finished
+    _anim.init(_attackFrameWidth, _attackFrameHeight, _attackSpeed, _attackFrames, /*loop*/false);
+    refreshOriginByCurrentFrames(_anim.getFrameWidth(), _anim.getFrameHeight());
+    _anim.applyTo(_sprite);
+}
 
-    _totalFrames = _attackFrames;
-    _animationSpeed = _attackSpeed;
-    _frameWidth = _attackFrameWidth;
-    _frameHeight = _attackFrameHeight;
+void cenemy::startDeath() {
+    _sprite.setTexture(*_deathTex);
+    _state = DEATH;
+    _isDead = false; // will flip true when finished
+    _anim.init(_deathFrameWidth, _deathFrameHeight, _deathSpeed, _deathFrames, /*loop*/false);
+    refreshOriginByCurrentFrames(_anim.getFrameWidth(), _anim.getFrameHeight());
+    _anim.applyTo(_sprite);
+}
 
-    _frameRect = IntRect(0, 0, _frameWidth, _frameHeight);
-    _sprite.setTextureRect(_frameRect);
-    _sprite.setOrigin(_frameWidth / 2.f, _frameHeight / 1.25f);
+void cenemy::refreshOriginByCurrentFrames(int fw, int fh)
+{
+    _sprite.setOrigin(fw / 2.f, fh / 1.25f);
+}
+
+void cenemy::triggerAttack() {
+    if (_state != WALK) return;
+    startAttack();
 }
 
 void cenemy::updateAnimation(float deltaTime) {
+    // If death already finalized, nothing to animate
     if (_state == DEATH && _isDead) return;
 
-    _animationTimer += deltaTime;
-    if (_animationTimer >= _animationSpeed) {
-        _animationTimer -= _animationSpeed;
-        _currentFrame++;
+    _anim.update(deltaTime);
+    _anim.applyTo(_sprite);
 
-        if (_currentFrame >= _totalFrames) {
-            _currentFrame = _totalFrames - 1;
-
-            if (_state == DEATH)
-                _isDead = true;
-
-            else if (_state == ATTACK)
-                _isAttack = true;
-
-            else
-                _currentFrame = 0;
-        }
-
-        _frameRect.left = _currentFrame * _frameWidth;
-        _frameRect.top = 0;
-        _sprite.setTextureRect(_frameRect);
-    }
+    if (_state == DEATH && _anim.isFinished()) 
+        _isDead = true;      
+    
+    else if (_state == ATTACK && _anim.isFinished()) 
+        _isAttack = true;    
 }
 
 void cenemy::faceLeft(EnemyType type) {
@@ -242,9 +223,9 @@ void cenemy::faceRight(EnemyType type) {
 
 int cenemy::getHealthByType(EnemyType type) {
     switch (type) {
-    case FAST_SCOUT: return 3;
-    case RANGED_MECH: return 5;
-    case HEAVY_WALKER: return 8;
+    case FAST_SCOUT: return 5;
+    case RANGED_MECH: return 8;
+    case HEAVY_WALKER: return 10;
     default: return 3;
     }
 }
@@ -276,3 +257,5 @@ int cenemy::getDamageByType(EnemyType type)
     default: return 100;
     }
 }
+
+

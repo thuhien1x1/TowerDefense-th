@@ -105,6 +105,7 @@ Application::Application()
     mTextures.load(Textures::miniMap2Locked, "Media/UI/miniMapLocked/miniMap2Locked.png");
     mTextures.load(Textures::miniMap3Locked, "Media/UI/miniMapLocked/miniMap3Locked.png");
     mTextures.load(Textures::miniMap4Locked, "Media/UI/miniMapLocked/miniMap4Locked.png");
+    mTextures.load(Textures::wave, "Media/UI/icons/wave.png");
 
     // Load UI in PauseState 
     mTextures.load(Textures::pauseButton, "Media/UI/buttons/pauseButton.png");

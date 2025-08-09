@@ -225,6 +225,16 @@ void GameState::draw()
         pauseButton.setScale(1.f, 1.f);
     window.draw(pauseButton);
 
+    if (showTowerRange)
+        window.draw(circleRange);
+
+    for (const auto& tower : towers)
+        window.draw(tower.getSprite());
+
+    for (const auto& tower : towers)
+        if (tower.isEffectPlaying())
+            window.draw(tower.getEffectSprite());
+
     for (const auto& e : enemies) {
         if (!e.hasReachedEnd() || e.getState() == DEATH) {
 
@@ -254,16 +264,6 @@ void GameState::draw()
             window.draw(hpBar);
         }
     }
-
-    if (showTowerRange)
-        window.draw(circleRange);
-
-    for (const auto& tower : towers)
-        window.draw(tower.getSprite());
-
-    for (const auto& tower : towers)
-        if (tower.isEffectPlaying())
-            window.draw(tower.getEffectSprite());
 
     for (int i = 0; i < bullets.size(); ++i) {
         if (!bullets[i].isActive())
@@ -562,11 +562,11 @@ bool GameState::handleEvent(const Event& event)
 
                 // Display tower info panel and upgrade button if upgradeable
                 infoSprite[c - 3].setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 4 * cpoint::TILE_SIZE);
-                sellButton.setPosition((float)fx + cpoint::TILE_SIZE * 3.5f, (float)fy - 4.85f * cpoint::TILE_SIZE);
+                sellButton.setPosition((float)fx + cpoint::TILE_SIZE * 3.5f, (float)fy - 4.85f * cpoint::TILE_SIZE - 50.f);
                 circleRange.setPosition((float)fx + cpoint::TILE_SIZE * 0.5f, (float)fy + cpoint::TILE_SIZE * 0.5f - 80.f);
 
                 if (c >= 3 && c <= 5) 
-                    upgradeButton.setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 4.85f * cpoint::TILE_SIZE);
+                    upgradeButton.setPosition((float)fx + cpoint::TILE_SIZE + 20.f, (float)fy - 4.85f * cpoint::TILE_SIZE - 50.f);
 
 
                 showInfo = true;

@@ -1,4 +1,4 @@
-#include "MapSelectionState.h"
+﻿#include "MapSelectionState.h"
 #include "Utility.h"
 #include "Foreach.h"
 #include "ResourceHolder.h"
@@ -45,7 +45,7 @@ MapSelectionState::MapSelectionState(StateStack& stack, Context context)
 	centerOrigin(level4);
 	unlockedLevels.push_back(level4);
 
-	// Load locked map textures (map 1 is always unlocked) (use later)
+	// Load locked map textures (map 1 is always unlocked)
 	sf::Sprite level2Locked;
 	level2Locked.setTexture(context.textures->get(Textures::miniMap2Locked));
 	level2Locked.setPosition(1380.0f, 360.0f);
@@ -73,48 +73,82 @@ MapSelectionState::MapSelectionState(StateStack& stack, Context context)
 		{
 			string temp = to_string(SaveManagement::playerResult[i].curWave + 1);
 
-			Text wave;
+			Text waveText;
+			waveText.setFont(font);
+			waveText.setCharacterSize(40);
+			waveText.setFillColor(Color::Yellow);
+			currentWave.push_back(waveText);
+
+			sf::Sprite waveIcon;
+			waveIcon.setTexture(context.textures->get(Textures::wave));
+			waveIcon.setScale(1.3f, 1.3f);
+
 			if (i == 0)
 			{
-				wave.setString(temp + "/" + to_string(3));
-				wave.setPosition(580.0f, 360.0f);
+				waveText.setString(temp + "/" + to_string(3));
+				waveText.setPosition(560.0f, 550.0f);
+				waveIcon.setPosition(480.0f, 550.0f);
 			}
 			else if (i == 1)
 			{
-				wave.setString(temp + "/" + to_string(3));
-				wave.setPosition(1380.0f, 360.0f);
+				waveText.setString(temp + "/" + to_string(3));
+				waveText.setPosition(1360.0f, 550.0f);
+				waveIcon.setPosition(1280.0f, 550.0f);
 			}
 			else if (i == 2)
 			{
-				wave.setString(temp + "/" + to_string(4));
-				wave.setPosition(580.0f, 800.0f);
+				waveText.setString(temp + "/" + to_string(4));
+				waveText.setPosition(560.0f, 990.0f);
+				waveIcon.setPosition(480.0f, 990.0f);
 			}
 			else if (i == 3)
 			{
-				wave.setString(temp + "/" + to_string(5));
-				wave.setPosition(1380.0f, 800.0f);
+				waveText.setString(temp + "/" + to_string(5));
+				waveText.setPosition(1360.0f, 990.f);
+				waveIcon.setPosition(1280.0f, 990.0f);
 			}
 
-			wave.setFont(font);
-			wave.setCharacterSize(20);
-			wave.setFillColor(Color::Yellow);
-			currentWave.push_back(wave);
+			waveInfo.push_back({ waveIcon, waveText });
 		}
+
 		else if (SaveManagement::playerResult[i].status == 1) // done playing
 		{
-			string temp = to_string(SaveManagement::playerResult[i].stars);
-			Text star;
-			star.setString("STAR" + temp);
+			int starCount = SaveManagement::playerResult[i].stars;
+			std::vector<sf::Sprite> starsForLevel;
 
-			if (i == 0) star.setPosition(580.0f, 360.0f);
-			else if (i == 1) star.setPosition(1380.0f, 360.0f);
-			else if (i == 2) star.setPosition(580.0f, 800.0f);
-			else star.setPosition(1380.0f, 800.0f);
+			if (starCount > 0)
+			{
+				const float scale = 0.7f;
+				const float spacing = 12.f;     
+				const float offsetY = 220.f;
 
-			star.setFont(font);
-			star.setCharacterSize(20);
-			star.setFillColor(Color::Yellow);
-			stars.push_back(star);
+				sf::Sprite proto;
+				proto.setTexture(context.textures->get(Textures::star));
+				proto.setScale(scale, scale);
+
+				auto lb = proto.getLocalBounds();
+				float w = lb.width * scale;
+				float h = lb.height * scale;
+
+				sf::Vector2f center = unlockedLevels[i].getPosition();
+				center.y += offsetY;
+
+				// Compute the total width of the star row, then left-most x to center it
+				float totalW = starCount * w + (starCount - 1) * spacing;
+				float startX = center.x - totalW * 0.5f;
+
+				for (int s = 0; s < starCount; ++s)
+				{
+					sf::Sprite starSprite = proto;
+					starSprite.setOrigin(lb.width * 0.5f, lb.height * 0.5f);
+
+					float x = startX + s * (w + spacing) + w * 0.5f;
+					starSprite.setPosition(x, center.y);
+					starsForLevel.push_back(starSprite);
+				}
+			}
+
+			starIcons.push_back(std::move(starsForLevel));
 		}
 	}
 
@@ -159,18 +193,20 @@ void MapSelectionState::draw()
 
 			if (SaveManagement::playerResult[i].status == -1)
 			{
-				if (currentWaveIndex < currentWave.size())
-					window.draw(currentWave[currentWaveIndex]);
-				currentWaveIndex++;
+				window.draw(waveInfo[currentWaveIndex].first);   // icon wave
+				window.draw(waveInfo[currentWaveIndex].second);  // text wave
+					currentWaveIndex++;
 			}
+
 			else if (SaveManagement::playerResult[i].status == 1)
 			{
-				if (starsIndex < stars.size())
-					window.draw(stars[starsIndex]);
+				for (auto& s : starIcons[starsIndex])
+					window.draw(s);
 				starsIndex++;
 			}
 			continue;
 		}
+
 		else
 		{
 			if (!(SaveManagement::playerResult[i - 1].win)) // Locked: previous level is not done
@@ -184,6 +220,7 @@ void MapSelectionState::draw()
 			}
 			else // Unlocked
 			{
+
 				if (unlockedLevels[i].getGlobalBounds().contains(mousePos))
 					unlockedLevels[i].setScale(1.1f, 1.1f);
 				else
@@ -193,14 +230,15 @@ void MapSelectionState::draw()
 
 				if (SaveManagement::playerResult[i].status == -1)
 				{
-					if (currentWaveIndex < currentWave.size())
-						window.draw(currentWave[currentWaveIndex]);
+					window.draw(waveInfo[currentWaveIndex].first);   // icon wave
+					window.draw(waveInfo[currentWaveIndex].second);  // text wave
 					currentWaveIndex++;
 				}
+
 				else if (SaveManagement::playerResult[i].status == 1)
 				{
-					if (starsIndex < stars.size())
-						window.draw(stars[starsIndex]);
+					for (auto& s : starIcons[starsIndex])
+						window.draw(s);
 					starsIndex++;
 				}
 			}
@@ -242,4 +280,3 @@ bool MapSelectionState::handleEvent(const sf::Event& event)
 
 	return true;
 }
-

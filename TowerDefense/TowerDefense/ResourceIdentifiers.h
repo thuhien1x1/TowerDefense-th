@@ -101,6 +101,7 @@ namespace Textures
         miniMap2Locked,
         miniMap3Locked,
         miniMap4Locked,
+        wave,
 
         // UI for GameState
         pauseButton,

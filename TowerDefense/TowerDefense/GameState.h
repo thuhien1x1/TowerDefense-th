@@ -11,7 +11,7 @@
 #include "cBaseTower.h"
 #include "MapHandle.h"
 #include "Player.h"
-#include "SaveManagement.h" // NEW FEATURE
+#include "SaveManagement.h"
 #include <vector>
 #include <map>
 #include <cmath>
@@ -29,6 +29,8 @@ public:
     virtual void draw();
     virtual bool update(Time dt);
     virtual bool handleEvent(const Event& event);
+
+    ~GameState();
 
 private:
     Event event;
@@ -54,8 +56,6 @@ private:
 
     bool isGameOver;
     bool isGameWin;
-    bool isWaitingForNextLevel = false;
-    bool showEndButtons = false;
     bool hasPressedPlay = false;
 
     map<EnemyType, EnemyAnimationData> enemyData;
@@ -69,6 +69,7 @@ private:
     Sprite pauseButton;
     Sprite commingWave;
     Sprite upgradeButton;
+    Sprite sellButton;
     Sprite towerChoosingButtons[3];
     Sprite towerChoosingCircle;
     Sprite heartIcon;
@@ -94,4 +95,16 @@ private:
     // Upgrade Assistance
     int selectedRow;
     int selectedCol;
+
+    // Sound - NEW FEATURE
+    Sound bulletBombSound;
+    Sound bulletFireSound;
+    Sound bulletLaserSound;
+
+    Sound enemyAttackSound;
+    Sound enemyDeadSound;
+    Sound enemyWalkSound;
+
+    Sound towerPlaceSound;
+    Sound TowerUpgradeSound;
 };

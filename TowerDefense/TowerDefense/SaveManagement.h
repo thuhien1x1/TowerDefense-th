@@ -10,6 +10,7 @@
 #include <fstream>
 
 using namespace std;
+using namespace sf;
 
 class SaveManagement : public State
 {
@@ -17,36 +18,32 @@ public:
 	SaveManagement(StateStack& stack, Context context);
 
 	virtual void			draw();
-	virtual bool			update(sf::Time dt);
-	virtual bool			handleEvent(const sf::Event& event);
-
-	void					updateOptionText();
+	virtual bool			update(Time dt);
+	virtual bool			handleEvent(const Event& event);
 
 private:
-	enum fileState
-	{
-		SELECT_SAVE,
-		Exit
-	};
+	Sprite				mBackgroundSprite;
+	Sprite				closePanelButton;
+	vector<Sprite>		nameBar;
 
-private:
-	sf::Sprite				mBackgroundSprite;
-
-	std::vector<sf::Text>	mOptions;
-	std::size_t				mOptionIndex;
+	vector<Text>		mOptions;
+	size_t				mOptionIndex;
 
 private:
 	// process load file
-	vector<string> savedNames;
-	void scanSaveFolder();
+	vector<string>		savedNames;
+	void				scanSaveFolder();
+	void				layoutNamesOnBars();
 
 public:
+
 	// process save file
 	struct levelResult
 	{
-		int status; // isGameOver = 0, isGameWin = 1, else = -1
-		int curGold; // startGold = 
-		int stars; // if (!status) = 0, else = 
+		bool win = false;	// ever win? // NEW FEATURE
+		int status;			// isGameOver = 0, isGameWin = 1, isNotFinished = -1
+		int curGold;
+		int stars;			// (status != 1) => (stars = 0)
 		int health;
 		int curWave;
 		vector<ctower> towers;

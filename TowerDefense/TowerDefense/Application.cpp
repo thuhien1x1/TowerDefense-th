@@ -17,7 +17,7 @@ Application::Application()
     , mTextures()
     , mFonts()
     , mPlayer()
-    , mStateStack(State::Context(mWindow, mTextures, mFonts, mPlayer, mVictoryStars))
+    , mStateStack(State::Context(mWindow, mTextures, mFonts, mPlayer, mVictoryStars, mSoundBuffers, mMusics, isMusicOn, isSoundOn, currentMusic))
 {
     mWindow.setVerticalSyncEnabled(true); // Smoother rendering
 
@@ -73,8 +73,9 @@ Application::Application()
     mTextures.load(Textures::Enemy3_Attack, "Media/Textures/enemy_3_attack_212_210_6.png");
     mTextures.load(Textures::Enemy3_Death, "Media/Textures/enemy_3_death_212_210_6.png");
 
-    // Load Upgrade button
+    // Load functional button
     mTextures.load(Textures::upgradeButton, "Media/UI/buttons/upgradeButton.png");
+    mTextures.load(Textures::sellButton, "Media/UI/buttons/SellButton.png");
 
     // Load construction icon
     mTextures.load(Textures::constructionicon, "Media/Textures/ConstructionIcon.png");
@@ -139,6 +140,10 @@ Application::Application()
     mTextures.load(Textures::inputNameBackground, "Media/Textures/inputNameBackground.png");
     mTextures.load(Textures::nextButton, "Media/UI/buttons/nextButton.png");
 
+    // Load UI in SaveMangement for Loading
+    mTextures.load(Textures::loadBackground, "Media/UI/loadBackground.png");
+    mTextures.load(Textures::nameBar, "Media/UI/buttons/nameBar.png");
+
     // NEW FEATURE
     // Load sound and music
     mSoundBuffers.load(SoundBuffers::BulletBomb, "Audio/BulletBomb.wav");
@@ -152,6 +157,10 @@ Application::Application()
     mSoundBuffers.load(SoundBuffers::GameOver, "Audio/GameOver.wav");
     mSoundBuffers.load(SoundBuffers::GameWin, "Audio/GameWin.wav");
 
+    mSoundBuffers.load(SoundBuffers::TowerPlace, "Audio/TowerPlace.wav");
+    mSoundBuffers.load(SoundBuffers::TowerUpgrade, "Audio/TowerUpgrade.wav");
+
+    mSoundBuffers.load(SoundBuffers::UIclick, "Audio/UIclick.wav");
     mMusics.open(Musics::MusicGame, "Audio/MusicGame.wav");
     mMusics.open(Musics::MusicMenu, "Audio/MusicMenu.wav");
 }
@@ -180,7 +189,6 @@ void Application::registerStates()
     mStateStack.registerState<MapSelectionState>(States::MapSelection);
     mStateStack.registerState<VictoryState>(States::Victory);
     mStateStack.registerState<DefeatState>(States::Defeat);
-    // NEW FEATURE
     mStateStack.registerState<InputNameState>(States::InputName);
     mStateStack.registerState<SaveManagement>(States::Load);
 }
@@ -190,6 +198,14 @@ void Application::processInput()
     sf::Event event;
     while (mWindow.pollEvent(event))
     {
+        // NEW FEATURE: Global click sound logic
+        if (event.type == sf::Event::MouseButtonPressed) {
+            if (isSoundOn) {
+                mClickSound.setBuffer(mSoundBuffers.get(SoundBuffers::UIclick));
+                mClickSound.play();
+            }
+        }
+
         mStateStack.handleEvent(event);
 
         if (event.type == sf::Event::Closed)

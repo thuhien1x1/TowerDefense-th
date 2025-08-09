@@ -27,6 +27,14 @@ private:
     Player mPlayer;
     int mVictoryStars;
     StateStack mStateStack;
+
+    MusicState currentMusic = MusicState::None; // NEW FEATURE
     SoundBufferHolder mSoundBuffers;    // NEW FEATURE
     MusicHolder mMusics;                // NEW FEATURE
+
+    bool isMusicOn = true;          // NEW FEATURE
+    bool isSoundOn = true;              // NEW FEATURE
+
+private:
+    sf::Sound mClickSound;
 };

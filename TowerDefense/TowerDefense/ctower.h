@@ -37,16 +37,16 @@ public:
     ctower();
 
     int calcPathBullet();
-    void init(const Texture& tex, float x, float y);
+    void init(const Texture& tex, float x, float y, int index, int itower);
     void resetShootTimer() { _shootTimer = 0.f; } // Reset the shoot timer to 0 after firing a bullet
     void addShootTimer(float dt) { _shootTimer += dt; } // Add delta time to the shoot timer, used to track cooldown between shots
+    void changeOrigin(int index, int itower, const Texture& tex); // UI tower
 
     // shootEffect
     void initEffect(const Texture& tex, int frameWidth, int frameHeight, int totalFrames, float animSpeed);
     void startEffect();
     void updateEffect(float deltaTime);
     bool isEffectPlaying() const { return _effectPlaying; }
-
 
     // Getter
     int getTargetEnemyIdx() const { return _targetEnemyIdx; }

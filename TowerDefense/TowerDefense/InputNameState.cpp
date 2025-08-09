@@ -7,10 +7,10 @@ InputNameState::InputNameState(StateStack& stack, Context context)
 	, invalidInputName()
 	, invalidName(false)
 {
-	sf::Texture& texture = context.textures->get(Textures::inputNameBackground);
+	Texture& texture = context.textures->get(Textures::inputNameBackground);
 	mBackgroundSprite.setTexture(texture);
 
-	sf::Font& font = context.fonts->get(Fonts::BruceForever);
+	Font& font = context.fonts->get(Fonts::BruceForever);
 	context.window->setKeyRepeatEnabled(false); // input name only happens once
 
 	closePanelButton.setTexture(context.textures->get(Textures::closeButton));
@@ -37,8 +37,8 @@ InputNameState::InputNameState(StateStack& stack, Context context)
 
 void InputNameState::draw()
 {
-	sf::RenderWindow& window = *getContext().window;
-	Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+	RenderWindow& window = *getContext().window;
+	Vector2f mousePos = window.mapPixelToCoords(Mouse::getPosition(window));
 	window.setView(window.getDefaultView());
 
 	// Draw background
@@ -71,52 +71,54 @@ void InputNameState::draw()
 	window.draw(nextButton);
 }
 
-bool InputNameState::update(sf::Time)
+bool InputNameState::update(Time)
 {
 	return true;
 }
 
-bool InputNameState::handleEvent(const sf::Event& event)
+bool InputNameState::handleEvent(const Event& event)
 {
 	// If is new player: Input name before choosing level
-	if (MenuState::isNewPlayer && event.type == sf::Event::TextEntered)
+	if (MenuState::isNewPlayer && event.type == Event::TextEntered)
 	{
-		char ch = static_cast<char>(event.text.unicode);
-		if (std::isprint(ch) && SaveManagement::playerName.size() < 15)
-			SaveManagement::playerName.push_back(ch);
-		else if (event.text.unicode == 8 && !SaveManagement::playerName.empty())
-		{
-			SaveManagement::playerName.pop_back();									// backspace: delete character
-		}
-		else if (event.text.unicode == 13 && !SaveManagement::playerName.empty()) // Enter: done input name -> not new player
-		{
-			MenuState::isNewPlayer = false;
-			getContext().window->setKeyRepeatEnabled(true); // input name done -> reset so UP/DOWN/... can be repeated
-			requestStackPop();
-			requestStackPush(States::MapSelection);
+		const uint32_t u = event.text.unicode;
+
+		// Backspace || Delete
+		if ((u == 8 || u == 127) && !SaveManagement::playerName.empty())
+			SaveManagement::playerName.pop_back();
+
+		// Skip Enter/Return/Newline
+		else if (u == 13 || u == 10) {
+
 		}
 
-		if (SaveManagement::playerName.size() < 10)
-			invalidName = false;
-		else
-			invalidName = true;
-
-		return true;
+		else {
+			char ch = static_cast<char>(u);
+			if (std::isprint(static_cast<unsigned char>(ch)) && SaveManagement::playerName.size() < 15)
+				SaveManagement::playerName.push_back(ch);
+		}
 	}
 
-	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-		Vector2f mousePos = getContext().window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+	if (SaveManagement::playerName.size() < 10)
+		invalidName = false;
+	else
+		invalidName = true;
+
+	if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+		Vector2f mousePos = getContext().window->mapPixelToCoords(Vector2i(event.mouseButton.x, event.mouseButton.y));
 
 		if (closePanelButton.getGlobalBounds().contains(mousePos)) {
 			requestStackPop();
 			requestStackPush(States::Menu);
+			return true;
 		}
 
-		else if (nextButton.getGlobalBounds().contains(mousePos) && !SaveManagement::playerName.empty()) {
+		if (nextButton.getGlobalBounds().contains(mousePos) && !SaveManagement::playerName.empty() && !invalidName) {
 			getContext().window->setKeyRepeatEnabled(true);
 			MenuState::isNewPlayer = false;
 			requestStackPop();
 			requestStackPush(States::MapSelection);
+			return true;
 		}
 	}
 

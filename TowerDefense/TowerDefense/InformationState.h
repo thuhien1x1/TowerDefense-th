@@ -1,21 +1,28 @@
 #pragma once
 
 #include "State.h"
-
-#include <SFML/Graphics/Sprite.hpp>
-#include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics.hpp>
+#include <vector>
 
 class InformationState : public State
 {
 public:
-	InformationState(StateStack& stack, Context context);
-
-	virtual void			draw();
-	virtual bool			update(sf::Time dt);
-	virtual bool			handleEvent(const sf::Event& event);
+    InformationState(StateStack& stack, Context context);
+    virtual void draw();
+    virtual bool update(sf::Time dt);
+    virtual bool handleEvent(const sf::Event& event);
 
 private:
-	sf::Sprite				mBackgroundSprite;
-	sf::Sprite				mCloseInfoButton;
-};
+    void clampScrollOffset();  // Helper function
 
+    sf::Sprite mBackgroundSprite;
+    sf::Sprite mCloseInfoButton;
+    sf::RectangleShape mScrollArea;
+
+    sf::Font mFont;  // Store font as member
+    std::vector<sf::Text> mInfoTexts;
+
+    float mScrollOffset;
+    bool mIsDragging;
+    float mLastMouseY;
+};

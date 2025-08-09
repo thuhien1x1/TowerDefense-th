@@ -12,9 +12,7 @@ GameState::GameState(StateStack& stack, Context context)
     levels(),
     isGameOver(false),
     isGameWin(false),
-    hasPressedPlay(false),
-    isWaitingForNextLevel(false),
-    showEndButtons(false)
+    hasPressedPlay(false)
 {
     // NEW FEATURE: Load music
     auto& musicFlag = *getContext().isMusicOn;
@@ -193,8 +191,8 @@ void GameState::draw()
 {
     RenderWindow& window = *getContext().window;
     window.setView(window.getDefaultView());
-    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-    window.clear(sf::Color::Black);
+    Vector2f mousePos = window.mapPixelToCoords(Mouse::getPosition(window));
+    window.clear(Color::Black);
 
     window.draw(backgroundSprite);
     curMap->drawPowerStations(window);
@@ -300,7 +298,7 @@ void GameState::draw()
     }
 
 }
-bool GameState::handleEvent(const sf::Event& event)
+bool GameState::handleEvent(const Event& event)
 {
     RenderWindow& window = *getContext().window;
 
@@ -309,7 +307,7 @@ bool GameState::handleEvent(const sf::Event& event)
 
     if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
         // Add pause button
-        sf::Vector2f mousePos = getContext().window->mapPixelToCoords(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+        Vector2f mousePos = getContext().window->mapPixelToCoords(Vector2i(event.mouseButton.x, event.mouseButton.y));
 
         // Click commingWave icon to spawn enemies
         if (commingWave.getGlobalBounds().contains(mousePos) && !hasPressedPlay) {
@@ -555,7 +553,7 @@ bool GameState::handleEvent(const sf::Event& event)
     }
 }
 
-bool GameState::update(sf::Time dt)
+bool GameState::update(Time dt)
 {
     // Set Icons
     MapHandle::setIconsmap(currentLevelIndex, constructionicons);
@@ -690,18 +688,6 @@ bool GameState::update(sf::Time dt)
 
             spawnEnemies();
         }
-
-        else {
-            isGameWin = true;
-            isWaitingForNextLevel = true;
-        }
-    }
-
-    if (isGameWin && currentLevelIndex == levels.size() - 1) {
-        if (currentLevelIndex == levels.size() - 1)
-            showEndButtons = true; // Only show Exit and Restart buttons on last level
-        else
-            isWaitingForNextLevel = true; // Go to the next level
     }
 
     if (isGameOver) {
@@ -779,19 +765,7 @@ bool GameState::update(sf::Time dt)
             else if (tower.getType() == 4) b.setDamage(5);
             else if (tower.getType() == 5) b.setDamage(6);
             else b.setDamage(1);
-            bullets.push_back(b);
-
-            // Test laser
-            /*int enemyIdx = tower.getTargetEnemyIdx();
-            Vector2f towerPos = tower.getSprite().getPosition();
-            Vector2f enemyPos(enemies[enemyIdx].getX(), enemies[enemyIdx].getY());
-
-            cbullet laser;
-            laser.initLaser(*bulletTexture[5], towerPos.x, towerPos.y, enemyPos.x, enemyPos.y, 0.2f);
-            laser.setTargetIdx(enemyIdx);
-            laser.setDamage(1);
-
-            bullets.push_back(laser);*/
+            bullets.push_back(b);         
         }
     }
 

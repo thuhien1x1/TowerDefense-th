@@ -63,12 +63,11 @@ private:
     Texture* towerTexture[6];
     Texture* bulletTexture[6];
     Texture* mainTowerTexture;
-    Texture* shootEffectTexture;
 
     // UI
     Sprite pauseButton;
     Sprite commingWave;
-    Sprite upgradeButton;
+    Sprite upgradeButton[3];
     Sprite sellButton;
     Sprite towerChoosingButtons[3];
     Sprite towerChoosingCircle;

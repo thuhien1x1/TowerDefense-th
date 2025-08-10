@@ -114,11 +114,53 @@ void cbullet::init(const sf::Texture& tex, float x, float y, int frameWidth, int
     _curr = cpoint::fromXYToRowCol(x, y);
 
     _active = true;
+    _collisionPlaying = false;
 }
 
 void cbullet::updateAnimation(float deltaTime) {
     _anim.update(deltaTime);
     _anim.applyTo(_sprite);
 }
+
+void cbullet::initCollisionEffect(const sf::Texture& tex, int frameWidth, int frameHeight, int totalFrames, float animSpeed, float scale)
+{
+    _collisionSprite.setTexture(tex);
+    _collisionSprite.setOrigin(frameWidth * 0.5f, frameHeight * 0.5f);
+    _collisionSprite.setScale(scale, scale);
+
+    _collisionAnim.init(frameWidth, frameHeight, animSpeed, totalFrames, /*loop*/false);
+    _collisionAnim.applyTo(_collisionSprite);
+}
+
+void cbullet::triggerCollision(float x, float y)
+{
+    // Stop bullet, start effect
+    _active = false;
+    _collisionPlaying = true;
+    _collisionAnim.reset();
+    _collisionSprite.setPosition(x, y - 20.f);
+}
+
+void cbullet::updateCollisionEffectAnimation(float deltaTime)
+{
+    // Bullet flying animation
+    if (_active) {
+        _anim.update(deltaTime);
+        _anim.applyTo(_sprite);
+    }
+}
+
+void cbullet::updateCollision(float deltaTime)
+{
+    if (_collisionPlaying) {
+        _collisionAnim.update(deltaTime);
+        _collisionAnim.applyTo(_collisionSprite);
+        if (_collisionAnim.isFinished()) {
+            _collisionPlaying = false;
+            _collisionSprite.setTextureRect({ 0,0,0,0 });
+        }
+    }
+}
+
 
 

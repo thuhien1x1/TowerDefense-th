@@ -72,7 +72,6 @@ GameState::GameState(StateStack& stack, Context context)
     bulletTexture[3] = &getContext().textures->get(Textures::Bomb);
     bulletTexture[4] = &getContext().textures->get(Textures::Fire);
     bulletTexture[5] = &getContext().textures->get(Textures::Ice);
-    shootEffectTexture = &getContext().textures->get(Textures::ShootEffect);
     font = getContext().fonts->get(Fonts::BruceForever);
 
     // Load info tower texture
@@ -80,7 +79,9 @@ GameState::GameState(StateStack& stack, Context context)
         infoSprite[i].setTexture(*infoTexture[i]);
 
     // Load Functional Button
-    upgradeButton.setTexture(context.textures->get(Textures::upgradeButton75));
+    upgradeButton[0].setTexture(context.textures->get(Textures::upgradeButton75));
+    upgradeButton[1].setTexture(context.textures->get(Textures::upgradeButton100));
+    upgradeButton[2].setTexture(context.textures->get(Textures::upgradeButton125));
     sellButton.setTexture(context.textures->get(Textures::sellButton));
 
     // Load Construction Icon
@@ -129,19 +130,19 @@ GameState::GameState(StateStack& stack, Context context)
 
     // Initialize 4 levels (levelID, enemyCount, waveCount, towerMaxCount, startGold) 
     clevel level1(1, 45, 3, 5, 200);
-    level1.setWaves({ {FAST_SCOUT, 20}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1} }); // 10, 15, 20
+    level1.setWaves({ {FAST_SCOUT, 10}, {HEAVY_WALKER, 15}, {RANGED_MECH, 20} }); // 10, 15, 20
     level1.loadMap(mainTowerTexture, backgroundTexture[0], 1);
 
     clevel level2(2, 65, 3, 6, 400);
-    level2.setWaves({ {FAST_SCOUT, 1}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1} }); // 15, 20, 30
+    level2.setWaves({ {FAST_SCOUT, 15}, {HEAVY_WALKER, 20}, {RANGED_MECH, 30} }); // 15, 20, 30
     level2.loadMap(mainTowerTexture, backgroundTexture[1], 2);
 
     clevel level3(3, 100, 4, 6, 700);
-    level3.setWaves({ {FAST_SCOUT, 1}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1}, {HEAVY_WALKER, 1} }); // 20, 25, 30, 25
+    level3.setWaves({ {FAST_SCOUT, 20}, {HEAVY_WALKER, 25}, {RANGED_MECH, 30}, {HEAVY_WALKER, 25} }); // 20, 25, 30, 25
     level3.loadMap(mainTowerTexture, backgroundTexture[2], 3);
 
     clevel level4(4, 175, 5, 7, 1000);
-    level4.setWaves({ {FAST_SCOUT, 1}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1}, {FAST_SCOUT, 1}, {HEAVY_WALKER, 1} }); // 25, 30, 35, 40, 45
+    level4.setWaves({ {FAST_SCOUT, 25}, {HEAVY_WALKER, 30}, {RANGED_MECH, 35}, {FAST_SCOUT, 40}, {HEAVY_WALKER, 45} }); // 25, 30, 35, 40, 45
     level4.loadMap(mainTowerTexture, backgroundTexture[3], 4);
 
     levels.push_back(level1);
@@ -290,12 +291,13 @@ void GameState::draw()
         if (tower.isEffectPlaying())
             window.draw(tower.getEffectSprite());
 
-    for (int i = 0; i < bullets.size(); ++i) {
-        if (!bullets[i].isActive())
-            continue;
-        else
-            window.draw(bullets[i].getSprite());
+    for (auto& b : bullets) {
+        if (b.isActive()) 
+            window.draw(b.getSprite());
+        else if (b.isCollisionPlaying()) 
+            window.draw(b.getCollisionSprite());
     }
+
 
     // Draw choosingTowerButton
     if (isChoosingTower) {
@@ -321,11 +323,11 @@ void GameState::draw()
         window.draw(sellButton);
 
         if (selectedinfo - 3 < 3) {
-            if (upgradeButton.getGlobalBounds().contains(mousePos))
-                upgradeButton.setScale(1.1f, 1.1f);
+            if (upgradeButton[selectedinfo - 3].getGlobalBounds().contains(mousePos))
+                upgradeButton[selectedinfo - 3].setScale(1.1f, 1.1f);
             else
-                upgradeButton.setScale(1.f, 1.f);
-            window.draw(upgradeButton);
+                upgradeButton[selectedinfo - 3].setScale(1.f, 1.f);
+            window.draw(upgradeButton[selectedinfo - 3]);
         }
     }
 
@@ -402,7 +404,13 @@ bool GameState::handleEvent(const Event& event)
                         t.setMapForBullet(curMap->getMap());
                         t.getBullet().setSpeed(8);
                         t.setType(towerType);
-                        t.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);
+
+                        switch (towerType) {
+                        case 0: t.initEffect(getContext().textures->get(Textures::BombShootEffect), 30, 23, 5, 0.05f); break;
+                        case 1: t.initEffect(getContext().textures->get(Textures::FireShootEffect), 30, 23, 5, 0.05f); break;
+                        case 2: t.initEffect(getContext().textures->get(Textures::IceShootEffect), 30, 23, 5, 0.05f); break;
+                        }
+
                         int index = MapHandle::findBlockmap(currentLevelIndex, td.first, td.second);
                         towerconstructed[index] = true;
 
@@ -446,7 +454,7 @@ bool GameState::handleEvent(const Event& event)
         }
 
         // Handle tower upgrade button click
-        if (showInfo && upgradeButton.getGlobalBounds().contains(mx, my)) {
+        if (showInfo && upgradeButton[selectedinfo - 3].getGlobalBounds().contains(mx, my)) {
             int tileC = selectedinfo;
             if (tileC >= 3 && tileC <= 5) {
                 if (player.spendMoney(GameConstants::UPGRADE_COSTS[tileC - 3])) {
@@ -607,7 +615,7 @@ bool GameState::handleEvent(const Event& event)
                 circleRange.setPosition((float)fx + cpoint::TILE_SIZE * 0.5f, (float)fy + cpoint::TILE_SIZE * 0.5f - 80.f);
 
                 if (c >= 3 && c <= 5) 
-                    upgradeButton.setPosition((float)fx + cpoint::TILE_SIZE + 20.f, (float)fy - 4.85f * cpoint::TILE_SIZE - 50.f);
+                    upgradeButton[selectedinfo - 3].setPosition((float)fx + cpoint::TILE_SIZE + 20.f, (float)fy - 4.85f * cpoint::TILE_SIZE - 50.f);
 
 
                 showInfo = true;
@@ -800,7 +808,11 @@ bool GameState::update(Time dt)
     // Tower attack logic: target enemies and shoot
     for (auto& tower : towers) {
         tower.addShootTimer(dt.asSeconds());
-        tower.updateEffect(dt.asSeconds());
+
+        // Trigger shootEffect
+        if (tower.getTargetEnemyIdx() != -1 && tower.getShootTimer() > 0.8f && !tower.isEffectPlaying())
+            tower.startEffect();
+
         bool validTarget = false;
         int idx = tower.getTargetEnemyIdx();
 
@@ -826,10 +838,6 @@ bool GameState::update(Time dt)
             }
         }
 
-        // Trigger VFX
-        if (tower.getTargetEnemyIdx() != -1 && tower.getShootTimer() > 0.8f)
-            tower.startEffect();
-
         // Shoot bullet when cooldown is over
         if (tower.getTargetEnemyIdx() != -1 && tower.getShootTimer() > 1.f) {
             tower.startEffect();
@@ -847,18 +855,54 @@ bool GameState::update(Time dt)
                 tex = bulletTexture[0];
                 frameW = 16; frameH = 15; totalFrames = 7;
                 animSpeed = 0.05f; scale = 4.f;
+
+                b.initCollisionEffect(getContext().textures->get(Textures::BombImpact), (float) 542 / 9, 62, 9, 0.05f, 1.7f);
+
                 break;
 
             case 1: // Tower type 2 - Fire
                 tex = bulletTexture[1];
                 frameW = 1667; frameH = 1167; totalFrames = 4;
                 animSpeed = 0.05f; scale = 0.1f;
+
+                b.initCollisionEffect(getContext().textures->get(Textures::FireImpact), (float) 283 / 5, 44, 5, 0.09f, 1.7f);
+
                 break;
 
             case 2: // Tower type 3 - Ice
                 tex = bulletTexture[2];
                 frameW = 141; frameH = 114; totalFrames = 5;
                 animSpeed = 0.05f; scale = 0.8f;
+
+                b.initCollisionEffect(getContext().textures->get(Textures::IceImpact), (float) 388 / 6, 69, 6, 0.09f, 1.4f);
+
+                break;
+
+            case 3: // Tower type 1 - Upgraded - Bomb
+                tex = bulletTexture[0];
+                frameW = 16; frameH = 15; totalFrames = 7;
+                animSpeed = 0.05f; scale = 4.f;
+
+                b.initCollisionEffect(getContext().textures->get(Textures::BombImpact), (float)542 / 9, 62, 9, 0.05f, 1.7f);
+
+                break;
+
+            case 4: // Tower type 2 - Upgraded - Fire
+                tex = bulletTexture[1];
+                frameW = 1667; frameH = 1167; totalFrames = 4;
+                animSpeed = 0.05f; scale = 0.1f;
+
+                b.initCollisionEffect(getContext().textures->get(Textures::FireImpact), (float)283 / 5, 44, 5, 0.09f, 1.7f);
+
+                break;
+
+            case 5: // Tower type 3 - Upgraded - Ice
+                tex = bulletTexture[2];
+                frameW = 141; frameH = 114; totalFrames = 5;
+                animSpeed = 0.05f; scale = 0.8f;
+
+                b.initCollisionEffect(getContext().textures->get(Textures::IceImpact), (float)388 / 6, 69, 6, 0.09f, 1.4f);
+
                 break;
 
             default:
@@ -892,42 +936,43 @@ bool GameState::update(Time dt)
 
             bullets.push_back(b);         
         }
+
+        tower.updateEffect(dt.asSeconds());
     }
 
     // Bullet logic: track and hit enemies
     for (auto& b : bullets) {
-        if (!b.isActive()) continue;
-        int idx = b.getTargetIdx();
+        if (b.isActive()) {
+            int idx = b.getTargetIdx();
 
-        if (idx < 0 || idx >= enemies.size() || enemies[idx].hasReachedEnd() || enemies[idx].isDead()) {
-            b.deactivate();
-            continue;
-        }
+            if (idx < 0 || idx >= enemies.size() || enemies[idx].hasReachedEnd() || enemies[idx].isDead())
+                b.deactivate();
 
-        if (b.checkCollision(enemies[idx]))
-        {
-            if (*getContext().isSoundOn)
-            {
-                bulletBombSound.setVolume(25);
-                bulletBombSound.play();
+            else if (b.checkCollision(enemies[idx])) {
+                if (*getContext().isSoundOn) { 
+                    bulletBombSound.setVolume(25);
+                    bulletBombSound.play(); 
+                }
+
+                b.triggerCollision(enemies[idx].getX(), enemies[idx].getY()); 
+                enemies[idx].takeDamage(b.getDamage());
             }
 
-            b.deactivate();
-            enemies[idx].takeDamage(b.getDamage());
+            else {
+                b.trackEnemy(enemies[idx], dt.asSeconds());
+                b.updateAnimation(dt.asSeconds()); 
+            }
         }
 
-        else {
-            b.trackEnemy(enemies[idx], dt.asSeconds());
-            b.updateAnimation(dt.asSeconds());
-        }
-
+        b.updateCollision(dt.asSeconds());
     }
 
     // Update powerStations animation
     curMap->updatePowerStation(dt.asSeconds());
 
     // Remove inactive bullets
-    bullets.erase(remove_if(bullets.begin(), bullets.end(), [](cbullet& b) { return !b.isActive(); }), bullets.end());
+    bullets.erase(remove_if(bullets.begin(), bullets.end(),
+        [](cbullet& b) { return b.isRemovable(); }), bullets.end());
 
     // Update mainTower hp & gold
     hp.setString(to_string(curMap->getMainTower().getHealth()));
@@ -1005,6 +1050,11 @@ void GameState::loadLevel(int index) {
         cpoint tLoc = SaveManagement::playerResult[currentLevelIndex].towers[i].getLocation();
 
         tTower.setType(tType);
+        switch (tType) {
+        case 0: tTower.initEffect(getContext().textures->get(Textures::BombShootEffect), 30, 23, 5, 0.05f); break;
+        case 1: tTower.initEffect(getContext().textures->get(Textures::FireShootEffect), 30, 23, 5, 0.05f); break;
+        case 2: tTower.initEffect(getContext().textures->get(Textures::IceShootEffect), 30, 23, 5, 0.05f); break;
+        }
         tTower.setLocation(tLoc);
         int itower = MapHandle::findBlockmap(currentLevelIndex, tLoc.getRow(), tLoc.getCol());
         tTower.init(*towerTexture[tType],
@@ -1012,7 +1062,6 @@ void GameState::loadLevel(int index) {
             tLoc.getPixelY(), currentLevelIndex, itower);
         tTower.setMapForBullet(curMap->getMap());
         tTower.getBullet().setSpeed(8);
-        tTower.initEffect(*shootEffectTexture, 30, 23, 5, 0.05f);
         int index = MapHandle::findBlockmap(currentLevelIndex, tLoc.getRow(), tLoc.getCol());
         towerconstructed[index] = true;
 

@@ -45,7 +45,9 @@ Application::Application()
     mTextures.load(Textures::Tower3plus, "Media/Textures/tower 3 - upgraded.png");
 
     // Load effect textures
-    mTextures.load(Textures::ShootEffect, "Media/Textures/shootEffect.png");
+    mTextures.load(Textures::BombShootEffect, "Media/Textures/BombShootEffect.png");
+    mTextures.load(Textures::FireShootEffect, "Media/Textures/FireShootEffect.png");
+    mTextures.load(Textures::IceShootEffect, "Media/Textures/IceShootEffect.png");
 
     // Load tower Infos
     mTextures.load(Textures::Info1, "Media/Textures/infotower1.png");
@@ -164,6 +166,11 @@ Application::Application()
     mSoundBuffers.load(SoundBuffers::UIclick, "Audio/UIclick.wav");
     mMusics.open(Musics::MusicGame, "Audio/MusicGame.wav");
     mMusics.open(Musics::MusicMenu, "Audio/MusicMenu.wav");
+
+    // Load collision effect
+    mTextures.load(Textures::BombImpact, "Media/Textures/BombImpact.png");
+    mTextures.load(Textures::FireImpact, "Media/Textures/FireImpact.png");
+    mTextures.load(Textures::IceImpact, "Media/Textures/IceImpact.png");
 }
 
 void Application::run()

@@ -68,8 +68,10 @@ namespace Textures
 
         MenuScreen,
 
-        // Upgrade Button
-        upgradeButton,
+        // Upgrade & Sell Button
+        upgradeButton75,
+        upgradeButton100,
+        upgradeButton125,
         sellButton,
 
         // Construction Icon

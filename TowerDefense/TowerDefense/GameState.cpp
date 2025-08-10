@@ -12,9 +12,13 @@ GameState::GameState(StateStack& stack, Context context)
     levels(),
     isGameOver(false),
     isGameWin(false),
-    hasPressedPlay(false)
+    hasPressedPlay(false),
+    showNotEnough(false),
+    showInfo(false),
+    showTowerRange(false),
+    isChoosingTower(false)
 {
-    // NEW FEATURE: Load music
+    // Load music
     auto& musicFlag = *getContext().isMusicOn;
     auto& musicState = *getContext().currentMusic;
     auto& musicHolder = *getContext().musics;
@@ -76,7 +80,7 @@ GameState::GameState(StateStack& stack, Context context)
         infoSprite[i].setTexture(*infoTexture[i]);
 
     // Load Functional Button
-    upgradeButton.setTexture(context.textures->get(Textures::upgradeButton));
+    upgradeButton.setTexture(context.textures->get(Textures::upgradeButton75));
     sellButton.setTexture(context.textures->get(Textures::sellButton));
 
     // Load Construction Icon
@@ -114,9 +118,18 @@ GameState::GameState(StateStack& stack, Context context)
     circleRange.setRadius(TOWER_RANGE);
     circleRange.setOrigin(TOWER_RANGE, TOWER_RANGE);
 
+    notEnoughText.setFont(font);
+    notEnoughText.setCharacterSize(36);
+    notEnoughText.setString("Not enough money!");
+    notEnoughText.setFillColor(Color::Green); 
+    notEnoughText.setOutlineColor(Color::Black);
+    notEnoughText.setOutlineThickness(2.f);
+    notEnoughText.setStyle(Text::Bold);
+    notEnoughText.setPosition(1920.f * 0.5f - 180.f, 1080.f * 0.5f - 20.f);
+
     // Initialize 4 levels (levelID, enemyCount, waveCount, towerMaxCount, startGold) 
     clevel level1(1, 45, 3, 5, 200);
-    level1.setWaves({ {FAST_SCOUT, 10}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1} }); // 10, 15, 20
+    level1.setWaves({ {FAST_SCOUT, 20}, {HEAVY_WALKER, 1}, {RANGED_MECH, 1} }); // 10, 15, 20
     level1.loadMap(mainTowerTexture, backgroundTexture[0], 1);
 
     clevel level2(2, 65, 3, 6, 400);
@@ -173,7 +186,7 @@ GameState::GameState(StateStack& stack, Context context)
         0.5f, 0.5f,
     };
 
-    // Load Sound - NEW FEATURE
+    // Load Sound 
     if (*getContext().isSoundOn)
     {
         bulletBombSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::BulletBomb));
@@ -199,6 +212,18 @@ void GameState::draw()
     window.clear(Color::Black);
 
     window.draw(backgroundSprite);
+
+    // Draw Construction Icons
+    int numbericons;
+
+    if (currentLevelIndex == 0) numbericons = 5;
+    else if (currentLevelIndex == 3) numbericons = 7;
+    else numbericons = 6;
+
+    for (int i = 0; i < numbericons; ++i)
+        if (towerconstructed[i] == false)
+            window.draw(constructionicons[i]);
+
     curMap->drawPowerStations(window);
     window.draw(curMap->getMainTower().getSprite());
     curMap->getMainTower().drawHealthBar(window);
@@ -227,13 +252,6 @@ void GameState::draw()
 
     if (showTowerRange)
         window.draw(circleRange);
-
-    for (const auto& tower : towers)
-        window.draw(tower.getSprite());
-
-    for (const auto& tower : towers)
-        if (tower.isEffectPlaying())
-            window.draw(tower.getEffectSprite());
 
     for (const auto& e : enemies) {
         if (!e.hasReachedEnd() || e.getState() == DEATH) {
@@ -265,23 +283,19 @@ void GameState::draw()
         }
     }
 
+    for (const auto& tower : towers)
+        window.draw(tower.getSprite());
+
+    for (const auto& tower : towers)
+        if (tower.isEffectPlaying())
+            window.draw(tower.getEffectSprite());
+
     for (int i = 0; i < bullets.size(); ++i) {
         if (!bullets[i].isActive())
             continue;
         else
             window.draw(bullets[i].getSprite());
     }
-
-    // Draw Construction Icons
-    int numbericons;
-
-    if (currentLevelIndex == 0) numbericons = 5;
-    else if (currentLevelIndex == 3) numbericons = 7;
-    else numbericons = 6;
-
-    for (int i = 0; i < numbericons; ++i) 
-        if (towerconstructed[i] == false) 
-            window.draw(constructionicons[i]);
 
     // Draw choosingTowerButton
     if (isChoosingTower) {
@@ -314,6 +328,10 @@ void GameState::draw()
             window.draw(upgradeButton);
         }
     }
+
+    // Draw text "Not enough money!" 
+    if (showNotEnough) 
+        window.draw(notEnoughText);
 }
 
 bool GameState::handleEvent(const Event& event)
@@ -369,7 +387,7 @@ bool GameState::handleEvent(const Event& event)
             if (clickedButton && towerType != -1)
             {
                 if (player.spendMoney(GameConstants::TOWER_COSTS[towerType])) {
-                    // NEW FEATURE: Play sound when place tower
+                    // Play sound when place tower
                     if (*getContext().isSoundOn == true)
                         towerPlaceSound.play();
 
@@ -407,6 +425,15 @@ bool GameState::handleEvent(const Event& event)
                         }
                         SaveManagement::save(SaveManagement::playerName);
                     }
+                }
+
+                else {
+                    // Turn on toast
+                    showNotEnough = true;
+                    notEnoughClock.restart();
+
+                    auto mousePos = getContext().window->mapPixelToCoords(
+                        Vector2i(event.mouseButton.x, event.mouseButton.y));
 
                     isChoosingTower = false;
                     return false;
@@ -415,6 +442,7 @@ bool GameState::handleEvent(const Event& event)
 
             isChoosingTower = false;
             return false;
+
         }
 
         // Handle tower upgrade button click
@@ -422,7 +450,7 @@ bool GameState::handleEvent(const Event& event)
             int tileC = selectedinfo;
             if (tileC >= 3 && tileC <= 5) {
                 if (player.spendMoney(GameConstants::UPGRADE_COSTS[tileC - 3])) {
-                    // NEW FEATURE: Play sound when upgrade tower
+                    // Play sound when upgrade tower
                     if (*getContext().isSoundOn == true)
                         TowerUpgradeSound.play();
 
@@ -468,7 +496,19 @@ bool GameState::handleEvent(const Event& event)
                     }
 
                     showInfo = false;
+                    showTowerRange = false;
                     selectedinfo = -1;
+                    return false;
+                }
+
+                else {
+                    // Turn on toast
+                    showNotEnough = true;
+                    notEnoughClock.restart();
+
+                    auto mousePos = getContext().window->mapPixelToCoords(
+                        Vector2i(event.mouseButton.x, event.mouseButton.y));
+
                     return false;
                 }
             }
@@ -494,12 +534,12 @@ bool GameState::handleEvent(const Event& event)
                         if (tileC >= 3 && tileC <= 5)
                             player.addMoney(GameConstants::TOWER_COSTS[tileC - 3] / 10 * 7);
                         else
-                            player.addMoney(GameConstants::UPGRADE_COSTS[tileC - 6] / 10 * 7);
+                            player.addMoney((GameConstants::UPGRADE_COSTS[tileC - 6] + GameConstants::TOWER_COSTS[tileC - 3]) / 10 * 7);
 
                         int index = MapHandle::findBlockmap(currentLevelIndex, row, col);
                         towerconstructed[index] = false;
 
-                        // NEW FEATURE: save when a tower upgraded
+                        // Save when a tower upgraded
                         int tCurLevel = currentLevelIndex;
                         SaveManagement::playerResult[tCurLevel].status = -1; // not finished
                         SaveManagement::playerResult[tCurLevel].stars = 0;
@@ -523,6 +563,7 @@ bool GameState::handleEvent(const Event& event)
                 }
 
                 showInfo = false;
+                showTowerRange = false;
                 selectedinfo = -1;
                 return false;
             }
@@ -637,8 +678,11 @@ bool GameState::update(Time dt)
                         // If not already attacking, trigger attack
                         if (e.getState() != ATTACK)
                             e.triggerAttack();
-                        if (*getContext().isSoundOn) // NEW FEATURE
+
+                        if (*getContext().isSoundOn) {
+                            bulletLaserSound.setVolume(20);
                             bulletLaserSound.play();
+                        }
 
                         // Check if attack animation has finished
                         if (e.hasFinishedAttackAnim()) {
@@ -659,11 +703,13 @@ bool GameState::update(Time dt)
                     dx /= len;
                     dy /= len;
 
-                    // Rotate enemy sprite
-                    if (dx < -0.1f)
-                        e.faceLeft(e.getType());
-                    else if (dx > 0.1f || dy < -0.1f)
-                        e.faceRight(e.getType());
+                    // Rotate enemy sprite (only in level 3)
+                    if (currentLevelIndex == 2) {
+                        if (dx < -0.1f)
+                            e.faceLeft(e.getType());
+                        else if (dx > 0.1f || dy < -0.1f)
+                            e.faceRight(e.getType());
+                    }
 
                     e.move(dx * e.getSpeedByType(e.getType()) * dt.asSeconds(),
                         dy * e.getSpeedByType(e.getType()) * dt.asSeconds());
@@ -725,7 +771,7 @@ bool GameState::update(Time dt)
     }
 
     if (isGameOver) {
-        if (!SaveManagement::playerResult[currentLevelIndex].win)       // NEW FEATUREh
+        if (!SaveManagement::playerResult[currentLevelIndex].win)       
             SaveManagement::playerResult[currentLevelIndex].status = 0; // locked
 
         requestStackPush(States::Defeat);
@@ -860,7 +906,7 @@ bool GameState::update(Time dt)
 
         if (b.checkCollision(enemies[idx]))
         {
-            if (*getContext().isSoundOn) // NEW FEATURE
+            if (*getContext().isSoundOn)
             {
                 bulletBombSound.setVolume(25);
                 bulletBombSound.play();
@@ -887,6 +933,10 @@ bool GameState::update(Time dt)
     hp.setString(to_string(curMap->getMainTower().getHealth()));
     gold.setString(to_string(player.getMoney()));
     wave.setString(to_string(levels[currentLevelIndex].getCurrentWaveIndex() + 1) + "/" + to_string(levels[currentLevelIndex].getWaveCount()));
+
+    // Turn off toast after 1s
+    if (showNotEnough && notEnoughClock.getElapsedTime().asSeconds() > NOT_ENOUGH_DURATION) 
+        showNotEnough = false;
 
     return true;
 }
@@ -1051,7 +1101,6 @@ int GameState::calStars() {
         return 0;
 }
 
-// NEW FEATURE
 GameState::~GameState()
 {
     auto& musicFlag = *getContext().isMusicOn;

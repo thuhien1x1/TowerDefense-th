@@ -98,7 +98,7 @@ private:
     int selectedRow;
     int selectedCol;
 
-    // Sound - NEW FEATURE
+    // Sound
     Sound bulletBombSound;
     Sound bulletFireSound;
     Sound bulletLaserSound;
@@ -109,4 +109,10 @@ private:
 
     Sound towerPlaceSound;
     Sound TowerUpgradeSound;
+
+    // Toast "Not enough money"
+    Text notEnoughText;
+    bool showNotEnough = false;
+    Clock notEnoughClock;
+    const float NOT_ENOUGH_DURATION = 1.2f; // sec
 };

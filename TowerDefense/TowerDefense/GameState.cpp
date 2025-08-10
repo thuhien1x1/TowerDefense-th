@@ -611,11 +611,11 @@ bool GameState::handleEvent(const Event& event)
 
                 // Display tower info panel and upgrade button if upgradeable
                 infoSprite[c - 3].setPosition((float)fx + cpoint::TILE_SIZE, (float)fy - 4 * cpoint::TILE_SIZE);
-                sellButton.setPosition((float)fx + cpoint::TILE_SIZE * 3.5f, (float)fy - 4.85f * cpoint::TILE_SIZE - 50.f);
+                sellButton.setPosition((float)fx + cpoint::TILE_SIZE * 3.5f + 200.f, (float)fy - 4.85f * cpoint::TILE_SIZE + 30.f);
                 circleRange.setPosition((float)fx + cpoint::TILE_SIZE * 0.5f, (float)fy + cpoint::TILE_SIZE * 0.5f - 80.f);
 
                 if (c >= 3 && c <= 5) 
-                    upgradeButton[selectedinfo - 3].setPosition((float)fx + cpoint::TILE_SIZE + 20.f, (float)fy - 4.85f * cpoint::TILE_SIZE - 50.f);
+                    upgradeButton[selectedinfo - 3].setPosition((float)fx + cpoint::TILE_SIZE + 300.f, (float)fy - 4.85f * cpoint::TILE_SIZE + 110.f);
 
 
                 showInfo = true;

@@ -72,7 +72,9 @@ Application::Application()
     mTextures.load(Textures::Enemy3_Death, "Media/Textures/enemy_3_death_212_210_6.png");
 
     // Load functional button
-    mTextures.load(Textures::upgradeButton, "Media/UI/buttons/upgradeButton.png");
+    mTextures.load(Textures::upgradeButton75, "Media/UI/buttons/upgradeButton75.png");
+    mTextures.load(Textures::upgradeButton100, "Media/UI/buttons/upgradeButton100.png");
+    mTextures.load(Textures::upgradeButton125, "Media/UI/buttons/upgradeButton125.png");
     mTextures.load(Textures::sellButton, "Media/UI/buttons/SellButton.png");
 
     // Load construction icon

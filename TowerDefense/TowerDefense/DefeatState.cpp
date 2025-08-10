@@ -27,7 +27,6 @@ DefeatState::DefeatState(StateStack& stack, Context context)
 	{
 		GameOverSound.setBuffer(getContext().soundBuffers->get(SoundBuffers::GameOver));
 		GameOverSound.setVolume(60);
-		GameOverSound.setLoop(true);
 		GameOverSound.play();
 	}
 }

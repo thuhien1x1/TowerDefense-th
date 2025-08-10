@@ -47,7 +47,9 @@ namespace Textures
         Ice,
 
         // Effect
-        ShootEffect,
+        BombShootEffect,
+        FireShootEffect,
+        IceShootEffect,
 
         // Towers 
         Tower1,
@@ -138,6 +140,11 @@ namespace Textures
         // Load UI for SaveManagemner (Loading)
         loadBackground,
         nameBar,
+
+        // Load collision effect 
+        BombImpact,
+        FireImpact,
+        IceImpact,
     };
 }
 

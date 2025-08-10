@@ -6,18 +6,26 @@
 
 class cbullet
 {
+    // Position
     cpoint _p[cpoint::MAP_ROW * cpoint::MAP_COL];
     cpoint _m[cpoint::MAP_ROW][cpoint::MAP_COL];
     cpoint _curr;
 
+    // Stats
     int _n, _speed;
     float _posX, _posY;
     bool _active;
     int _targetIdx;
     int _damage;
 
+    // Animation for bullet
     sf::Sprite _sprite;
     FrameAnimator _anim;
+
+    // Animation for collision effect
+    sf::Sprite _collisionSprite;
+    FrameAnimator _collisionAnim;
+    bool _collisionPlaying = false;
 
 public:
     cbullet();
@@ -60,4 +68,13 @@ public:
     // Bullet logic
     bool isActive() const { return _active; } // Returns true if the bullet is still active (on screen, valid target), used to skip deactivated bullets.
     void deactivate() { _active = false; } // Marks the bullet as inactive after hitting an enemy or going off - screen, Prevents further updates or rendering.
+
+    // Animation for collision effect
+    const sf::Sprite& getCollisionSprite() const { return _collisionSprite; }
+    bool isCollisionPlaying() const { return _collisionPlaying; }
+    bool isRemovable() const { return !_active && !_collisionPlaying; } // safe to erase
+    void initCollisionEffect(const sf::Texture& tex, int frameWidth, int frameHeight, int totalFrames, float animSpeed, float scale);
+    void triggerCollision(float x, float y);
+    void updateCollisionEffectAnimation(float deltaTime);
+    void updateCollision(float deltaTime);
 };

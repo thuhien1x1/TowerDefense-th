@@ -223,8 +223,8 @@ void cenemy::faceRight(EnemyType type) {
 
 int cenemy::getHealthByType(EnemyType type) {
     switch (type) {
-    case FAST_SCOUT: return 5;
-    case RANGED_MECH: return 8;
+    case FAST_SCOUT: return 3;
+    case RANGED_MECH: return 5;
     case HEAVY_WALKER: return 10;
     default: return 3;
     }

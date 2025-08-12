@@ -779,8 +779,17 @@ bool GameState::update(Time dt)
     }
 
     if (isGameOver) {
-        if (!SaveManagement::playerResult[currentLevelIndex].win)       
+        int tCurLevel = currentLevelIndex;
+        if (!SaveManagement::playerResult[currentLevelIndex].win || tCurLevel == 0)
+        {
             SaveManagement::playerResult[currentLevelIndex].status = 0; // locked
+            SaveManagement::playerResult[tCurLevel].stars = 0;
+            SaveManagement::playerResult[tCurLevel].health = curMap->getMainTower().getMaxHealth();
+            SaveManagement::playerResult[tCurLevel].curWave = 0;
+            SaveManagement::playerResult[tCurLevel].curGold = levels[currentLevelIndex].getStartGold();
+            SaveManagement::playerResult[tCurLevel].towers.clear();
+            SaveManagement::save(SaveManagement::playerName);
+        }
 
         requestStackPush(States::Defeat);
         isGameOver = false;

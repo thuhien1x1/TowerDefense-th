@@ -130,7 +130,7 @@ GameState::GameState(StateStack& stack, Context context)
 
     // Initialize 4 levels (levelID, enemyCount, waveCount, towerMaxCount, startGold) 
     clevel level1(1, 45, 3, 5, 200);
-    level1.setWaves({ {FAST_SCOUT, 10}, {HEAVY_WALKER, 15}, {RANGED_MECH, 20} }); // 10, 15, 20
+    level1.setWaves({ {FAST_SCOUT, 20}, {HEAVY_WALKER, 15}, {RANGED_MECH, 20} }); // 10, 15, 20
     level1.loadMap(mainTowerTexture, backgroundTexture[0], 1);
 
     clevel level2(2, 65, 3, 6, 400);
@@ -844,6 +844,7 @@ bool GameState::update(Time dt)
             tower.resetShootTimer();
 
             cbullet b;
+            cbullet b1;
             int t = tower.getType();
 
             const Texture* tex = nullptr;
@@ -884,6 +885,7 @@ bool GameState::update(Time dt)
                 animSpeed = 0.05f; scale = 4.f;
 
                 b.initCollisionEffect(getContext().textures->get(Textures::BombImpact), (float)542 / 9, 62, 9, 0.05f, 1.7f);
+                b1.initCollisionEffect(getContext().textures->get(Textures::BombImpact), (float)542 / 9, 62, 9, 0.05f, 1.7f);
 
                 break;
 
@@ -893,6 +895,7 @@ bool GameState::update(Time dt)
                 animSpeed = 0.05f; scale = 0.1f;
 
                 b.initCollisionEffect(getContext().textures->get(Textures::FireImpact), (float)283 / 5, 44, 5, 0.09f, 1.7f);
+                b1.initCollisionEffect(getContext().textures->get(Textures::FireImpact), (float)283 / 5, 44, 5, 0.09f, 1.7f);
 
                 break;
 
@@ -902,6 +905,7 @@ bool GameState::update(Time dt)
                 animSpeed = 0.05f; scale = 0.8f;
 
                 b.initCollisionEffect(getContext().textures->get(Textures::IceImpact), (float)388 / 6, 69, 6, 0.09f, 1.4f);
+                b1.initCollisionEffect(getContext().textures->get(Textures::IceImpact), (float)388 / 6, 69, 6, 0.09f, 1.4f);
 
                 break;
 
@@ -915,26 +919,49 @@ bool GameState::update(Time dt)
             b.init(*tex, 
                    tower.getSprite().getPosition().x, tower.getSprite().getPosition().y - 40.f, 
                    frameW, frameH, totalFrames, animSpeed, scale);
+            b1.init(*tex,
+                tower.getSprite().getPosition().x, tower.getSprite().getPosition().y - 40.f,
+                frameW, frameH, totalFrames, animSpeed, scale);
 
             b.setTargetIdx(tower.getTargetEnemyIdx());
+            b1.setTargetIdx(tower.getTargetEnemyIdx());
 
             // Set speed for bullet by tower type
             if (tower.getType() == 1) b.setSpeed(4);
             else if (tower.getType() == 2) b.setSpeed(3);
-            else if (tower.getType() == 3) b.setSpeed(6);
-            else if (tower.getType() == 4) b.setSpeed(5);
-            else if (tower.getType() == 5) b.setSpeed(4);
+            else if (tower.getType() == 3) {
+                b.setSpeed(6);
+                b1.setSpeed(4.5);
+            }
+            else if (tower.getType() == 4) {
+                b.setSpeed(5);
+                b1.setSpeed(3.5);
+            }
+            else if (tower.getType() == 5) {
+                b.setSpeed(4);
+                b1.setSpeed(2.5);
+            }
             else b.setSpeed(5);
 
             // Set dmg for bullet by tower type
             if (tower.getType() == 1) b.setDamage(2);
             else if (tower.getType() == 2) b.setDamage(3);
-            else if (tower.getType() == 3) b.setDamage(4);
-            else if (tower.getType() == 4) b.setDamage(5);
-            else if (tower.getType() == 5) b.setDamage(6);
+            else if (tower.getType() == 3) {
+                b.setDamage(4);
+                b1.setDamage(0);
+            }
+            else if (tower.getType() == 4) {
+                b.setDamage(5);
+                b1.setDamage(0);
+            }
+            else if (tower.getType() == 5) {
+                b.setDamage(6);
+                b1.setDamage(0);
+            }
             else b.setDamage(1);
 
-            bullets.push_back(b);         
+            bullets.push_back(b);   
+            if (tower.getType() == 3 || tower.getType() == 4 || tower.getType() == 5) bullets.push_back(b1);
         }
 
         tower.updateEffect(dt.asSeconds());

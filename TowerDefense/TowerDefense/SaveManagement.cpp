@@ -141,7 +141,7 @@ bool SaveManagement::handleEvent(const Event& event)
 		}
 
 		for (size_t i = 0; i < nameBar.size() && i < mOptions.size(); ++i) {
-			if (nameBar[i].getGlobalBounds().contains(mousePos)) {
+			if (nameBar[i].getGlobalBounds().contains(mousePos) && mOptions[i].getString() != "Empty") {
 				mOptionIndex = static_cast<int>(i);
 				SaveManagement::setName(mOptions[i].getString());
 

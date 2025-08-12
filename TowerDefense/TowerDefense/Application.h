@@ -28,12 +28,12 @@ private:
     int mVictoryStars;
     StateStack mStateStack;
 
-    MusicState currentMusic = MusicState::None; // NEW FEATURE
-    SoundBufferHolder mSoundBuffers;    // NEW FEATURE
-    MusicHolder mMusics;                // NEW FEATURE
+    MusicState currentMusic = MusicState::None; 
+    SoundBufferHolder mSoundBuffers;    
+    MusicHolder mMusics;                
 
-    bool isMusicOn = true;          // NEW FEATURE
-    bool isSoundOn = true;              // NEW FEATURE
+    bool isMusicOn = true;          
+    bool isSoundOn = true;              
 
 private:
     sf::Sound mClickSound;
